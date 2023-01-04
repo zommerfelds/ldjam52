@@ -43298,7 +43298,14 @@ motion_actuators_SimpleActuator.stage_onEnterFrame = function(deltaTime) {
 };
 motion_actuators_SimpleActuator.__super__ = motion_actuators_GenericActuator;
 motion_actuators_SimpleActuator.prototype = $extend(motion_actuators_GenericActuator.prototype,{
-	apply: function() {
+	reverse: function(value) {
+		var ga = motion_actuators_GenericActuator.prototype.reverse.call(this,value);
+		var startTime = 0;
+		startTime = window.performance.now() / 1000;
+		this.update(startTime);
+		return ga;
+	}
+	,apply: function() {
 		motion_actuators_GenericActuator.prototype.apply.call(this);
 		if(this.toggleVisible && Object.prototype.hasOwnProperty.call(this.properties,"alpha")) {
 			var target = this.target;
@@ -43311,7 +43318,7 @@ motion_actuators_SimpleActuator.prototype = $extend(motion_actuators_GenericActu
 			if(value != null) {
 				var target = this.target;
 				var value = Reflect.field(this.properties,"alpha") > 0;
-				if(Object.prototype.hasOwnProperty.call(target,"visible")) {
+				if(Object.prototype.hasOwnProperty.call(target,"visible") && !(target.__properties__ && target.__properties__["set_" + "visible"])) {
 					target["visible"] = value;
 				} else {
 					Reflect.setProperty(target,"visible",value);
@@ -43329,7 +43336,7 @@ motion_actuators_SimpleActuator.prototype = $extend(motion_actuators_GenericActu
 			if(this.setVisible) {
 				var target = this.target;
 				var value = this.cacheVisible;
-				if(Object.prototype.hasOwnProperty.call(target,"visible")) {
+				if(Object.prototype.hasOwnProperty.call(target,"visible") && !(target.__properties__ && target.__properties__["set_" + "visible"])) {
 					target["visible"] = value;
 				} else {
 					Reflect.setProperty(target,"visible",value);
@@ -43361,7 +43368,7 @@ motion_actuators_SimpleActuator.prototype = $extend(motion_actuators_GenericActu
 			var i = _g1[_g];
 			++_g;
 			var isField = true;
-			if(Object.prototype.hasOwnProperty.call(this.target,i)) {
+			if(Object.prototype.hasOwnProperty.call(this.target,i) && !(this.target.__properties__ && this.target.__properties__["set_" + i])) {
 				start = Reflect.field(this.target,i);
 			} else {
 				isField = false;
@@ -43416,7 +43423,7 @@ motion_actuators_SimpleActuator.prototype = $extend(motion_actuators_GenericActu
 			this.cacheVisible = value;
 			var target = this.target;
 			var value = true;
-			if(Object.prototype.hasOwnProperty.call(target,"visible")) {
+			if(Object.prototype.hasOwnProperty.call(target,"visible") && !(target.__properties__ && target.__properties__["set_" + "visible"])) {
 				target["visible"] = value;
 			} else {
 				Reflect.setProperty(target,"visible",value);
@@ -43440,7 +43447,7 @@ motion_actuators_SimpleActuator.prototype = $extend(motion_actuators_GenericActu
 		if(!this.paused) {
 			this.paused = true;
 			motion_actuators_GenericActuator.prototype.pause.call(this);
-			this.pauseTime = window.performance.now() / 1000;
+			this.pauseTime = window.performance.now();
 		}
 	}
 	,resume: function() {
@@ -43451,7 +43458,7 @@ motion_actuators_SimpleActuator.prototype = $extend(motion_actuators_GenericActu
 		}
 	}
 	,setField: function(target,propertyName,value) {
-		if(Object.prototype.hasOwnProperty.call(target,propertyName)) {
+		if(Object.prototype.hasOwnProperty.call(target,propertyName) && !(target.__properties__ && target.__properties__["set_" + propertyName])) {
 			target[propertyName] = value;
 		} else {
 			Reflect.setProperty(target,propertyName,value);
@@ -43503,12 +43510,7 @@ motion_actuators_SimpleActuator.prototype = $extend(motion_actuators_GenericActu
 				var _g1 = this.detailsLength;
 				while(_g < _g1) {
 					details = this.propertyDetails[_g++];
-					var value = details.start + details.change * easing;
-					if(details.isField) {
-						details.target[details.propertyName] = value;
-					} else {
-						Reflect.setProperty(details.target,details.propertyName,value);
-					}
+					this.setProperty(details,details.start + details.change * easing);
 				}
 			} else {
 				if(!this._reverse) {
@@ -43533,19 +43535,9 @@ motion_actuators_SimpleActuator.prototype = $extend(motion_actuators_GenericActu
 						endValue = details.start + details.change * easing;
 					}
 					if(!this._snapping) {
-						var value = endValue;
-						if(details.isField) {
-							details.target[details.propertyName] = value;
-						} else {
-							Reflect.setProperty(details.target,details.propertyName,value);
-						}
+						this.setProperty(details,endValue);
 					} else {
-						var value1 = Math.round(endValue);
-						if(details.isField) {
-							details.target[details.propertyName] = value1;
-						} else {
-							Reflect.setProperty(details.target,details.propertyName,value1);
-						}
+						this.setProperty(details,Math.round(endValue));
 					}
 				}
 			}
@@ -43568,7 +43560,7 @@ motion_actuators_SimpleActuator.prototype = $extend(motion_actuators_GenericActu
 					if(tmp) {
 						var target = this.target;
 						var value = false;
-						if(Object.prototype.hasOwnProperty.call(target,"visible")) {
+						if(Object.prototype.hasOwnProperty.call(target,"visible") && !(target.__properties__ && target.__properties__["set_" + "visible"])) {
 							target["visible"] = value;
 						} else {
 							Reflect.setProperty(target,"visible",value);
@@ -43677,18 +43669,20 @@ motion_actuators_MethodActuator.prototype = $extend(motion_actuators_SimpleActua
 		if(sendEvent == null) {
 			sendEvent = true;
 		}
-		var _g = 0;
-		var _g1 = this.properties.start.length;
-		while(_g < _g1) {
-			var i = _g++;
-			this.currentParameters[i] = Reflect.field(this.tweenProperties,"param" + i);
+		if(this.initialized) {
+			var _g = 0;
+			var _g1 = this.properties.start.length;
+			while(_g < _g1) {
+				var i = _g++;
+				this.currentParameters[i] = Reflect.field(this.tweenProperties,"param" + i);
+			}
+			var method = this.target;
+			var params = this.currentParameters;
+			if(params == null) {
+				params = [];
+			}
+			method.apply(method,params);
 		}
-		var method = this.target;
-		var params = this.currentParameters;
-		if(params == null) {
-			params = [];
-		}
-		method.apply(method,params);
 		motion_actuators_SimpleActuator.prototype.complete.call(this,sendEvent);
 	}
 	,initialize: function() {
@@ -43839,7 +43833,7 @@ motion_actuators_MotionPathActuator.prototype = $extend(motion_actuators_SimpleA
 					if(tmp) {
 						var target = this.target;
 						var value = false;
-						if(Object.prototype.hasOwnProperty.call(target,"visible")) {
+						if(Object.prototype.hasOwnProperty.call(target,"visible") && !(target.__properties__ && target.__properties__["set_" + "visible"])) {
 							target["visible"] = value;
 						} else {
 							Reflect.setProperty(target,"visible",value);
