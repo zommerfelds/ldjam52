@@ -1,0 +1,10 @@
+{
+    "haxe.configurations": [
+        [
+            "build-js.hxml"
+        ]
+    ],
+    "editor.codeActionsOnSave": {
+        "source.organizeImports": true
+    }
+}

@@ -2,18 +2,19 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
-			"type": "shell",
-			"command": [
-				"haxe",
-				"-D",
-				"source-map-content",
-				"build-js.hxml"
+			"label": "Build",
+			"type": "hxml",
+			"file": "build-js.hxml",
+			"problemMatcher": [
+				"$haxe-absolute",
+				"$haxe",
+				"$haxe-error",
+				"$haxe-trace"
 			],
 			"group": {
 				"kind": "build",
-				"isDefault": true
+				"isDefault": true,
 			},
-			"label": "haxe: shell command"
 		},
 		{
 			"label": "Serve dev version",
