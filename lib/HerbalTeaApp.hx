@@ -1,7 +1,7 @@
-import haxe.Timer;
-import h2d.col.Point;
-import haxe.ds.Option;
 import Utils.*;
+import h2d.col.Point;
+import haxe.Timer;
+import haxe.ds.Option;
 
 using Lambda;
 
@@ -72,6 +72,10 @@ class HerbalTeaApp extends hxd.App {
 					// since we don't know if it's a normal font or SDF. Skip this case.
 					case ".txt":
 					// No preloading needed.
+					case "ldtk":
+					// It seems like LDtk files are loaded on demand by the library. So we don't do anything now.
+					// I'm not sure if the file is really needed though, as some things seems to be stored at runtime.
+					// https://github.com/deepnight/ldtk-haxe-api/issues/20
 					case x:
 						throw 'Error loading resource "${node.name}" (unidentified type "$x")';
 				}

@@ -8,6 +8,8 @@
 -lib heaps:1.9.0
 -lib actuate:1.9.0
 -lib differ:1.4.0
+-lib ldtk-haxe-api:1.2.1-rc.1
+-lib deepnightLibs:1.0.72
 
 -D js-source-map
 

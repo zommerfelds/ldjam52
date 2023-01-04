@@ -6,5 +6,7 @@
     ],
     "editor.codeActionsOnSave": {
         "source.organizeImports": true
-    }
+    },
+    "editor.inlayHints.enabled": "off",
+    "task.allowAutomaticTasks": "on"
 }

@@ -45,6 +45,19 @@ class PlayView extends GameState {
 		gameArea.drawRect(0, 0, playWidth, playHeight);
 		addChild(gameArea);
 
+		final project = new LdtkProject();
+		final map = new h2d.Graphics(gameArea);
+		map.beginFill(0xa05368);
+		final t = playWidth / project.levels[0].l_IntGrid.cWid;
+		for (y in 0...project.levels[0].l_IntGrid.cHei) {
+			for (x in 0...project.levels[0].l_IntGrid.cWid) {
+				final value = project.levels[0].l_IntGrid.getInt(x, y);
+				if (value == 1) {
+					map.drawRect(x * t, y * t, t, t);
+				}
+			}
+		}
+
 		final wall = new h2d.Graphics(gameArea);
 		wall.beginFill(0xffffff);
 		wall.drawRect(0, 0, playWidth, wallSize);
