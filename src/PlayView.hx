@@ -48,11 +48,14 @@ class PlayView extends GameState {
 		level1.scale(6);
 		level1.alpha = 0.0;
 
+		final project = new LdtkProject();
+		final combine0 = project.all_levels.Level_1.l_Entities.all_Combine[0];
+
 		final playerTile = Res.combine.toTile();
 		playerTile.setCenterRatio(0.8, 0.5);
 		player = new Bitmap(playerTile, this);
-		player.x = 64 * FIELD_TILE_SIZE;
-		player.y = 64 * FIELD_TILE_SIZE;
+		player.x = combine0.pixelX;
+		player.y = combine0.pixelY;
 
 		// A bit of a hacky way to set the collision shape that cuts the crops.
 		final cutterOffset = new Object(player);
@@ -96,9 +99,13 @@ class PlayView extends GameState {
 					final element = fieldElements.get(new Point2d(x, y));
 					if (element != null && collider.contains(new Point(x * FIELD_TILE_SIZE, y * FIELD_TILE_SIZE))) {
 						element.t = fieldTileEmpty;
+						fieldElements.remove(new Point2d(x, y));
 					}
 				}
 			}
+		}
+		if (!fieldElements.keys().hasNext()) {
+			App.instance.switchState(new GameEndView());
 		}
 	}
 }

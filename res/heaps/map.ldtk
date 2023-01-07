@@ -32,7 +32,7 @@
 	"pngFilePattern": null,
 	"backupOnSave": false,
 	"backupLimit": 10,
-	"levelNamePattern": "Level_%idx",
+	"levelNamePattern": "Level_%idx1",
 	"tutorialDesc": null,
 	"customCommands": [],
 	"flags": [],
@@ -88,14 +88,14 @@
 			"maxCount": 0,
 			"limitScope": "PerLevel",
 			"limitBehavior": "MoveLastOne",
-			"pivotX": 0,
-			"pivotY": 0,
+			"pivotX": 0.8,
+			"pivotY": 0.5,
 			"fieldDefs": []
 		}
 	], "tilesets": [], "enums": [], "externalEnums": [], "levelFields": [] },
 	"levels": [
 		{
-			"identifier": "Level_0",
+			"identifier": "Level_1",
 			"iid": "2ed59b10-7820-11ed-8a57-4bed449216cf",
 			"uid": 0,
 			"worldX": 0,
@@ -141,8 +141,8 @@
 					"entityInstances": [
 						{
 							"__identifier": "Combine",
-							"__grid": [65,63],
-							"__pivot": [0,0],
+							"__grid": [38,60],
+							"__pivot": [0.8,0.5],
 							"__tags": [],
 							"__tile": null,
 							"__smartColor": "#FEAE34",
@@ -150,35 +150,7 @@
 							"width": 64,
 							"height": 64,
 							"defUid": 3,
-							"px": [522,508],
-							"fieldInstances": []
-						},
-						{
-							"__identifier": "Combine",
-							"__grid": [58,9],
-							"__pivot": [0,0],
-							"__tags": [],
-							"__tile": null,
-							"__smartColor": "#FEAE34",
-							"iid": "19b4e730-7820-11ed-9d14-db2f67b7aebd",
-							"width": 64,
-							"height": 64,
-							"defUid": 3,
-							"px": [471,78],
-							"fieldInstances": []
-						},
-						{
-							"__identifier": "Combine",
-							"__grid": [10,49],
-							"__pivot": [0,0],
-							"__tags": [],
-							"__tile": null,
-							"__smartColor": "#FEAE34",
-							"iid": "6825ed60-7820-11ed-9d14-a9692ab95726",
-							"width": 64,
-							"height": 64,
-							"defUid": 3,
-							"px": [82,394],
+							"px": [306,484],
 							"fieldInstances": []
 						}
 					]

@@ -13,6 +13,8 @@ class App extends HerbalTeaApp {
 			case "play":
 				// final levelIndex = params.get("level") == null ? 0 : Std.parseInt(params.get("level")) - 1;
 				new PlayView();
+			case "end":
+				new GameEndView();
 			case "menu" | null:
 				new MenuView();
 			case x: throw 'invavid "start" query param "$x"';
