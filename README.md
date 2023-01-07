@@ -1,4 +1,4 @@
-# Ludum Dare 52
+# Ludum Dare 52: Harvest
 
 See https://github.com/zommerfelds/gamejam-template for setup instructions.
 

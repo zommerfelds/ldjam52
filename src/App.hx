@@ -6,7 +6,19 @@ class App extends HerbalTeaApp {
 	}
 
 	override function onload() {
-		switchState(new MenuView());
+		// switchState(new MenuView());
+
+		final params = new js.html.URLSearchParams(js.Browser.window.location.search);
+		final view = switch (params.get("start")) {
+			case "play":
+				// final levelIndex = params.get("level") == null ? 0 : Std.parseInt(params.get("level")) - 1;
+				new PlayView();
+			case "menu" | null:
+				new MenuView();
+			case x: throw 'invavid "start" query param "$x"';
+		}
+
+		switchState(view);
 	}
 
 	// TODO: move this to HerbalTeaApp
