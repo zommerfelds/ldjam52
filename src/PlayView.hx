@@ -39,7 +39,6 @@ class PlayView extends GameState {
 					element.x = x * FIELD_TILE_SIZE;
 					element.y = y * FIELD_TILE_SIZE;
 					field.add(element);
-					// fieldElements[x][y] = element;
 					fieldElements.set(new Point2d(x, y), element);
 				}
 			}
@@ -50,14 +49,14 @@ class PlayView extends GameState {
 		level1.alpha = 0.0;
 
 		final playerTile = Res.combine.toTile();
-		playerTile.setCenterRatio();
+		playerTile.setCenterRatio(0.8, 0.5);
 		player = new Bitmap(playerTile, this);
 		player.x = 64 * FIELD_TILE_SIZE;
 		player.y = 64 * FIELD_TILE_SIZE;
 
 		// A bit of a hacky way to set the collision shape that cuts the crops.
 		final cutterOffset = new Object(player);
-		cutterOffset.x = 15;
+		cutterOffset.x = 0;
 		final cutterTile = Tile.fromColor(0x000000, 10, 60);
 		cutterTile.setCenterRatio();
 		cutter = new Bitmap(cutterTile, cutterOffset);
@@ -74,31 +73,30 @@ class PlayView extends GameState {
 			player.rotation += dt * 1.0;
 		}
 		if (Key.isDown(Key.UP)) {
-			final vel = Utils.direction(player.rotation).multiply(dt * 40.0);
+			final vel = Utils.direction(player.rotation).multiply(dt * 50.0);
 			player.setPos(Utils.point(player).add(vel));
-		}
 
-		// final pos = Utils.point(player);
-		final bounds = cutter.getBounds(this);
-		final xMin = Math.floor(bounds.xMin / FIELD_TILE_SIZE);
-		final xMax = Math.ceil(bounds.xMax / FIELD_TILE_SIZE);
-		final yMin = Math.floor(bounds.yMin / FIELD_TILE_SIZE);
-		final yMax = Math.ceil(bounds.yMax / FIELD_TILE_SIZE);
+			final bounds = cutter.getBounds(this);
+			final xMin = Math.floor(bounds.xMin / FIELD_TILE_SIZE);
+			final xMax = Math.ceil(bounds.xMax / FIELD_TILE_SIZE);
+			final yMin = Math.floor(bounds.yMin / FIELD_TILE_SIZE);
+			final yMax = Math.ceil(bounds.yMax / FIELD_TILE_SIZE);
 
-		final localBounds = cutter.getBounds(cutter);
-		final p = new Polygon([
-			globalToLocal(cutter.localToGlobal(new Point(localBounds.xMin, localBounds.yMin))),
-			globalToLocal(cutter.localToGlobal(new Point(localBounds.xMax, localBounds.yMin))),
-			globalToLocal(cutter.localToGlobal(new Point(localBounds.xMax, localBounds.yMax))),
-			globalToLocal(cutter.localToGlobal(new Point(localBounds.xMin, localBounds.yMax)))
-		]);
-		final collider = p.getCollider();
+			final localBounds = cutter.getBounds(cutter);
+			final p = new Polygon([
+				globalToLocal(cutter.localToGlobal(new Point(localBounds.xMin, localBounds.yMin))),
+				globalToLocal(cutter.localToGlobal(new Point(localBounds.xMax, localBounds.yMin))),
+				globalToLocal(cutter.localToGlobal(new Point(localBounds.xMax, localBounds.yMax))),
+				globalToLocal(cutter.localToGlobal(new Point(localBounds.xMin, localBounds.yMax)))
+			]);
+			final collider = p.getCollider();
 
-		for (y in yMin...yMax + 1) {
-			for (x in xMin...xMax + 1) {
-				final element = fieldElements.get(new Point2d(x, y));
-				if (element != null && collider.contains(new Point(x * FIELD_TILE_SIZE, y * FIELD_TILE_SIZE))) {
-					element.t = fieldTileEmpty;
+			for (y in yMin...yMax + 1) {
+				for (x in xMin...xMax + 1) {
+					final element = fieldElements.get(new Point2d(x, y));
+					if (element != null && collider.contains(new Point(x * FIELD_TILE_SIZE, y * FIELD_TILE_SIZE))) {
+						element.t = fieldTileEmpty;
+					}
 				}
 			}
 		}
