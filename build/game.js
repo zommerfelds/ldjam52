@@ -3925,6 +3925,9 @@ ObjExt.setPos = function(obj,pos) {
 	obj.y = pos.y;
 };
 var PlayView = function() {
+	this.fieldTileEmpty = hxd_Res.get_loader().loadCache("field-tiles.png",hxd_res_Image).toTile().sub(PlayView.FIELD_TILE_SIZE,0,PlayView.FIELD_TILE_SIZE,PlayView.FIELD_TILE_SIZE,PlayView.FIELD_TILE_SIZE * -0.5,PlayView.FIELD_TILE_SIZE * -0.5);
+	this.fieldTileFull = hxd_Res.get_loader().loadCache("field-tiles.png",hxd_res_Image).toTile().sub(0 * PlayView.FIELD_TILE_SIZE,0,PlayView.FIELD_TILE_SIZE,PlayView.FIELD_TILE_SIZE,PlayView.FIELD_TILE_SIZE * -0.5,PlayView.FIELD_TILE_SIZE * -0.5);
+	this.fieldElements = new haxe_ds__$HashMap_HashMapData();
 	GameState.call(this);
 };
 $hxClasses["PlayView"] = PlayView;
@@ -3938,21 +3941,56 @@ PlayView.prototype = $extend(GameState.prototype,{
 		this.posChanged = true;
 		this.scaleY *= 2;
 		this.addEventListener($bind(this,this.onEvent));
+		var pixels = hxd_Res.get_loader().loadCache("level1.png",hxd_res_Image).getPixels();
+		var field = new h2d_SpriteBatch(hxd_Res.get_loader().loadCache("field-tiles.png",hxd_res_Image).toTile(),this);
+		var _g = 0;
+		var _g1 = pixels.height;
+		while(_g < _g1) {
+			var x = _g++;
+			var _g2 = 0;
+			var _g3 = pixels.width;
+			while(_g2 < _g3) {
+				var y = _g2++;
+				if((pixels.getPixel(x,y) & 16777215) == 0) {
+					var element = new h2d_BatchElement(this.fieldTileFull);
+					element.x = x * PlayView.FIELD_TILE_SIZE;
+					element.y = y * PlayView.FIELD_TILE_SIZE;
+					field.add(element);
+					var this1 = this.fieldElements;
+					var k = new Point2d(x,y);
+					var _this = this1.keys;
+					var key = k.hashCode();
+					_this.h[key] = k;
+					var _this1 = this1.values;
+					var key1 = k.hashCode();
+					_this1.h[key1] = element;
+				}
+			}
+		}
 		var level1 = new h2d_Bitmap(hxd_Res.get_loader().loadCache("level1.png",hxd_res_Image).toTile(),this);
 		level1.posChanged = true;
 		level1.scaleX *= 6;
 		level1.posChanged = true;
 		level1.scaleY *= 6;
+		level1.alpha = 0.0;
 		var playerTile = hxd_Res.get_loader().loadCache("combine.png",hxd_res_Image).toTile();
 		playerTile.dx = -(0.5 * playerTile.width);
 		playerTile.dy = -(0.5 * playerTile.height);
 		this.player = new h2d_Bitmap(playerTile,this);
 		var _this = this.player;
 		_this.posChanged = true;
-		_this.x = this.width / 2 / this.scaleX;
+		_this.x = 64 * PlayView.FIELD_TILE_SIZE;
 		var _this = this.player;
 		_this.posChanged = true;
-		_this.y = this.height / 2 / this.scaleY;
+		_this.y = 64 * PlayView.FIELD_TILE_SIZE;
+		var cutterOffset = new h2d_Object(this.player);
+		cutterOffset.posChanged = true;
+		cutterOffset.x = 15;
+		var cutterTile = h2d_Tile.fromColor(0,10,60);
+		cutterTile.dx = -(0.5 * cutterTile.width);
+		cutterTile.dy = -(0.5 * cutterTile.height);
+		this.cutter = new h2d_Bitmap(cutterTile,cutterOffset);
+		this.cutter.set_visible(false);
 	}
 	,onEvent: function(event) {
 	}
@@ -3978,9 +4016,32 @@ PlayView.prototype = $extend(GameState.prototype,{
 			if(x == null) {
 				x = 0.;
 			}
-			haxe_Log.trace("r: " + this.player.rotation + " dir: " + Std.string(Utils.direction(this.player.rotation)),{ fileName : "src/PlayView.hx", lineNumber : 36, className : "PlayView", methodName : "update"});
 			var _this = Utils.point(this.player);
 			ObjExt.setPos(this.player,new h2d_col_Point(_this.x + x,_this.y + y));
+		}
+		var bounds = this.cutter.getBounds(this);
+		var xMin = Math.floor(bounds.xMin / PlayView.FIELD_TILE_SIZE);
+		var xMax = Math.ceil(bounds.xMax / PlayView.FIELD_TILE_SIZE);
+		var yMin = Math.floor(bounds.yMin / PlayView.FIELD_TILE_SIZE);
+		var yMax = Math.ceil(bounds.yMax / PlayView.FIELD_TILE_SIZE);
+		var localBounds = this.cutter.getBounds(this.cutter);
+		var points = [this.globalToLocal(this.cutter.localToGlobal(new h2d_col_Point(localBounds.xMin,localBounds.yMin))),this.globalToLocal(this.cutter.localToGlobal(new h2d_col_Point(localBounds.xMax,localBounds.yMin))),this.globalToLocal(this.cutter.localToGlobal(new h2d_col_Point(localBounds.xMax,localBounds.yMax))),this.globalToLocal(this.cutter.localToGlobal(new h2d_col_Point(localBounds.xMin,localBounds.yMax)))];
+		var collider = h2d_col_Polygon.getCollider(points == null ? [] : points);
+		var _g = yMin;
+		var _g1 = yMax + 1;
+		while(_g < _g1) {
+			var y = _g++;
+			var _g2 = xMin;
+			var _g3 = xMax + 1;
+			while(_g2 < _g3) {
+				var x = _g2++;
+				var _this = this.fieldElements.values;
+				var key = new Point2d(x,y).hashCode();
+				var element = _this.h[key];
+				if(element != null && collider.contains(new h2d_col_Point(x * PlayView.FIELD_TILE_SIZE,y * PlayView.FIELD_TILE_SIZE))) {
+					element.t = this.fieldTileEmpty;
+				}
+			}
 		}
 	}
 	,__class__: PlayView
@@ -4324,6 +4385,30 @@ Type.enumParameters = function(e) {
 	} else {
 		return [];
 	}
+};
+var Point2d = function(x,y) {
+	if(y == null) {
+		y = 0;
+	}
+	if(x == null) {
+		x = 0;
+	}
+	this.x = x;
+	this.y = y;
+};
+$hxClasses["Point2d"] = Point2d;
+Point2d.__name__ = "Point2d";
+Point2d.prototype = {
+	hashCode: function() {
+		var xx = this.x >= 0 ? this.x * 2 : this.x * -2 - 1;
+		var yy = this.y >= 0 ? this.y * 2 : this.y * -2 - 1;
+		if(xx >= yy) {
+			return xx * xx + xx + yy;
+		} else {
+			return yy * yy + xx;
+		}
+	}
+	,__class__: Point2d
 };
 var Utils = function() { };
 $hxClasses["Utils"] = Utils;
@@ -11741,6 +11826,302 @@ var h2d_ScaleMode = $hxEnums["h2d.ScaleMode"] = { __ename__:true,__constructs__:
 };
 h2d_ScaleMode.__constructs__ = [h2d_ScaleMode.Resize,h2d_ScaleMode.Stretch,h2d_ScaleMode.LetterBox,h2d_ScaleMode.Fixed,h2d_ScaleMode.Zoom,h2d_ScaleMode.AutoZoom];
 h2d_ScaleMode.__empty_constructs__ = [h2d_ScaleMode.Resize];
+var h2d_BatchElement = function(t) {
+	this.visible = true;
+	this.a = 1;
+	this.b = 1;
+	this.g = 1;
+	this.r = 1;
+	this.rotation = 0;
+	this.scaleY = 1;
+	this.scaleX = 1;
+	this.y = 0;
+	this.x = 0;
+	this.t = t;
+};
+$hxClasses["h2d.BatchElement"] = h2d_BatchElement;
+h2d_BatchElement.__name__ = "h2d.BatchElement";
+h2d_BatchElement.prototype = {
+	update: function(et) {
+		return true;
+	}
+	,remove: function() {
+		if(this.batch != null) {
+			this.batch.delete(this);
+		}
+	}
+	,__class__: h2d_BatchElement
+};
+var h2d_SpriteBatch = function(t,parent) {
+	this.hasUpdate = false;
+	this.hasRotationScale = false;
+	h2d_Drawable.call(this,parent);
+	this.tile = t;
+	this.state = new h2d_impl_BatchDrawState();
+};
+$hxClasses["h2d.SpriteBatch"] = h2d_SpriteBatch;
+h2d_SpriteBatch.__name__ = "h2d.SpriteBatch";
+h2d_SpriteBatch.__super__ = h2d_Drawable;
+h2d_SpriteBatch.prototype = $extend(h2d_Drawable.prototype,{
+	add: function(e,before) {
+		if(before == null) {
+			before = false;
+		}
+		e.batch = this;
+		if(this.first == null) {
+			this.first = this.last = e;
+			e.prev = e.next = null;
+		} else if(before) {
+			e.prev = null;
+			e.next = this.first;
+			this.first.prev = e;
+			this.first = e;
+		} else {
+			this.last.next = e;
+			e.prev = this.last;
+			e.next = null;
+			this.last = e;
+		}
+		return e;
+	}
+	,'delete': function(e) {
+		if(e.prev == null) {
+			if(this.first == e) {
+				this.first = e.next;
+			}
+		} else {
+			e.prev.next = e.next;
+		}
+		if(e.next == null) {
+			if(this.last == e) {
+				this.last = e.prev;
+			}
+		} else {
+			e.next.prev = e.prev;
+		}
+		e.batch = null;
+	}
+	,sync: function(ctx) {
+		h2d_Drawable.prototype.sync.call(this,ctx);
+		if(this.hasUpdate) {
+			var e = this.first;
+			while(e != null) {
+				if(!e.update(ctx.elapsedTime)) {
+					e.remove();
+				}
+				e = e.next;
+			}
+		}
+		this.flush();
+	}
+	,getBoundsRec: function(relativeTo,out,forSize) {
+		h2d_Drawable.prototype.getBoundsRec.call(this,relativeTo,out,forSize);
+		var e = this.first;
+		while(e != null) {
+			var t = e.t;
+			if(this.hasRotationScale) {
+				var ca = Math.cos(e.rotation);
+				var sa = Math.sin(e.rotation);
+				var hx = t.width;
+				var hy = t.height;
+				var px = t.dx * e.scaleX;
+				var py = t.dy * e.scaleY;
+				var x = px * ca - py * sa + e.x;
+				var y = py * ca + px * sa + e.y;
+				this.addBounds(relativeTo,out,x,y,1e-10,1e-10);
+				var px1 = (t.dx + hx) * e.scaleX;
+				var py1 = t.dy * e.scaleY;
+				x = px1 * ca - py1 * sa + e.x;
+				y = py1 * ca + px1 * sa + e.y;
+				this.addBounds(relativeTo,out,x,y,1e-10,1e-10);
+				var px2 = t.dx * e.scaleX;
+				var py2 = (t.dy + hy) * e.scaleY;
+				x = px2 * ca - py2 * sa + e.x;
+				y = py2 * ca + px2 * sa + e.y;
+				this.addBounds(relativeTo,out,x,y,1e-10,1e-10);
+				var px3 = (t.dx + hx) * e.scaleX;
+				var py3 = (t.dy + hy) * e.scaleY;
+				x = px3 * ca - py3 * sa + e.x;
+				y = py3 * ca + px3 * sa + e.y;
+				this.addBounds(relativeTo,out,x,y,1e-10,1e-10);
+			} else {
+				this.addBounds(relativeTo,out,e.x + t.dx,e.y + t.dy,t.width,t.height);
+			}
+			e = e.next;
+		}
+	}
+	,flush: function() {
+		if(this.first == null) {
+			return;
+		}
+		if(this.tmpBuf == null) {
+			this.tmpBuf = hxd__$FloatBuffer_Float32Expand._new(0);
+		}
+		var pos = 0;
+		var e = this.first;
+		var tmp = this.tmpBuf;
+		var bufferVertices = 0;
+		this.state.clear();
+		while(e != null) {
+			if(!e.visible) {
+				e = e.next;
+				continue;
+			}
+			var t = e.t;
+			if(t != null) {
+				this.state.setTexture(t.innerTex);
+			}
+			var _this = this.state;
+			_this.tail.count += 4;
+			_this.totalCount += 4;
+			var _g = tmp.pos;
+			var _g1 = pos + 32;
+			while(_g < _g1) {
+				++_g;
+				if(tmp.pos == tmp.array.length) {
+					var newSize = tmp.array.length << 1;
+					if(newSize < 128) {
+						newSize = 128;
+					}
+					var newArray = new Float32Array(newSize);
+					newArray.set(tmp.array);
+					tmp.array = newArray;
+				}
+				tmp.array[tmp.pos++] = 0.;
+			}
+			if(this.hasRotationScale) {
+				var ca = Math.cos(e.rotation);
+				var sa = Math.sin(e.rotation);
+				var hx = t.width;
+				var hy = t.height;
+				var px = t.dx * e.scaleX;
+				var py = t.dy * e.scaleY;
+				tmp.array[pos++] = px * ca - py * sa + e.x;
+				tmp.array[pos++] = py * ca + px * sa + e.y;
+				tmp.array[pos++] = t.u;
+				tmp.array[pos++] = t.v;
+				tmp.array[pos++] = e.r;
+				tmp.array[pos++] = e.g;
+				tmp.array[pos++] = e.b;
+				tmp.array[pos++] = e.a;
+				var px1 = (t.dx + hx) * e.scaleX;
+				var py1 = t.dy * e.scaleY;
+				tmp.array[pos++] = px1 * ca - py1 * sa + e.x;
+				tmp.array[pos++] = py1 * ca + px1 * sa + e.y;
+				tmp.array[pos++] = t.u2;
+				tmp.array[pos++] = t.v;
+				tmp.array[pos++] = e.r;
+				tmp.array[pos++] = e.g;
+				tmp.array[pos++] = e.b;
+				tmp.array[pos++] = e.a;
+				var px2 = t.dx * e.scaleX;
+				var py2 = (t.dy + hy) * e.scaleY;
+				tmp.array[pos++] = px2 * ca - py2 * sa + e.x;
+				tmp.array[pos++] = py2 * ca + px2 * sa + e.y;
+				tmp.array[pos++] = t.u;
+				tmp.array[pos++] = t.v2;
+				tmp.array[pos++] = e.r;
+				tmp.array[pos++] = e.g;
+				tmp.array[pos++] = e.b;
+				tmp.array[pos++] = e.a;
+				var px3 = (t.dx + hx) * e.scaleX;
+				var py3 = (t.dy + hy) * e.scaleY;
+				tmp.array[pos++] = px3 * ca - py3 * sa + e.x;
+				tmp.array[pos++] = py3 * ca + px3 * sa + e.y;
+				tmp.array[pos++] = t.u2;
+				tmp.array[pos++] = t.v2;
+				tmp.array[pos++] = e.r;
+				tmp.array[pos++] = e.g;
+				tmp.array[pos++] = e.b;
+				tmp.array[pos++] = e.a;
+			} else {
+				var sx = e.x + t.dx;
+				var sy = e.y + t.dy;
+				tmp.array[pos++] = sx;
+				tmp.array[pos++] = sy;
+				tmp.array[pos++] = t.u;
+				tmp.array[pos++] = t.v;
+				tmp.array[pos++] = e.r;
+				tmp.array[pos++] = e.g;
+				tmp.array[pos++] = e.b;
+				tmp.array[pos++] = e.a;
+				tmp.array[pos++] = sx + t.width + 0.1;
+				tmp.array[pos++] = sy;
+				tmp.array[pos++] = t.u2;
+				tmp.array[pos++] = t.v;
+				tmp.array[pos++] = e.r;
+				tmp.array[pos++] = e.g;
+				tmp.array[pos++] = e.b;
+				tmp.array[pos++] = e.a;
+				tmp.array[pos++] = sx;
+				tmp.array[pos++] = sy + t.height + 0.1;
+				tmp.array[pos++] = t.u;
+				tmp.array[pos++] = t.v2;
+				tmp.array[pos++] = e.r;
+				tmp.array[pos++] = e.g;
+				tmp.array[pos++] = e.b;
+				tmp.array[pos++] = e.a;
+				tmp.array[pos++] = sx + t.width + 0.1;
+				tmp.array[pos++] = sy + t.height + 0.1;
+				tmp.array[pos++] = t.u2;
+				tmp.array[pos++] = t.v2;
+				tmp.array[pos++] = e.r;
+				tmp.array[pos++] = e.g;
+				tmp.array[pos++] = e.b;
+				tmp.array[pos++] = e.a;
+			}
+			e = e.next;
+		}
+		bufferVertices = pos >> 3;
+		var tmp;
+		if(this.buffer != null) {
+			var _this = this.buffer;
+			tmp = !(_this.buffer == null || _this.buffer.vbuf == null);
+		} else {
+			tmp = false;
+		}
+		if(tmp) {
+			if(this.buffer.vertices >= bufferVertices) {
+				this.buffer.uploadVector(this.tmpBuf,0,bufferVertices);
+				return;
+			}
+			this.buffer.dispose();
+			this.buffer = null;
+		}
+		this.empty = bufferVertices == 0;
+		if(bufferVertices > 0) {
+			this.buffer = h3d_Buffer.ofSubFloats(this.tmpBuf,8,bufferVertices,[h3d_BufferFlag.Dynamic,h3d_BufferFlag.Quads,h3d_BufferFlag.RawFormat]);
+		}
+	}
+	,draw: function(ctx) {
+		this.drawWith(ctx,this);
+	}
+	,drawWith: function(ctx,obj) {
+		var tmp;
+		if(!(this.first == null || this.buffer == null)) {
+			var _this = this.buffer;
+			tmp = _this.buffer == null || _this.buffer.vbuf == null;
+		} else {
+			tmp = true;
+		}
+		if(tmp || this.empty) {
+			return;
+		}
+		if(!ctx.beginDrawBatchState(obj)) {
+			return;
+		}
+		this.state.drawQuads(ctx,this.buffer);
+	}
+	,onRemove: function() {
+		h2d_Drawable.prototype.onRemove.call(this);
+		if(this.buffer != null) {
+			this.buffer.dispose();
+			this.buffer = null;
+		}
+		this.state.clear();
+	}
+	,__class__: h2d_SpriteBatch
+});
 var h2d_Align = $hxEnums["h2d.Align"] = { __ename__:true,__constructs__:null
 	,Left: {_hx_name:"Left",_hx_index:0,__enum__:"h2d.Align",toString:$estr}
 	,Right: {_hx_name:"Right",_hx_index:1,__enum__:"h2d.Align",toString:$estr}
@@ -12315,10 +12696,79 @@ var h2d_col_Point = function(x,y) {
 $hxClasses["h2d.col.Point"] = h2d_col_Point;
 h2d_col_Point.__name__ = "h2d.col.Point";
 h2d_col_Point.prototype = {
-	toString: function() {
-		return "{" + hxd_Math.fmt(this.x) + "," + hxd_Math.fmt(this.y) + "}";
+	__class__: h2d_col_Point
+};
+var h2d_col_Polygon = {};
+h2d_col_Polygon.getCollider = function(this1,isConvex) {
+	if(isConvex == null) {
+		isConvex = false;
 	}
-	,__class__: h2d_col_Point
+	return new h2d_col_PolygonCollider([this1],isConvex);
+};
+h2d_col_Polygon.contains = function(this1,p,isConvex) {
+	if(isConvex == null) {
+		isConvex = false;
+	}
+	if(isConvex) {
+		var p1 = this1[this1.length - 1];
+		var _g = 0;
+		while(_g < this1.length) {
+			var p2 = this1[_g];
+			++_g;
+			if((p2.x - p1.x) * (p.y - p1.y) - (p2.y - p1.y) * (p.x - p1.x) < 0) {
+				return false;
+			}
+			p1 = p2;
+		}
+		return true;
+	} else {
+		var w = 0;
+		var p1 = this1[this1.length - 1];
+		var _g = 0;
+		while(_g < this1.length) {
+			var p2 = this1[_g];
+			++_g;
+			if(p2.y <= p.y) {
+				if(p1.y > p.y && (p1.x - p2.x) * (p.y - p2.y) - (p1.y - p2.y) * (p.x - p2.x) > 0) {
+					++w;
+				}
+			} else if(p1.y <= p.y && (p1.x - p2.x) * (p.y - p2.y) - (p1.y - p2.y) * (p.x - p2.x) < 0) {
+				--w;
+			}
+			p1 = p2;
+		}
+		return w != 0;
+	}
+};
+var h2d_col_PolygonCollider = function(polygons,isConvex) {
+	if(isConvex == null) {
+		isConvex = false;
+	}
+	this.polygons = polygons;
+	this.isConvex = isConvex;
+};
+$hxClasses["h2d.col.PolygonCollider"] = h2d_col_PolygonCollider;
+h2d_col_PolygonCollider.__name__ = "h2d.col.PolygonCollider";
+h2d_col_PolygonCollider.__interfaces__ = [h2d_col_Collider];
+h2d_col_PolygonCollider.prototype = {
+	contains: function(p) {
+		if(this.polygons == null) {
+			return false;
+		}
+		return h2d_col_Polygons.contains(this.polygons,p,this.isConvex);
+	}
+	,__class__: h2d_col_PolygonCollider
+};
+var h2d_col_Polygons = {};
+h2d_col_Polygons.contains = function(this1,p,isConvex) {
+	if(isConvex == null) {
+		isConvex = false;
+	}
+	var _g = 0;
+	while(_g < this1.length) if(h2d_col_Polygon.contains(this1[_g++],p,isConvex)) {
+		return true;
+	}
+	return false;
 };
 var h2d_filter_Filter = function() {
 	this.enable = true;
@@ -12494,6 +12944,11 @@ h3d_Buffer.ofFloats = function(v,stride,flags) {
 	var nvert = v.pos / stride | 0;
 	var b = new h3d_Buffer(nvert,stride,flags);
 	b.uploadVector(v,0,nvert);
+	return b;
+};
+h3d_Buffer.ofSubFloats = function(v,stride,vertices,flags) {
+	var b = new h3d_Buffer(vertices,stride,flags);
+	b.uploadVector(v,0,vertices);
 	return b;
 };
 h3d_Buffer.prototype = {
@@ -24472,6 +24927,15 @@ haxe_ds_EnumValueMap.prototype = $extend(haxe_ds_BalancedTree.prototype,{
 	}
 	,__class__: haxe_ds_EnumValueMap
 });
+var haxe_ds__$HashMap_HashMapData = function() {
+	this.keys = new haxe_ds_IntMap();
+	this.values = new haxe_ds_IntMap();
+};
+$hxClasses["haxe.ds._HashMap.HashMapData"] = haxe_ds__$HashMap_HashMapData;
+haxe_ds__$HashMap_HashMapData.__name__ = "haxe.ds._HashMap.HashMapData";
+haxe_ds__$HashMap_HashMapData.prototype = {
+	__class__: haxe_ds__$HashMap_HashMapData
+};
 var haxe_ds_IntMap = function() {
 	this.h = { };
 };
@@ -26494,29 +26958,6 @@ hxd_Key.onEvent = function(e) {
 		break;
 	default:
 	}
-};
-var hxd_Math = function() { };
-$hxClasses["hxd.Math"] = hxd_Math;
-hxd_Math.__name__ = "hxd.Math";
-hxd_Math.fmt = function(v) {
-	var neg;
-	if(v < 0) {
-		neg = -1.0;
-		v = -v;
-	} else {
-		neg = 1.0;
-	}
-	if(isNaN(v) || !isFinite(v)) {
-		return v;
-	}
-	var digits = 4 - Math.log(v) / Math.log(10) | 0;
-	if(digits < 1) {
-		digits = 1;
-	} else if(digits >= 10) {
-		return 0.;
-	}
-	var exp = Math.pow(10,digits);
-	return Math.floor(v * exp + .49999) * neg / exp;
 };
 var hxd_Flags = $hxEnums["hxd.Flags"] = { __ename__:true,__constructs__:null
 	,ReadOnly: {_hx_name:"ReadOnly",_hx_index:0,__enum__:"hxd.Flags",toString:$estr}
@@ -43399,6 +43840,7 @@ Colors.BLUE = -13291603;
 Colors.LIGHT_GREY = -10066330;
 TextButton.BUTTON_TEXT_COLOR_ENABLED = -1;
 TextButton.BUTTON_TEXT_COLOR_DISABLED = -5592406;
+PlayView.FIELD_TILE_SIZE = 6;
 Xml.Element = 0;
 Xml.PCData = 1;
 Xml.CData = 2;
