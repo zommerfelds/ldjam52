@@ -375,6 +375,1259 @@ HerbalTeaApp.prototype = $extend(hxd_App.prototype,{
 	}
 	,__class__: HerbalTeaApp
 });
+var ldtk_Project = function() {
+};
+$hxClasses["ldtk.Project"] = ldtk_Project;
+ldtk_Project.__name__ = "ldtk.Project";
+ldtk_Project.error = function(str) {
+	throw haxe_Exception.thrown("[ldtk-api] " + str);
+};
+ldtk_Project.prototype = {
+	parseJson: function(jsonString) {
+		this._untypedTilesets = new haxe_ds_IntMap();
+		this.assetCache = new haxe_ds_StringMap();
+		var json = JSON.parse(jsonString);
+		this.defs = json.defs;
+		this.bgColor_hex = json.bgColor;
+		var hex = json.bgColor;
+		this.bgColor_int = hex == null ? 0 : Std.parseInt("0x" + HxOverrides.substr(hex,1,null));
+		this.worldLayout = Type.createEnum(ldtk_WorldLayout,Std.string(json.worldLayout),null);
+		this._untypedLevels = [];
+		var idx = 0;
+		var _g = 0;
+		var _g1 = json.levels;
+		while(_g < _g1.length) this._untypedLevels.push(this._instanciateLevel(this,idx++,_g1[_g++]));
+		this["all_tilesets"] = { };
+		var _g = 0;
+		var _g1 = json.defs.tilesets;
+		while(_g < _g1.length) {
+			var tsJson = _g1[_g];
+			++_g;
+			var this1 = this._untypedTilesets;
+			var key = tsJson.uid;
+			var value = this._instanciateTileset(this,tsJson);
+			this1.h[key] = value;
+			Reflect.field(this,"all_tilesets")[tsJson.identifier] = this._instanciateTileset(this,tsJson);
+		}
+	}
+	,capitalize: function(id) {
+		if(id == null) {
+			id = "";
+		}
+		var reg = new EReg("^(_*)([a-z])([a-zA-Z0-9_]*)","g");
+		if(reg.match(id)) {
+			id = reg.matched(1) + reg.matched(2).toUpperCase() + reg.matched(3);
+		}
+		return id;
+	}
+	,_resolveExternalEnumValue: function(name,enumValueId) {
+		return null;
+	}
+	,_assignFieldInstanceValues: function(target,fieldInstances) {
+		var _gthis = this;
+		var arrayReg = new EReg("Array<(.*)>","gi");
+		var _g = 0;
+		while(_g < fieldInstances.length) {
+			var f = fieldInstances[_g];
+			++_g;
+			if(f.__value == null) {
+				continue;
+			}
+			var isArray = arrayReg.match(f.__type);
+			var typeName = isArray ? arrayReg.matched(1) : f.__type;
+			var _hx_tmp;
+			var _hx_tmp1;
+			switch(typeName) {
+			case "Color":
+				target["f_" + f.__identifier + "_hex"] = f.__value;
+				if(!isArray) {
+					var hex = f.__value;
+					target["f_" + f.__identifier + "_int"] = hex == null ? 0 : Std.parseInt("0x" + HxOverrides.substr(hex,1,null));
+				} else {
+					var arr = f.__value;
+					var field = "f_" + f.__identifier + "_int";
+					var result = new Array(arr.length);
+					var _g1 = 0;
+					var _g2 = arr.length;
+					while(_g1 < _g2) {
+						var i = _g1++;
+						var c = arr[i];
+						result[i] = c == null ? 0 : Std.parseInt("0x" + HxOverrides.substr(c,1,null));
+					}
+					target[field] = result;
+				}
+				break;
+			case "EntityRef":
+				target["f_" + f.__identifier] = f.__value;
+				break;
+			case "FilePath":
+				target["f_" + f.__identifier] = f.__value;
+				break;
+			case "Point":
+				if(!isArray) {
+					target["f_" + f.__identifier] = new ldtk_Point(f.__value.cx,f.__value.cy);
+				} else {
+					var arr1 = f.__value;
+					var field1 = "f_" + f.__identifier;
+					var result1 = new Array(arr1.length);
+					var _g3 = 0;
+					var _g4 = arr1.length;
+					while(_g3 < _g4) {
+						var i1 = _g3++;
+						var pt = arr1[i1];
+						result1[i1] = new ldtk_Point(pt.cx,pt.cy);
+					}
+					target[field1] = result1;
+				}
+				break;
+			case "Bool":case "Float":case "Int":case "String":
+				target["f_" + f.__identifier] = f.__value;
+				break;
+			case "Tile":
+				_hx_tmp1 = typeName.indexOf("LocalEnum.");
+				if(_hx_tmp1 == 0) {
+					var type = this._enumTypePrefix + HxOverrides.substr(typeName,typeName.indexOf(".") + 1,null);
+					var e = $hxEnums[type];
+					if(!isArray) {
+						target["f_" + f.__identifier] = Type.createEnum(e,this.capitalize(f.__value));
+					} else {
+						var arr2 = f.__value;
+						var field2 = "f_" + f.__identifier;
+						var result2 = new Array(arr2.length);
+						var _g5 = 0;
+						var _g6 = arr2.length;
+						while(_g5 < _g6) {
+							var i2 = _g5++;
+							result2[i2] = Type.createEnum(e,_gthis.capitalize(arr2[i2]));
+						}
+						target[field2] = result2;
+					}
+				} else {
+					_hx_tmp = typeName.indexOf("ExternEnum.");
+					if(_hx_tmp == 0) {
+						var type1 = HxOverrides.substr(typeName,typeName.indexOf(".") + 1,null);
+						if(!isArray) {
+							target["f_" + f.__identifier] = this._resolveExternalEnumValue(type1,f.__value);
+						} else {
+							var arr3 = f.__value;
+							var field3 = "f_" + f.__identifier;
+							var result3 = new Array(arr3.length);
+							var _g7 = 0;
+							var _g8 = arr3.length;
+							while(_g7 < _g8) {
+								var i3 = _g7++;
+								result3[i3] = _gthis._resolveExternalEnumValue(type1,arr3[i3]);
+							}
+							target[field3] = result3;
+						}
+					} else {
+						var _checkTile = (function() {
+							return function(tileRect) {
+								var _checkTile;
+								if(tileRect != null) {
+									var v = tileRect.x;
+									_checkTile = !(v != null && !isNaN(v) && isFinite(v));
+								} else {
+									_checkTile = true;
+								}
+								if(_checkTile) {
+									return null;
+								} else {
+									return tileRect;
+								}
+							};
+						})();
+						var _heapsTileGetter = [(function() {
+							return function(tileRect) {
+								var _heapsTileGetter;
+								if(tileRect != null) {
+									var v = tileRect.x;
+									_heapsTileGetter = !(v != null && !isNaN(v) && isFinite(v));
+								} else {
+									_heapsTileGetter = true;
+								}
+								if(_heapsTileGetter || !_gthis._untypedTilesets.h.hasOwnProperty(tileRect.tilesetUid)) {
+									return null;
+								}
+								var tileset = _gthis._untypedTilesets.h[tileRect.tilesetUid];
+								var x = tileRect.x;
+								var y = tileRect.y;
+								var wid = tileRect.w;
+								var hei = tileRect.h;
+								var atlas;
+								if(tileset._cachedAtlasTile != null) {
+									atlas = tileset._cachedAtlasTile;
+								} else {
+									tileset._cachedAtlasTile = dn_ImageDecoder.decodeTile(tileset.untypedProject.getAsset(tileset.relPath));
+									if(tileset._cachedAtlasTile == null) {
+										tileset._cachedAtlasTile = h2d_Tile.fromColor(16711680,tileset.pxWid,tileset.pxHei);
+									}
+									atlas = tileset._cachedAtlasTile;
+								}
+								return atlas == null ? null : atlas.sub(x,y,wid,hei);
+							};
+						})()];
+						if(isArray) {
+							var arr4 = f.__value;
+							var field4 = "f_" + f.__identifier + "_infos";
+							var result4 = new Array(arr4.length);
+							var _g9 = 0;
+							var _g10 = arr4.length;
+							while(_g9 < _g10) {
+								var i4 = _g9++;
+								result4[i4] = _checkTile(arr4[i4]);
+							}
+							target[field4] = result4;
+							var field5 = "f_" + f.__identifier + "_getTile";
+							var result5 = new Array(arr4.length);
+							var _g11 = 0;
+							var _g12 = arr4.length;
+							while(_g11 < _g12) {
+								var i5 = _g11++;
+								result5[i5] = (function(tileRect,_heapsTileGetter) {
+									return function() {
+										return _heapsTileGetter[0](tileRect[0]);
+									};
+								})([arr4[i5]],_heapsTileGetter);
+							}
+							target[field5] = result5;
+						} else {
+							target["f_" + f.__identifier + "_infos"] = _checkTile(f.__value);
+							target["f_" + f.__identifier + "_getTile"] = (function(tileRect,_heapsTileGetter) {
+								return function() {
+									return _heapsTileGetter[0](tileRect[0]);
+								};
+							})([f.__value],_heapsTileGetter);
+						}
+					}
+				}
+				break;
+			default:
+				_hx_tmp1 = typeName.indexOf("LocalEnum.");
+				if(_hx_tmp1 == 0) {
+					var type2 = this._enumTypePrefix + HxOverrides.substr(typeName,typeName.indexOf(".") + 1,null);
+					var e1 = $hxEnums[type2];
+					if(!isArray) {
+						target["f_" + f.__identifier] = Type.createEnum(e1,this.capitalize(f.__value));
+					} else {
+						var arr5 = f.__value;
+						var field6 = "f_" + f.__identifier;
+						var result6 = new Array(arr5.length);
+						var _g13 = 0;
+						var _g14 = arr5.length;
+						while(_g13 < _g14) {
+							var i6 = _g13++;
+							result6[i6] = Type.createEnum(e1,_gthis.capitalize(arr5[i6]));
+						}
+						target[field6] = result6;
+					}
+				} else {
+					_hx_tmp = typeName.indexOf("ExternEnum.");
+					if(_hx_tmp == 0) {
+						var type3 = HxOverrides.substr(typeName,typeName.indexOf(".") + 1,null);
+						if(!isArray) {
+							target["f_" + f.__identifier] = this._resolveExternalEnumValue(type3,f.__value);
+						} else {
+							var arr6 = f.__value;
+							var field7 = "f_" + f.__identifier;
+							var result7 = new Array(arr6.length);
+							var _g15 = 0;
+							var _g16 = arr6.length;
+							while(_g15 < _g16) {
+								var i7 = _g15++;
+								result7[i7] = _gthis._resolveExternalEnumValue(type3,arr6[i7]);
+							}
+							target[field7] = result7;
+						}
+					} else {
+						ldtk_Project.error("Unknown field type " + typeName + " at runtime");
+					}
+				}
+			}
+		}
+	}
+	,toString: function() {
+		return "ldtk.Project[" + this._untypedLevels.length + " levels]";
+	}
+	,getAsset: function(projectRelativePath) {
+		if(Object.prototype.hasOwnProperty.call(this.assetCache.h,projectRelativePath)) {
+			return this.assetCache.h[projectRelativePath];
+		} else {
+			var bytes = this.loadAssetBytes(projectRelativePath);
+			this.assetCache.h[projectRelativePath] = bytes;
+			return bytes;
+		}
+	}
+	,makeAssetRelativePath: function(projectRelativePath) {
+		var p = StringTools.replace(this.projectFilePath,"\\","/");
+		var projectFileName = p.lastIndexOf("/") < 0 ? p : HxOverrides.substr(p,p.lastIndexOf("/") + 1,null);
+		var pendingDirs = [hxd_Res.get_loader().fs.getRoot()];
+		while(pendingDirs.length > 0) {
+			var _g = pendingDirs.shift().iterator();
+			while(_g.i < _g.l) {
+				var f = _g.a[_g.i++];
+				if(f.get_isDirectory()) {
+					pendingDirs.push(f);
+				} else if(f.name == projectFileName) {
+					var path = f.get_directory().length == 0 ? "" : f.get_directory() + "/";
+					var p = new dn_FilePath();
+					p.parse(path + projectRelativePath,true);
+					return (p.isWindowsNetworkDrive && !p._useWinNetDriveUriFormat ? p.backslashes ? "\\" : "/" : p.uriScheme != null ? p.uriAuthority == null ? "" + p.uriScheme + ":/" : "" + p.uriScheme + "://" + p.uriAuthority + "/" : "") + (p.directory == null ? "" : p.fileName == null && p.extension == null || p.directory == (p.backslashes ? "\\" : "/") ? p.directory : p.directory == null ? null : p.directory == (p.backslashes ? "\\" : "/") ? p.directory : p.directory + (p.backslashes ? "\\" : "/")) + ((p.fileName == null && p.extension == null ? null : (p.fileName == null ? "" : p.fileName) + (p.extension == null ? "" : "." + p.extension)) == null ? "" : p.fileName == null && p.extension == null ? null : (p.fileName == null ? "" : p.fileName) + (p.extension == null ? "" : "." + p.extension));
+				}
+			}
+		}
+		ldtk_Project.error("Project file is not in Heaps res/ folder!");
+		return "";
+	}
+	,loadAssetBytes: function(projectRelativePath) {
+		var resPath = this.makeAssetRelativePath(projectRelativePath);
+		if(!hxd_Res.get_loader().exists(resPath)) {
+			ldtk_Project.error("Asset not found in Heaps res/ folder: " + resPath);
+		}
+		return hxd_Res.load(resPath).entry.getBytes();
+	}
+	,_instanciateLevel: function(project,arrayIndex,json) {
+		return null;
+	}
+	,_instanciateTileset: function(project,json) {
+		return null;
+	}
+	,searchDef: function(arr,uid,identifier) {
+		if(uid == null && identifier == null) {
+			return null;
+		}
+		var _g = 0;
+		while(_g < arr.length) {
+			var e = arr[_g];
+			++_g;
+			if(uid != null && e.uid == uid || identifier != null && e.identifier == identifier) {
+				return e;
+			}
+		}
+		return null;
+	}
+	,getLayerDefJson: function(uid,identifier) {
+		return this.searchDef(this.defs.layers,uid,identifier);
+	}
+	,__class__: ldtk_Project
+};
+var LdtkProject = function(overrideEmbedJson) {
+	this.all_levels = { Level_1 : null, Level_2 : null};
+	this.levels = [];
+	ldtk_Project.call(this);
+	this._enumTypePrefix = "Enum_";
+	this.projectDir = "res/heaps";
+	this.projectFilePath = "res/heaps/map.ldtk";
+	this.parseJson(overrideEmbedJson != null ? overrideEmbedJson : "{\n\t\"__header__\": {\n\t\t\"fileType\": \"LDtk Project JSON\",\n\t\t\"app\": \"LDtk\",\n\t\t\"doc\": \"https://ldtk.io/json\",\n\t\t\"schema\": \"https://ldtk.io/files/JSON_SCHEMA.json\",\n\t\t\"appAuthor\": \"Sebastien 'deepnight' Benard\",\n\t\t\"appVersion\": \"1.2.1\",\n\t\t\"url\": \"https://ldtk.io\"\n\t},\n\t\"iid\": \"2ed57400-7820-11ed-8a57-8f6658066982\",\n\t\"jsonVersion\": \"1.2.1\",\n\t\"appBuildId\": 464653,\n\t\"nextUid\": 7,\n\t\"identifierStyle\": \"Capitalize\",\n\t\"worldLayout\": \"LinearHorizontal\",\n\t\"worldGridWidth\": 256,\n\t\"worldGridHeight\": 256,\n\t\"defaultLevelWidth\": 256,\n\t\"defaultLevelHeight\": 256,\n\t\"defaultPivotX\": 0,\n\t\"defaultPivotY\": 0,\n\t\"defaultGridSize\": 16,\n\t\"bgColor\": \"#40465B\",\n\t\"defaultLevelBgColor\": \"#696A79\",\n\t\"minifyJson\": false,\n\t\"externalLevels\": false,\n\t\"exportTiled\": false,\n\t\"simplifiedExport\": false,\n\t\"imageExportMode\": \"None\",\n\t\"exportLevelBg\": true,\n\t\"pngFilePattern\": null,\n\t\"backupOnSave\": false,\n\t\"backupLimit\": 10,\n\t\"levelNamePattern\": \"Level_%idx1\",\n\t\"tutorialDesc\": null,\n\t\"customCommands\": [],\n\t\"flags\": [],\n\t\"defs\": { \"layers\": [\n\t\t{\n\t\t\t\"__type\": \"Entities\",\n\t\t\t\"identifier\": \"Entities\",\n\t\t\t\"type\": \"Entities\",\n\t\t\t\"uid\": 2,\n\t\t\t\"gridSize\": 8,\n\t\t\t\"guideGridWid\": 0,\n\t\t\t\"guideGridHei\": 0,\n\t\t\t\"displayOpacity\": 1,\n\t\t\t\"inactiveOpacity\": 0.6,\n\t\t\t\"hideInList\": false,\n\t\t\t\"hideFieldsWhenInactive\": true,\n\t\t\t\"canSelectWhenInactive\": true,\n\t\t\t\"pxOffsetX\": 0,\n\t\t\t\"pxOffsetY\": 0,\n\t\t\t\"parallaxFactorX\": 0,\n\t\t\t\"parallaxFactorY\": 0,\n\t\t\t\"parallaxScaling\": true,\n\t\t\t\"requiredTags\": [],\n\t\t\t\"excludedTags\": [],\n\t\t\t\"intGridValues\": [],\n\t\t\t\"autoRuleGroups\": [],\n\t\t\t\"autoSourceLayerDefUid\": null,\n\t\t\t\"tilesetDefUid\": null,\n\t\t\t\"tilePivotX\": 0,\n\t\t\t\"tilePivotY\": 0\n\t\t}\n\t], \"entities\": [\n\t\t{\n\t\t\t\"identifier\": \"Combine\",\n\t\t\t\"uid\": 3,\n\t\t\t\"tags\": [],\n\t\t\t\"width\": 64,\n\t\t\t\"height\": 64,\n\t\t\t\"resizableX\": false,\n\t\t\t\"resizableY\": false,\n\t\t\t\"keepAspectRatio\": false,\n\t\t\t\"tileOpacity\": 1,\n\t\t\t\"fillOpacity\": 1,\n\t\t\t\"lineOpacity\": 1,\n\t\t\t\"hollow\": false,\n\t\t\t\"color\": \"#FEAE34\",\n\t\t\t\"renderMode\": \"Rectangle\",\n\t\t\t\"showName\": true,\n\t\t\t\"tilesetId\": null,\n\t\t\t\"tileRenderMode\": \"FitInside\",\n\t\t\t\"tileRect\": null,\n\t\t\t\"nineSliceBorders\": [],\n\t\t\t\"maxCount\": 0,\n\t\t\t\"limitScope\": \"PerLevel\",\n\t\t\t\"limitBehavior\": \"MoveLastOne\",\n\t\t\t\"pivotX\": 0.8,\n\t\t\t\"pivotY\": 0.5,\n\t\t\t\"fieldDefs\": []\n\t\t}\n\t], \"tilesets\": [], \"enums\": [], \"externalEnums\": [], \"levelFields\": [] },\n\t\"levels\": [\n\t\t{\n\t\t\t\"identifier\": \"Level_1\",\n\t\t\t\"iid\": \"2ed59b10-7820-11ed-8a57-4bed449216cf\",\n\t\t\t\"uid\": 0,\n\t\t\t\"worldX\": -1,\n\t\t\t\"worldY\": -1,\n\t\t\t\"worldDepth\": 0,\n\t\t\t\"pxWid\": 768,\n\t\t\t\"pxHei\": 768,\n\t\t\t\"__bgColor\": \"#696A79\",\n\t\t\t\"bgColor\": null,\n\t\t\t\"useAutoIdentifier\": true,\n\t\t\t\"bgRelPath\": \"level1.png\",\n\t\t\t\"bgPos\": \"Contain\",\n\t\t\t\"bgPivotX\": 0.5,\n\t\t\t\"bgPivotY\": 0.5,\n\t\t\t\"__smartColor\": \"#ADADB5\",\n\t\t\t\"__bgPos\": { \"topLeftPx\": [0,0], \"scale\": [6,6], \"cropRect\": [0,0,128,128] },\n\t\t\t\"externalRelPath\": null,\n\t\t\t\"fieldInstances\": [],\n\t\t\t\"layerInstances\": [\n\t\t\t\t{\n\t\t\t\t\t\"__identifier\": \"Entities\",\n\t\t\t\t\t\"__type\": \"Entities\",\n\t\t\t\t\t\"__cWid\": 96,\n\t\t\t\t\t\"__cHei\": 96,\n\t\t\t\t\t\"__gridSize\": 8,\n\t\t\t\t\t\"__opacity\": 1,\n\t\t\t\t\t\"__pxTotalOffsetX\": 0,\n\t\t\t\t\t\"__pxTotalOffsetY\": 0,\n\t\t\t\t\t\"__tilesetDefUid\": null,\n\t\t\t\t\t\"__tilesetRelPath\": null,\n\t\t\t\t\t\"iid\": \"384e5620-7820-11ed-9d14-1b810d9730e8\",\n\t\t\t\t\t\"levelId\": 0,\n\t\t\t\t\t\"layerDefUid\": 2,\n\t\t\t\t\t\"pxOffsetX\": 0,\n\t\t\t\t\t\"pxOffsetY\": 0,\n\t\t\t\t\t\"visible\": true,\n\t\t\t\t\t\"optionalRules\": [],\n\t\t\t\t\t\"intGridCsv\": [],\n\t\t\t\t\t\"autoLayerTiles\": [],\n\t\t\t\t\t\"seed\": 8508788,\n\t\t\t\t\t\"overrideTilesetUid\": null,\n\t\t\t\t\t\"gridTiles\": [],\n\t\t\t\t\t\"entityInstances\": [\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"__identifier\": \"Combine\",\n\t\t\t\t\t\t\t\"__grid\": [38,60],\n\t\t\t\t\t\t\t\"__pivot\": [0.8,0.5],\n\t\t\t\t\t\t\t\"__tags\": [],\n\t\t\t\t\t\t\t\"__tile\": null,\n\t\t\t\t\t\t\t\"__smartColor\": \"#FEAE34\",\n\t\t\t\t\t\t\t\"iid\": \"fe903400-7820-11ed-9d14-e90854c21f44\",\n\t\t\t\t\t\t\t\"width\": 64,\n\t\t\t\t\t\t\t\"height\": 64,\n\t\t\t\t\t\t\t\"defUid\": 3,\n\t\t\t\t\t\t\t\"px\": [306,484],\n\t\t\t\t\t\t\t\"fieldInstances\": []\n\t\t\t\t\t\t}\n\t\t\t\t\t]\n\t\t\t\t}\n\t\t\t],\n\t\t\t\"__neighbours\": []\n\t\t},\n\t\t{\n\t\t\t\"identifier\": \"Level_2\",\n\t\t\t\"iid\": \"d61c8250-7820-11ed-9d14-e768b30eedc7\",\n\t\t\t\"uid\": 6,\n\t\t\t\"worldX\": -1,\n\t\t\t\"worldY\": -1,\n\t\t\t\"worldDepth\": 0,\n\t\t\t\"pxWid\": 768,\n\t\t\t\"pxHei\": 768,\n\t\t\t\"__bgColor\": \"#696A79\",\n\t\t\t\"bgColor\": null,\n\t\t\t\"useAutoIdentifier\": true,\n\t\t\t\"bgRelPath\": \"level2.png\",\n\t\t\t\"bgPos\": \"Contain\",\n\t\t\t\"bgPivotX\": 0.5,\n\t\t\t\"bgPivotY\": 0.5,\n\t\t\t\"__smartColor\": \"#ADADB5\",\n\t\t\t\"__bgPos\": { \"topLeftPx\": [0,0], \"scale\": [6,6], \"cropRect\": [0,0,128,128] },\n\t\t\t\"externalRelPath\": null,\n\t\t\t\"fieldInstances\": [],\n\t\t\t\"layerInstances\": [\n\t\t\t\t{\n\t\t\t\t\t\"__identifier\": \"Entities\",\n\t\t\t\t\t\"__type\": \"Entities\",\n\t\t\t\t\t\"__cWid\": 96,\n\t\t\t\t\t\"__cHei\": 96,\n\t\t\t\t\t\"__gridSize\": 8,\n\t\t\t\t\t\"__opacity\": 1,\n\t\t\t\t\t\"__pxTotalOffsetX\": 0,\n\t\t\t\t\t\"__pxTotalOffsetY\": 0,\n\t\t\t\t\t\"__tilesetDefUid\": null,\n\t\t\t\t\t\"__tilesetRelPath\": null,\n\t\t\t\t\t\"iid\": \"d61c8251-7820-11ed-9d14-8f40071589ab\",\n\t\t\t\t\t\"levelId\": 6,\n\t\t\t\t\t\"layerDefUid\": 2,\n\t\t\t\t\t\"pxOffsetX\": 0,\n\t\t\t\t\t\"pxOffsetY\": 0,\n\t\t\t\t\t\"visible\": true,\n\t\t\t\t\t\"optionalRules\": [],\n\t\t\t\t\t\"intGridCsv\": [],\n\t\t\t\t\t\"autoLayerTiles\": [],\n\t\t\t\t\t\"seed\": 8508788,\n\t\t\t\t\t\"overrideTilesetUid\": null,\n\t\t\t\t\t\"gridTiles\": [],\n\t\t\t\t\t\"entityInstances\": [\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"__identifier\": \"Combine\",\n\t\t\t\t\t\t\t\"__grid\": [30,11],\n\t\t\t\t\t\t\t\"__pivot\": [0.8,0.5],\n\t\t\t\t\t\t\t\"__tags\": [],\n\t\t\t\t\t\t\t\"__tile\": null,\n\t\t\t\t\t\t\t\"__smartColor\": \"#FEAE34\",\n\t\t\t\t\t\t\t\"iid\": \"d61c8252-7820-11ed-9d14-1d8ba3330c77\",\n\t\t\t\t\t\t\t\"width\": 64,\n\t\t\t\t\t\t\t\"height\": 64,\n\t\t\t\t\t\t\t\"defUid\": 3,\n\t\t\t\t\t\t\t\"px\": [242,92],\n\t\t\t\t\t\t\t\"fieldInstances\": []\n\t\t\t\t\t\t}\n\t\t\t\t\t]\n\t\t\t\t}\n\t\t\t],\n\t\t\t\"__neighbours\": []\n\t\t}\n\t],\n\t\"worlds\": []\n}");
+};
+$hxClasses["LdtkProject"] = LdtkProject;
+LdtkProject.__name__ = "LdtkProject";
+LdtkProject.__super__ = ldtk_Project;
+LdtkProject.prototype = $extend(ldtk_Project.prototype,{
+	parseJson: function(json) {
+		ldtk_Project.prototype.parseJson.call(this,json);
+		this.levels = this._untypedLevels.slice();
+		var _g = 0;
+		var _g1 = this._untypedLevels;
+		while(_g < _g1.length) {
+			var l = _g1[_g];
+			++_g;
+			this.all_levels[l.identifier] = l;
+		}
+	}
+	,_instanciateTileset: function(project,json) {
+		var name = "Tileset_" + json.identifier;
+		var c = $hxClasses[name];
+		if(c == null) {
+			return null;
+		} else {
+			return Type.createInstance(c,[project,json]);
+		}
+	}
+	,_instanciateLevel: function(project,arrayIndex,json) {
+		return new LdtkProject_$Level(project,arrayIndex,json);
+	}
+	,_resolveExternalEnumValue: function(name,enumValueId) {
+		ldtk_Project.error("Unknown external enum name: " + name);
+		return null;
+	}
+	,getLevel: function(uid,id) {
+		if(uid == null && id == null) {
+			return null;
+		}
+		var _g = 0;
+		var _g1 = this._untypedLevels;
+		while(_g < _g1.length) {
+			var l = _g1[_g];
+			++_g;
+			if(id != null && l.identifier == id || uid != null && l.uid == uid) {
+				return l;
+			}
+		}
+		return null;
+	}
+	,getLevelIdentifier: function(id) {
+		return this.getLevel(null,id);
+	}
+	,getLevelUid: function(uid) {
+		return this.getLevel(uid);
+	}
+	,getLevelAt: function(worldX,worldY) {
+		var _g = 0;
+		var _g1 = this._untypedLevels;
+		while(_g < _g1.length) {
+			var l = _g1[_g];
+			++_g;
+			if(worldX >= l.worldX && worldX < l.worldX + l.pxWid && worldY >= l.worldY && worldY < l.worldY + l.pxHei) {
+				return l;
+			}
+		}
+		return null;
+	}
+	,__class__: LdtkProject
+});
+var hxd_Save = function() { };
+$hxClasses["hxd.Save"] = hxd_Save;
+hxd_Save.__name__ = "hxd.Save";
+hxd_Save.makeCRC = function(data) {
+	return HxOverrides.substr(haxe_crypto_Sha1.encode(data + haxe_crypto_Sha1.encode(data + hxd_Save.SALT)),4,32);
+};
+hxd_Save.loadData = function(data,checkSum,defValue) {
+	if(checkSum) {
+		if(HxOverrides.cca(data,data.length - 33) != 35) {
+			throw haxe_Exception.thrown("Missing CRC");
+		}
+		var crc = HxOverrides.substr(data,data.length - 32,null);
+		data = HxOverrides.substr(data,0,-33);
+		if(hxd_Save.makeCRC(data) != crc) {
+			throw haxe_Exception.thrown("Invalid CRC");
+		}
+	}
+	var obj = haxe_Unserializer.run(data);
+	if(defValue != null && Reflect.isObject(obj) && Reflect.isObject(defValue)) {
+		var _g = 0;
+		var _g1 = Reflect.fields(defValue);
+		while(_g < _g1.length) {
+			var f = _g1[_g];
+			++_g;
+			if(Object.prototype.hasOwnProperty.call(obj,f)) {
+				continue;
+			}
+			obj[f] = Reflect.field(defValue,f);
+		}
+	}
+	return obj;
+};
+hxd_Save.saveData = function(value,checkSum) {
+	var data = haxe_Serializer.run(value);
+	if(checkSum) {
+		return data + "#" + hxd_Save.makeCRC(data);
+	} else {
+		return data;
+	}
+};
+hxd_Save.load = function(defValue,name,checkSum) {
+	if(checkSum == null) {
+		checkSum = false;
+	}
+	if(name == null) {
+		name = "save";
+	}
+	try {
+		return hxd_Save.loadData(hxd_Save.readSaveData(name),checkSum,defValue);
+	} catch( _g ) {
+		return defValue;
+	}
+};
+hxd_Save.readSaveData = function(name) {
+	return window.localStorage.getItem(name);
+};
+hxd_Save.writeSaveData = function(name,data) {
+	window.localStorage.setItem(name,data);
+};
+hxd_Save.save = function(val,name,checkSum) {
+	if(checkSum == null) {
+		checkSum = false;
+	}
+	if(name == null) {
+		name = "save";
+	}
+	var data = hxd_Save.saveData(val,checkSum);
+	try {
+		if(hxd_Save.readSaveData(name) == data) {
+			return false;
+		}
+	} catch( _g ) {
+	}
+	hxd_Save.writeSaveData(name,data);
+	return true;
+};
+var HxOverrides = function() { };
+$hxClasses["HxOverrides"] = HxOverrides;
+HxOverrides.__name__ = "HxOverrides";
+HxOverrides.strDate = function(s) {
+	switch(s.length) {
+	case 8:
+		var k = s.split(":");
+		var d = new Date();
+		d["setTime"](0);
+		d["setUTCHours"](k[0]);
+		d["setUTCMinutes"](k[1]);
+		d["setUTCSeconds"](k[2]);
+		return d;
+	case 10:
+		var k = s.split("-");
+		return new Date(k[0],k[1] - 1,k[2],0,0,0);
+	case 19:
+		var k = s.split(" ");
+		var y = k[0].split("-");
+		var t = k[1].split(":");
+		return new Date(y[0],y[1] - 1,y[2],t[0],t[1],t[2]);
+	default:
+		throw haxe_Exception.thrown("Invalid date format : " + s);
+	}
+};
+HxOverrides.cca = function(s,index) {
+	var x = s.charCodeAt(index);
+	if(x != x) {
+		return undefined;
+	}
+	return x;
+};
+HxOverrides.substr = function(s,pos,len) {
+	if(len == null) {
+		len = s.length;
+	} else if(len < 0) {
+		if(pos == 0) {
+			len = s.length + len;
+		} else {
+			return "";
+		}
+	}
+	return s.substr(pos,len);
+};
+HxOverrides.remove = function(a,obj) {
+	var i = a.indexOf(obj);
+	if(i == -1) {
+		return false;
+	}
+	a.splice(i,1);
+	return true;
+};
+HxOverrides.now = function() {
+	return Date.now();
+};
+var haxe_crypto_Sha1 = function() {
+};
+$hxClasses["haxe.crypto.Sha1"] = haxe_crypto_Sha1;
+haxe_crypto_Sha1.__name__ = "haxe.crypto.Sha1";
+haxe_crypto_Sha1.encode = function(s) {
+	var sh = new haxe_crypto_Sha1();
+	return sh.hex(sh.doEncode(haxe_crypto_Sha1.str2blks(s)));
+};
+haxe_crypto_Sha1.str2blks = function(s) {
+	var s1 = haxe_io_Bytes.ofString(s);
+	var nblk = (s1.length + 8 >> 6) + 1;
+	var blks = [];
+	var _g = 0;
+	var _g1 = nblk * 16;
+	while(_g < _g1) blks[_g++] = 0;
+	var _g = 0;
+	var _g1 = s1.length;
+	while(_g < _g1) {
+		var i = _g++;
+		blks[i >> 2] |= s1.b[i] << 24 - ((i & 3) << 3);
+	}
+	var i = s1.length;
+	blks[i >> 2] |= 128 << 24 - ((i & 3) << 3);
+	blks[nblk * 16 - 1] = s1.length * 8;
+	return blks;
+};
+haxe_crypto_Sha1.prototype = {
+	doEncode: function(x) {
+		var w = [];
+		var a = 1732584193;
+		var b = -271733879;
+		var c = -1732584194;
+		var d = 271733878;
+		var e = -1009589776;
+		var i = 0;
+		while(i < x.length) {
+			var olda = a;
+			var oldb = b;
+			var oldc = c;
+			var oldd = d;
+			var olde = e;
+			var j = 0;
+			while(j < 80) {
+				if(j < 16) {
+					w[j] = x[i + j];
+				} else {
+					var num = w[j - 3] ^ w[j - 8] ^ w[j - 14] ^ w[j - 16];
+					w[j] = num << 1 | num >>> 31;
+				}
+				var t = (a << 5 | a >>> 27) + this.ft(j,b,c,d) + e + w[j];
+				e = d;
+				d = c;
+				c = b << 30 | b >>> 2;
+				b = a;
+				a = t + this.kt(j);
+				++j;
+			}
+			a += olda;
+			b += oldb;
+			c += oldc;
+			d += oldd;
+			e += olde;
+			i += 16;
+		}
+		return [a,b,c,d,e];
+	}
+	,ft: function(t,b,c,d) {
+		if(t < 20) {
+			return b & c | ~b & d;
+		}
+		if(t < 40) {
+			return b ^ c ^ d;
+		}
+		if(t < 60) {
+			return b & c | b & d | c & d;
+		}
+		return b ^ c ^ d;
+	}
+	,kt: function(t) {
+		if(t < 20) {
+			return 1518500249;
+		}
+		if(t < 40) {
+			return 1859775393;
+		}
+		if(t < 60) {
+			return -1894007588;
+		}
+		return -899497514;
+	}
+	,hex: function(a) {
+		var str = "";
+		var _g = 0;
+		while(_g < a.length) str += StringTools.hex(a[_g++],8);
+		return str.toLowerCase();
+	}
+	,__class__: haxe_crypto_Sha1
+};
+var haxe_io_Bytes = function(data) {
+	this.length = data.byteLength;
+	this.b = new Uint8Array(data);
+	this.b.bufferValue = data;
+	data.hxBytes = this;
+	data.bytes = this.b;
+};
+$hxClasses["haxe.io.Bytes"] = haxe_io_Bytes;
+haxe_io_Bytes.__name__ = "haxe.io.Bytes";
+haxe_io_Bytes.ofString = function(s,encoding) {
+	if(encoding == haxe_io_Encoding.RawNative) {
+		var buf = new Uint8Array(s.length << 1);
+		var _g = 0;
+		var _g1 = s.length;
+		while(_g < _g1) {
+			var i = _g++;
+			var c = s.charCodeAt(i);
+			buf[i << 1] = c & 255;
+			buf[i << 1 | 1] = c >> 8;
+		}
+		return new haxe_io_Bytes(buf.buffer);
+	}
+	var a = [];
+	var i = 0;
+	while(i < s.length) {
+		var c = s.charCodeAt(i++);
+		if(55296 <= c && c <= 56319) {
+			c = c - 55232 << 10 | s.charCodeAt(i++) & 1023;
+		}
+		if(c <= 127) {
+			a.push(c);
+		} else if(c <= 2047) {
+			a.push(192 | c >> 6);
+			a.push(128 | c & 63);
+		} else if(c <= 65535) {
+			a.push(224 | c >> 12);
+			a.push(128 | c >> 6 & 63);
+			a.push(128 | c & 63);
+		} else {
+			a.push(240 | c >> 18);
+			a.push(128 | c >> 12 & 63);
+			a.push(128 | c >> 6 & 63);
+			a.push(128 | c & 63);
+		}
+	}
+	return new haxe_io_Bytes(new Uint8Array(a).buffer);
+};
+haxe_io_Bytes.ofData = function(b) {
+	var hb = b.hxBytes;
+	if(hb != null) {
+		return hb;
+	}
+	return new haxe_io_Bytes(b);
+};
+haxe_io_Bytes.prototype = {
+	blit: function(pos,src,srcpos,len) {
+		if(pos < 0 || srcpos < 0 || len < 0 || pos + len > this.length || srcpos + len > src.length) {
+			throw haxe_Exception.thrown(haxe_io_Error.OutsideBounds);
+		}
+		if(srcpos == 0 && len == src.b.byteLength) {
+			this.b.set(src.b,pos);
+		} else {
+			this.b.set(src.b.subarray(srcpos,srcpos + len),pos);
+		}
+	}
+	,fill: function(pos,len,value) {
+		var _g = 0;
+		while(_g < len) {
+			++_g;
+			this.b[pos++] = value;
+		}
+	}
+	,getFloat: function(pos) {
+		if(this.data == null) {
+			this.data = new DataView(this.b.buffer,this.b.byteOffset,this.b.byteLength);
+		}
+		return this.data.getFloat32(pos,true);
+	}
+	,setFloat: function(pos,v) {
+		if(this.data == null) {
+			this.data = new DataView(this.b.buffer,this.b.byteOffset,this.b.byteLength);
+		}
+		this.data.setFloat32(pos,v,true);
+	}
+	,getUInt16: function(pos) {
+		if(this.data == null) {
+			this.data = new DataView(this.b.buffer,this.b.byteOffset,this.b.byteLength);
+		}
+		return this.data.getUint16(pos,true);
+	}
+	,setUInt16: function(pos,v) {
+		if(this.data == null) {
+			this.data = new DataView(this.b.buffer,this.b.byteOffset,this.b.byteLength);
+		}
+		this.data.setUint16(pos,v,true);
+	}
+	,getInt32: function(pos) {
+		if(this.data == null) {
+			this.data = new DataView(this.b.buffer,this.b.byteOffset,this.b.byteLength);
+		}
+		return this.data.getInt32(pos,true);
+	}
+	,setInt32: function(pos,v) {
+		if(this.data == null) {
+			this.data = new DataView(this.b.buffer,this.b.byteOffset,this.b.byteLength);
+		}
+		this.data.setInt32(pos,v,true);
+	}
+	,getString: function(pos,len,encoding) {
+		if(pos < 0 || len < 0 || pos + len > this.length) {
+			throw haxe_Exception.thrown(haxe_io_Error.OutsideBounds);
+		}
+		if(encoding == null) {
+			encoding = haxe_io_Encoding.UTF8;
+		}
+		var s = "";
+		var b = this.b;
+		var i = pos;
+		var max = pos + len;
+		switch(encoding._hx_index) {
+		case 0:
+			while(i < max) {
+				var c = b[i++];
+				if(c < 128) {
+					if(c == 0) {
+						break;
+					}
+					s += String.fromCodePoint(c);
+				} else if(c < 224) {
+					var code = (c & 63) << 6 | b[i++] & 127;
+					s += String.fromCodePoint(code);
+				} else if(c < 240) {
+					var code1 = (c & 31) << 12 | (b[i++] & 127) << 6 | b[i++] & 127;
+					s += String.fromCodePoint(code1);
+				} else {
+					var u = (c & 15) << 18 | (b[i++] & 127) << 12 | (b[i++] & 127) << 6 | b[i++] & 127;
+					s += String.fromCodePoint(u);
+				}
+			}
+			break;
+		case 1:
+			while(i < max) {
+				var c = b[i++] | b[i++] << 8;
+				s += String.fromCodePoint(c);
+			}
+			break;
+		}
+		return s;
+	}
+	,toString: function() {
+		return this.getString(0,this.length);
+	}
+	,__class__: haxe_io_Bytes
+};
+var haxe_io_Encoding = $hxEnums["haxe.io.Encoding"] = { __ename__:"haxe.io.Encoding",__constructs__:null
+	,UTF8: {_hx_name:"UTF8",_hx_index:0,__enum__:"haxe.io.Encoding",toString:$estr}
+	,RawNative: {_hx_name:"RawNative",_hx_index:1,__enum__:"haxe.io.Encoding",toString:$estr}
+};
+haxe_io_Encoding.__constructs__ = [haxe_io_Encoding.UTF8,haxe_io_Encoding.RawNative];
+haxe_io_Encoding.__empty_constructs__ = [haxe_io_Encoding.UTF8,haxe_io_Encoding.RawNative];
+var haxe__$Unserializer_DefaultResolver = function() {
+};
+$hxClasses["haxe._Unserializer.DefaultResolver"] = haxe__$Unserializer_DefaultResolver;
+haxe__$Unserializer_DefaultResolver.__name__ = "haxe._Unserializer.DefaultResolver";
+haxe__$Unserializer_DefaultResolver.prototype = {
+	resolveClass: function(name) {
+		return $hxClasses[name];
+	}
+	,resolveEnum: function(name) {
+		return $hxEnums[name];
+	}
+	,__class__: haxe__$Unserializer_DefaultResolver
+};
+var haxe_Unserializer = function(buf) {
+	this.buf = buf;
+	this.length = this.buf.length;
+	this.pos = 0;
+	this.scache = [];
+	this.cache = [];
+	var r = haxe_Unserializer.DEFAULT_RESOLVER;
+	if(r == null) {
+		r = new haxe__$Unserializer_DefaultResolver();
+		haxe_Unserializer.DEFAULT_RESOLVER = r;
+	}
+	this.resolver = r;
+};
+$hxClasses["haxe.Unserializer"] = haxe_Unserializer;
+haxe_Unserializer.__name__ = "haxe.Unserializer";
+haxe_Unserializer.initCodes = function() {
+	var codes = [];
+	var _g = 0;
+	var _g1 = haxe_Unserializer.BASE64.length;
+	while(_g < _g1) {
+		var i = _g++;
+		codes[haxe_Unserializer.BASE64.charCodeAt(i)] = i;
+	}
+	return codes;
+};
+haxe_Unserializer.run = function(v) {
+	return new haxe_Unserializer(v).unserialize();
+};
+haxe_Unserializer.prototype = {
+	readDigits: function() {
+		var k = 0;
+		var s = false;
+		var fpos = this.pos;
+		while(true) {
+			var c = this.buf.charCodeAt(this.pos);
+			if(c != c) {
+				break;
+			}
+			if(c == 45) {
+				if(this.pos != fpos) {
+					break;
+				}
+				s = true;
+				this.pos++;
+				continue;
+			}
+			if(c < 48 || c > 57) {
+				break;
+			}
+			k = k * 10 + (c - 48);
+			this.pos++;
+		}
+		if(s) {
+			k *= -1;
+		}
+		return k;
+	}
+	,readFloat: function() {
+		var p1 = this.pos;
+		while(true) {
+			var c = this.buf.charCodeAt(this.pos);
+			if(c != c) {
+				break;
+			}
+			if(c >= 43 && c < 58 || c == 101 || c == 69) {
+				this.pos++;
+			} else {
+				break;
+			}
+		}
+		return parseFloat(HxOverrides.substr(this.buf,p1,this.pos - p1));
+	}
+	,unserializeObject: function(o) {
+		while(true) {
+			if(this.pos >= this.length) {
+				throw haxe_Exception.thrown("Invalid object");
+			}
+			if(this.buf.charCodeAt(this.pos) == 103) {
+				break;
+			}
+			var k = this.unserialize();
+			if(typeof(k) != "string") {
+				throw haxe_Exception.thrown("Invalid object key");
+			}
+			o[k] = this.unserialize();
+		}
+		this.pos++;
+	}
+	,unserializeEnum: function(edecl,tag) {
+		if(this.buf.charCodeAt(this.pos++) != 58) {
+			throw haxe_Exception.thrown("Invalid enum format");
+		}
+		var nargs = this.readDigits();
+		if(nargs == 0) {
+			return Type.createEnum(edecl,tag);
+		}
+		var args = [];
+		while(nargs-- > 0) args.push(this.unserialize());
+		return Type.createEnum(edecl,tag,args);
+	}
+	,unserialize: function() {
+		switch(this.buf.charCodeAt(this.pos++)) {
+		case 65:
+			var name = this.unserialize();
+			var cl = this.resolver.resolveClass(name);
+			if(cl == null) {
+				throw haxe_Exception.thrown("Class not found " + name);
+			}
+			return cl;
+		case 66:
+			var name = this.unserialize();
+			var e = this.resolver.resolveEnum(name);
+			if(e == null) {
+				throw haxe_Exception.thrown("Enum not found " + name);
+			}
+			return e;
+		case 67:
+			var name = this.unserialize();
+			var cl = this.resolver.resolveClass(name);
+			if(cl == null) {
+				throw haxe_Exception.thrown("Class not found " + name);
+			}
+			var o = Object.create(cl.prototype);
+			this.cache.push(o);
+			o.hxUnserialize(this);
+			if(this.buf.charCodeAt(this.pos++) != 103) {
+				throw haxe_Exception.thrown("Invalid custom data");
+			}
+			return o;
+		case 77:
+			var h = new haxe_ds_ObjectMap();
+			this.cache.push(h);
+			while(this.buf.charCodeAt(this.pos) != 104) h.set(this.unserialize(),this.unserialize());
+			this.pos++;
+			return h;
+		case 82:
+			var n = this.readDigits();
+			if(n < 0 || n >= this.scache.length) {
+				throw haxe_Exception.thrown("Invalid string reference");
+			}
+			return this.scache[n];
+		case 97:
+			var a = [];
+			this.cache.push(a);
+			while(true) {
+				var c = this.buf.charCodeAt(this.pos);
+				if(c == 104) {
+					this.pos++;
+					break;
+				}
+				if(c == 117) {
+					this.pos++;
+					var n = this.readDigits();
+					a[a.length + n - 1] = null;
+				} else {
+					a.push(this.unserialize());
+				}
+			}
+			return a;
+		case 98:
+			var h = new haxe_ds_StringMap();
+			this.cache.push(h);
+			while(this.buf.charCodeAt(this.pos) != 104) {
+				var s = this.unserialize();
+				var value = this.unserialize();
+				h.h[s] = value;
+			}
+			this.pos++;
+			return h;
+		case 99:
+			var name = this.unserialize();
+			var cl = this.resolver.resolveClass(name);
+			if(cl == null) {
+				throw haxe_Exception.thrown("Class not found " + name);
+			}
+			var o = Object.create(cl.prototype);
+			this.cache.push(o);
+			this.unserializeObject(o);
+			return o;
+		case 100:
+			return this.readFloat();
+		case 102:
+			return false;
+		case 105:
+			return this.readDigits();
+		case 106:
+			var name = this.unserialize();
+			var edecl = this.resolver.resolveEnum(name);
+			if(edecl == null) {
+				throw haxe_Exception.thrown("Enum not found " + name);
+			}
+			this.pos++;
+			var index = this.readDigits();
+			var _this = edecl.__constructs__;
+			var result = new Array(_this.length);
+			var _g = 0;
+			var _g1 = _this.length;
+			while(_g < _g1) {
+				var i = _g++;
+				result[i] = _this[i]._hx_name;
+			}
+			var tag = result[index];
+			if(tag == null) {
+				throw haxe_Exception.thrown("Unknown enum index " + name + "@" + index);
+			}
+			var e = this.unserializeEnum(edecl,tag);
+			this.cache.push(e);
+			return e;
+		case 107:
+			return NaN;
+		case 108:
+			var l = new haxe_ds_List();
+			this.cache.push(l);
+			while(this.buf.charCodeAt(this.pos) != 104) l.add(this.unserialize());
+			this.pos++;
+			return l;
+		case 109:
+			return -Infinity;
+		case 110:
+			return null;
+		case 111:
+			var o = { };
+			this.cache.push(o);
+			this.unserializeObject(o);
+			return o;
+		case 112:
+			return Infinity;
+		case 113:
+			var h = new haxe_ds_IntMap();
+			this.cache.push(h);
+			var c = this.buf.charCodeAt(this.pos++);
+			while(c == 58) {
+				var i = this.readDigits();
+				var value = this.unserialize();
+				h.h[i] = value;
+				c = this.buf.charCodeAt(this.pos++);
+			}
+			if(c != 104) {
+				throw haxe_Exception.thrown("Invalid IntMap format");
+			}
+			return h;
+		case 114:
+			var n = this.readDigits();
+			if(n < 0 || n >= this.cache.length) {
+				throw haxe_Exception.thrown("Invalid reference");
+			}
+			return this.cache[n];
+		case 115:
+			var len = this.readDigits();
+			var buf = this.buf;
+			if(this.buf.charCodeAt(this.pos++) != 58 || this.length - this.pos < len) {
+				throw haxe_Exception.thrown("Invalid bytes length");
+			}
+			var codes = haxe_Unserializer.CODES;
+			if(codes == null) {
+				codes = haxe_Unserializer.initCodes();
+				haxe_Unserializer.CODES = codes;
+			}
+			var i = this.pos;
+			var rest = len & 3;
+			var max = i + (len - rest);
+			var bytes = new haxe_io_Bytes(new ArrayBuffer((len >> 2) * 3 + (rest >= 2 ? rest - 1 : 0)));
+			var bpos = 0;
+			while(i < max) {
+				var c1 = codes[buf.charCodeAt(i++)];
+				var c2 = codes[buf.charCodeAt(i++)];
+				bytes.b[bpos++] = c1 << 2 | c2 >> 4;
+				var c3 = codes[buf.charCodeAt(i++)];
+				bytes.b[bpos++] = c2 << 4 | c3 >> 2;
+				var c4 = codes[buf.charCodeAt(i++)];
+				bytes.b[bpos++] = c3 << 6 | c4;
+			}
+			if(rest >= 2) {
+				var c1 = codes[buf.charCodeAt(i++)];
+				var c2 = codes[buf.charCodeAt(i++)];
+				bytes.b[bpos++] = c1 << 2 | c2 >> 4;
+				if(rest == 3) {
+					var c3 = codes[buf.charCodeAt(i++)];
+					bytes.b[bpos++] = c2 << 4 | c3 >> 2;
+				}
+			}
+			this.pos += len;
+			this.cache.push(bytes);
+			return bytes;
+		case 116:
+			return true;
+		case 118:
+			var d;
+			if(this.buf.charCodeAt(this.pos) >= 48 && this.buf.charCodeAt(this.pos) <= 57 && this.buf.charCodeAt(this.pos + 1) >= 48 && this.buf.charCodeAt(this.pos + 1) <= 57 && this.buf.charCodeAt(this.pos + 2) >= 48 && this.buf.charCodeAt(this.pos + 2) <= 57 && this.buf.charCodeAt(this.pos + 3) >= 48 && this.buf.charCodeAt(this.pos + 3) <= 57 && this.buf.charCodeAt(this.pos + 4) == 45) {
+				d = HxOverrides.strDate(HxOverrides.substr(this.buf,this.pos,19));
+				this.pos += 19;
+			} else {
+				d = new Date(this.readFloat());
+			}
+			this.cache.push(d);
+			return d;
+		case 119:
+			var name = this.unserialize();
+			var edecl = this.resolver.resolveEnum(name);
+			if(edecl == null) {
+				throw haxe_Exception.thrown("Enum not found " + name);
+			}
+			var e = this.unserializeEnum(edecl,this.unserialize());
+			this.cache.push(e);
+			return e;
+		case 120:
+			throw haxe_Exception.thrown(this.unserialize());
+		case 121:
+			var len = this.readDigits();
+			if(this.buf.charCodeAt(this.pos++) != 58 || this.length - this.pos < len) {
+				throw haxe_Exception.thrown("Invalid string length");
+			}
+			var s = HxOverrides.substr(this.buf,this.pos,len);
+			this.pos += len;
+			s = decodeURIComponent(s.split("+").join(" "));
+			this.scache.push(s);
+			return s;
+		case 122:
+			return 0;
+		default:
+		}
+		this.pos--;
+		throw haxe_Exception.thrown("Invalid char " + this.buf.charAt(this.pos) + " at position " + this.pos);
+	}
+	,__class__: haxe_Unserializer
+};
+var Reflect = function() { };
+$hxClasses["Reflect"] = Reflect;
+Reflect.__name__ = "Reflect";
+Reflect.field = function(o,field) {
+	try {
+		return o[field];
+	} catch( _g ) {
+		return null;
+	}
+};
+Reflect.getProperty = function(o,field) {
+	var tmp;
+	if(o == null) {
+		return null;
+	} else {
+		var tmp1;
+		if(o.__properties__) {
+			tmp = o.__properties__["get_" + field];
+			tmp1 = tmp;
+		} else {
+			tmp1 = false;
+		}
+		if(tmp1) {
+			return o[tmp]();
+		} else {
+			return o[field];
+		}
+	}
+};
+Reflect.setProperty = function(o,field,value) {
+	var tmp;
+	var tmp1;
+	if(o.__properties__) {
+		tmp = o.__properties__["set_" + field];
+		tmp1 = tmp;
+	} else {
+		tmp1 = false;
+	}
+	if(tmp1) {
+		o[tmp](value);
+	} else {
+		o[field] = value;
+	}
+};
+Reflect.fields = function(o) {
+	var a = [];
+	if(o != null) {
+		var hasOwnProperty = Object.prototype.hasOwnProperty;
+		for( var f in o ) {
+		if(f != "__id__" && f != "hx__closures__" && hasOwnProperty.call(o,f)) {
+			a.push(f);
+		}
+		}
+	}
+	return a;
+};
+Reflect.isFunction = function(f) {
+	if(typeof(f) == "function") {
+		return !(f.__name__ || f.__ename__);
+	} else {
+		return false;
+	}
+};
+Reflect.compare = function(a,b) {
+	if(a == b) {
+		return 0;
+	} else if(a > b) {
+		return 1;
+	} else {
+		return -1;
+	}
+};
+Reflect.compareMethods = function(f1,f2) {
+	if(f1 == f2) {
+		return true;
+	}
+	if(!Reflect.isFunction(f1) || !Reflect.isFunction(f2)) {
+		return false;
+	}
+	if(f1.scope == f2.scope && f1.method == f2.method) {
+		return f1.method != null;
+	} else {
+		return false;
+	}
+};
+Reflect.isObject = function(v) {
+	if(v == null) {
+		return false;
+	}
+	var t = typeof(v);
+	if(!(t == "string" || t == "object" && v.__enum__ == null)) {
+		if(t == "function") {
+			return (v.__name__ || v.__ename__) != null;
+		} else {
+			return false;
+		}
+	} else {
+		return true;
+	}
+};
+Reflect.isEnumValue = function(v) {
+	if(v != null) {
+		return v.__enum__ != null;
+	} else {
+		return false;
+	}
+};
+Reflect.deleteField = function(o,field) {
+	if(!Object.prototype.hasOwnProperty.call(o,field)) {
+		return false;
+	}
+	delete(o[field]);
+	return true;
+};
 var App = function() {
 	HerbalTeaApp.call(this);
 };
@@ -383,14 +1636,12 @@ App.__name__ = "App";
 App.main = function() {
 	App.instance = new App();
 };
-App.loadHighScore = function() {
-	return hxd_Save.load({ highscore : 0}).highscore;
-};
 App.__super__ = HerbalTeaApp;
 App.prototype = $extend(HerbalTeaApp.prototype,{
 	onload: function() {
+		var params = new URLSearchParams(window.location.search);
 		var view;
-		var _g = new URLSearchParams(window.location.search).get("start");
+		var _g = params.get("start");
 		if(_g == null) {
 			view = new MenuView();
 		} else {
@@ -402,7 +1653,10 @@ App.prototype = $extend(HerbalTeaApp.prototype,{
 				view = new MenuView();
 				break;
 			case "play":
-				view = new PlayView();
+				view = new PlayView(params.get("level") == null ? 0 : Std.parseInt(params.get("level")) - 1);
+				break;
+			case "select":
+				view = new LevelSelectView();
 				break;
 			default:
 				throw haxe_Exception.thrown("invavid \"start\" query param \"" + _g + "\"");
@@ -3848,61 +5102,6 @@ TextButton.prototype = $extend(Button.prototype,{
 	}
 	,__class__: TextButton
 });
-var HxOverrides = function() { };
-$hxClasses["HxOverrides"] = HxOverrides;
-HxOverrides.__name__ = "HxOverrides";
-HxOverrides.strDate = function(s) {
-	switch(s.length) {
-	case 8:
-		var k = s.split(":");
-		var d = new Date();
-		d["setTime"](0);
-		d["setUTCHours"](k[0]);
-		d["setUTCMinutes"](k[1]);
-		d["setUTCSeconds"](k[2]);
-		return d;
-	case 10:
-		var k = s.split("-");
-		return new Date(k[0],k[1] - 1,k[2],0,0,0);
-	case 19:
-		var k = s.split(" ");
-		var y = k[0].split("-");
-		var t = k[1].split(":");
-		return new Date(y[0],y[1] - 1,y[2],t[0],t[1],t[2]);
-	default:
-		throw haxe_Exception.thrown("Invalid date format : " + s);
-	}
-};
-HxOverrides.cca = function(s,index) {
-	var x = s.charCodeAt(index);
-	if(x != x) {
-		return undefined;
-	}
-	return x;
-};
-HxOverrides.substr = function(s,pos,len) {
-	if(len == null) {
-		len = s.length;
-	} else if(len < 0) {
-		if(pos == 0) {
-			len = s.length + len;
-		} else {
-			return "";
-		}
-	}
-	return s.substr(pos,len);
-};
-HxOverrides.remove = function(a,obj) {
-	var i = a.indexOf(obj);
-	if(i == -1) {
-		return false;
-	}
-	a.splice(i,1);
-	return true;
-};
-HxOverrides.now = function() {
-	return Date.now();
-};
 var Lambda = function() { };
 $hxClasses["Lambda"] = Lambda;
 Lambda.__name__ = "Lambda";
@@ -3912,7 +5111,7 @@ Lambda.array = function(it) {
 	while(i.hasNext()) a.push(i.next());
 	return a;
 };
-var EntityEnum = $hxEnums["EntityEnum"] = { __ename__:true,__constructs__:null
+var EntityEnum = $hxEnums["EntityEnum"] = { __ename__:"EntityEnum",__constructs__:null
 	,Combine: {_hx_name:"Combine",_hx_index:0,__enum__:"EntityEnum",toString:$estr}
 };
 EntityEnum.__constructs__ = [EntityEnum.Combine];
@@ -4166,416 +5365,39 @@ LdtkProject_$Level.prototype = $extend(ldtk_Level.prototype,{
 	,__class__: LdtkProject_$Level
 	,__properties__: {get_l_Entities:"get_l_Entities"}
 });
-var ldtk_Project = function() {
+var LevelSelectView = function() {
+	GameState.call(this);
 };
-$hxClasses["ldtk.Project"] = ldtk_Project;
-ldtk_Project.__name__ = "ldtk.Project";
-ldtk_Project.error = function(str) {
-	throw haxe_Exception.thrown("[ldtk-api] " + str);
-};
-ldtk_Project.prototype = {
-	parseJson: function(jsonString) {
-		this._untypedTilesets = new haxe_ds_IntMap();
-		this.assetCache = new haxe_ds_StringMap();
-		var json = JSON.parse(jsonString);
-		this.defs = json.defs;
-		this.bgColor_hex = json.bgColor;
-		var hex = json.bgColor;
-		this.bgColor_int = hex == null ? 0 : Std.parseInt("0x" + HxOverrides.substr(hex,1,null));
-		this.worldLayout = Type.createEnum(ldtk_WorldLayout,Std.string(json.worldLayout),null);
-		this._untypedLevels = [];
-		var idx = 0;
+$hxClasses["LevelSelectView"] = LevelSelectView;
+LevelSelectView.__name__ = "LevelSelectView";
+LevelSelectView.__super__ = GameState;
+LevelSelectView.prototype = $extend(GameState.prototype,{
+	init: function() {
+		var centeringFlow = new h2d_Flow(this);
+		centeringFlow.set_backgroundTile(h2d_Tile.fromColor(532534));
+		centeringFlow.set_fillWidth(true);
+		centeringFlow.set_fillHeight(true);
+		centeringFlow.set_horizontalAlign(h2d_FlowAlign.Middle);
+		centeringFlow.set_verticalAlign(h2d_FlowAlign.Middle);
+		centeringFlow.set_maxWidth(this.width);
+		centeringFlow.set_layout(h2d_FlowLayout.Vertical);
+		centeringFlow.set_verticalSpacing(Gui.scaleAsInt(50));
+		new Text("Select level",centeringFlow);
+		centeringFlow.addSpacing(Gui.scaleAsInt(100));
+		var i = 0;
 		var _g = 0;
-		var _g1 = json.levels;
-		while(_g < _g1.length) this._untypedLevels.push(this._instanciateLevel(this,idx++,_g1[_g++]));
-		this["all_tilesets"] = { };
-		var _g = 0;
-		var _g1 = json.defs.tilesets;
+		var _g1 = App.ldtkProject.levels;
 		while(_g < _g1.length) {
-			var tsJson = _g1[_g];
-			++_g;
-			var this1 = this._untypedTilesets;
-			var key = tsJson.uid;
-			var value = this._instanciateTileset(this,tsJson);
-			this1.h[key] = value;
-			Reflect.field(this,"all_tilesets")[tsJson.identifier] = this._instanciateTileset(this,tsJson);
+			var locked = i > App.save.unlockedLevel;
+			new TextButton(centeringFlow,_g1[_g++].identifier,(function(iCopy) {
+				return function() {
+					App.instance.switchState(new PlayView(iCopy[0]));
+				};
+			})([i]),Colors.BLUE,null,0.8).set_enabled(!locked);
+			++i;
 		}
 	}
-	,capitalize: function(id) {
-		if(id == null) {
-			id = "";
-		}
-		var reg = new EReg("^(_*)([a-z])([a-zA-Z0-9_]*)","g");
-		if(reg.match(id)) {
-			id = reg.matched(1) + reg.matched(2).toUpperCase() + reg.matched(3);
-		}
-		return id;
-	}
-	,_resolveExternalEnumValue: function(name,enumValueId) {
-		return null;
-	}
-	,_assignFieldInstanceValues: function(target,fieldInstances) {
-		var _gthis = this;
-		var arrayReg = new EReg("Array<(.*)>","gi");
-		var _g = 0;
-		while(_g < fieldInstances.length) {
-			var f = fieldInstances[_g];
-			++_g;
-			if(f.__value == null) {
-				continue;
-			}
-			var isArray = arrayReg.match(f.__type);
-			var typeName = isArray ? arrayReg.matched(1) : f.__type;
-			var _hx_tmp;
-			var _hx_tmp1;
-			switch(typeName) {
-			case "Color":
-				target["f_" + f.__identifier + "_hex"] = f.__value;
-				if(!isArray) {
-					var hex = f.__value;
-					target["f_" + f.__identifier + "_int"] = hex == null ? 0 : Std.parseInt("0x" + HxOverrides.substr(hex,1,null));
-				} else {
-					var arr = f.__value;
-					var field = "f_" + f.__identifier + "_int";
-					var result = new Array(arr.length);
-					var _g1 = 0;
-					var _g2 = arr.length;
-					while(_g1 < _g2) {
-						var i = _g1++;
-						var c = arr[i];
-						result[i] = c == null ? 0 : Std.parseInt("0x" + HxOverrides.substr(c,1,null));
-					}
-					target[field] = result;
-				}
-				break;
-			case "EntityRef":
-				target["f_" + f.__identifier] = f.__value;
-				break;
-			case "FilePath":
-				target["f_" + f.__identifier] = f.__value;
-				break;
-			case "Point":
-				if(!isArray) {
-					target["f_" + f.__identifier] = new ldtk_Point(f.__value.cx,f.__value.cy);
-				} else {
-					var arr1 = f.__value;
-					var field1 = "f_" + f.__identifier;
-					var result1 = new Array(arr1.length);
-					var _g3 = 0;
-					var _g4 = arr1.length;
-					while(_g3 < _g4) {
-						var i1 = _g3++;
-						var pt = arr1[i1];
-						result1[i1] = new ldtk_Point(pt.cx,pt.cy);
-					}
-					target[field1] = result1;
-				}
-				break;
-			case "Bool":case "Float":case "Int":case "String":
-				target["f_" + f.__identifier] = f.__value;
-				break;
-			case "Tile":
-				_hx_tmp1 = typeName.indexOf("LocalEnum.");
-				if(_hx_tmp1 == 0) {
-					var type = this._enumTypePrefix + HxOverrides.substr(typeName,typeName.indexOf(".") + 1,null);
-					var e = $hxEnums[type];
-					if(!isArray) {
-						target["f_" + f.__identifier] = Type.createEnum(e,this.capitalize(f.__value));
-					} else {
-						var arr2 = f.__value;
-						var field2 = "f_" + f.__identifier;
-						var result2 = new Array(arr2.length);
-						var _g5 = 0;
-						var _g6 = arr2.length;
-						while(_g5 < _g6) {
-							var i2 = _g5++;
-							result2[i2] = Type.createEnum(e,_gthis.capitalize(arr2[i2]));
-						}
-						target[field2] = result2;
-					}
-				} else {
-					_hx_tmp = typeName.indexOf("ExternEnum.");
-					if(_hx_tmp == 0) {
-						var type1 = HxOverrides.substr(typeName,typeName.indexOf(".") + 1,null);
-						if(!isArray) {
-							target["f_" + f.__identifier] = this._resolveExternalEnumValue(type1,f.__value);
-						} else {
-							var arr3 = f.__value;
-							var field3 = "f_" + f.__identifier;
-							var result3 = new Array(arr3.length);
-							var _g7 = 0;
-							var _g8 = arr3.length;
-							while(_g7 < _g8) {
-								var i3 = _g7++;
-								result3[i3] = _gthis._resolveExternalEnumValue(type1,arr3[i3]);
-							}
-							target[field3] = result3;
-						}
-					} else {
-						var _checkTile = (function() {
-							return function(tileRect) {
-								var _checkTile;
-								if(tileRect != null) {
-									var v = tileRect.x;
-									_checkTile = !(v != null && !isNaN(v) && isFinite(v));
-								} else {
-									_checkTile = true;
-								}
-								if(_checkTile) {
-									return null;
-								} else {
-									return tileRect;
-								}
-							};
-						})();
-						var _heapsTileGetter = [(function() {
-							return function(tileRect) {
-								var _heapsTileGetter;
-								if(tileRect != null) {
-									var v = tileRect.x;
-									_heapsTileGetter = !(v != null && !isNaN(v) && isFinite(v));
-								} else {
-									_heapsTileGetter = true;
-								}
-								if(_heapsTileGetter || !_gthis._untypedTilesets.h.hasOwnProperty(tileRect.tilesetUid)) {
-									return null;
-								}
-								var tileset = _gthis._untypedTilesets.h[tileRect.tilesetUid];
-								var x = tileRect.x;
-								var y = tileRect.y;
-								var wid = tileRect.w;
-								var hei = tileRect.h;
-								var atlas;
-								if(tileset._cachedAtlasTile != null) {
-									atlas = tileset._cachedAtlasTile;
-								} else {
-									tileset._cachedAtlasTile = dn_ImageDecoder.decodeTile(tileset.untypedProject.getAsset(tileset.relPath));
-									if(tileset._cachedAtlasTile == null) {
-										tileset._cachedAtlasTile = h2d_Tile.fromColor(16711680,tileset.pxWid,tileset.pxHei);
-									}
-									atlas = tileset._cachedAtlasTile;
-								}
-								return atlas == null ? null : atlas.sub(x,y,wid,hei);
-							};
-						})()];
-						if(isArray) {
-							var arr4 = f.__value;
-							var field4 = "f_" + f.__identifier + "_infos";
-							var result4 = new Array(arr4.length);
-							var _g9 = 0;
-							var _g10 = arr4.length;
-							while(_g9 < _g10) {
-								var i4 = _g9++;
-								result4[i4] = _checkTile(arr4[i4]);
-							}
-							target[field4] = result4;
-							var field5 = "f_" + f.__identifier + "_getTile";
-							var result5 = new Array(arr4.length);
-							var _g11 = 0;
-							var _g12 = arr4.length;
-							while(_g11 < _g12) {
-								var i5 = _g11++;
-								result5[i5] = (function(tileRect,_heapsTileGetter) {
-									return function() {
-										return _heapsTileGetter[0](tileRect[0]);
-									};
-								})([arr4[i5]],_heapsTileGetter);
-							}
-							target[field5] = result5;
-						} else {
-							target["f_" + f.__identifier + "_infos"] = _checkTile(f.__value);
-							target["f_" + f.__identifier + "_getTile"] = (function(tileRect,_heapsTileGetter) {
-								return function() {
-									return _heapsTileGetter[0](tileRect[0]);
-								};
-							})([f.__value],_heapsTileGetter);
-						}
-					}
-				}
-				break;
-			default:
-				_hx_tmp1 = typeName.indexOf("LocalEnum.");
-				if(_hx_tmp1 == 0) {
-					var type2 = this._enumTypePrefix + HxOverrides.substr(typeName,typeName.indexOf(".") + 1,null);
-					var e1 = $hxEnums[type2];
-					if(!isArray) {
-						target["f_" + f.__identifier] = Type.createEnum(e1,this.capitalize(f.__value));
-					} else {
-						var arr5 = f.__value;
-						var field6 = "f_" + f.__identifier;
-						var result6 = new Array(arr5.length);
-						var _g13 = 0;
-						var _g14 = arr5.length;
-						while(_g13 < _g14) {
-							var i6 = _g13++;
-							result6[i6] = Type.createEnum(e1,_gthis.capitalize(arr5[i6]));
-						}
-						target[field6] = result6;
-					}
-				} else {
-					_hx_tmp = typeName.indexOf("ExternEnum.");
-					if(_hx_tmp == 0) {
-						var type3 = HxOverrides.substr(typeName,typeName.indexOf(".") + 1,null);
-						if(!isArray) {
-							target["f_" + f.__identifier] = this._resolveExternalEnumValue(type3,f.__value);
-						} else {
-							var arr6 = f.__value;
-							var field7 = "f_" + f.__identifier;
-							var result7 = new Array(arr6.length);
-							var _g15 = 0;
-							var _g16 = arr6.length;
-							while(_g15 < _g16) {
-								var i7 = _g15++;
-								result7[i7] = _gthis._resolveExternalEnumValue(type3,arr6[i7]);
-							}
-							target[field7] = result7;
-						}
-					} else {
-						ldtk_Project.error("Unknown field type " + typeName + " at runtime");
-					}
-				}
-			}
-		}
-	}
-	,toString: function() {
-		return "ldtk.Project[" + this._untypedLevels.length + " levels]";
-	}
-	,getAsset: function(projectRelativePath) {
-		if(Object.prototype.hasOwnProperty.call(this.assetCache.h,projectRelativePath)) {
-			return this.assetCache.h[projectRelativePath];
-		} else {
-			var bytes = this.loadAssetBytes(projectRelativePath);
-			this.assetCache.h[projectRelativePath] = bytes;
-			return bytes;
-		}
-	}
-	,makeAssetRelativePath: function(projectRelativePath) {
-		var p = StringTools.replace(this.projectFilePath,"\\","/");
-		var projectFileName = p.lastIndexOf("/") < 0 ? p : HxOverrides.substr(p,p.lastIndexOf("/") + 1,null);
-		var pendingDirs = [hxd_Res.get_loader().fs.getRoot()];
-		while(pendingDirs.length > 0) {
-			var _g = pendingDirs.shift().iterator();
-			while(_g.i < _g.l) {
-				var f = _g.a[_g.i++];
-				if(f.get_isDirectory()) {
-					pendingDirs.push(f);
-				} else if(f.name == projectFileName) {
-					var path = f.get_directory().length == 0 ? "" : f.get_directory() + "/";
-					var p = new dn_FilePath();
-					p.parse(path + projectRelativePath,true);
-					return (p.isWindowsNetworkDrive && !p._useWinNetDriveUriFormat ? p.backslashes ? "\\" : "/" : p.uriScheme != null ? p.uriAuthority == null ? "" + p.uriScheme + ":/" : "" + p.uriScheme + "://" + p.uriAuthority + "/" : "") + (p.directory == null ? "" : p.fileName == null && p.extension == null || p.directory == (p.backslashes ? "\\" : "/") ? p.directory : p.directory == null ? null : p.directory == (p.backslashes ? "\\" : "/") ? p.directory : p.directory + (p.backslashes ? "\\" : "/")) + ((p.fileName == null && p.extension == null ? null : (p.fileName == null ? "" : p.fileName) + (p.extension == null ? "" : "." + p.extension)) == null ? "" : p.fileName == null && p.extension == null ? null : (p.fileName == null ? "" : p.fileName) + (p.extension == null ? "" : "." + p.extension));
-				}
-			}
-		}
-		ldtk_Project.error("Project file is not in Heaps res/ folder!");
-		return "";
-	}
-	,loadAssetBytes: function(projectRelativePath) {
-		var resPath = this.makeAssetRelativePath(projectRelativePath);
-		if(!hxd_Res.get_loader().exists(resPath)) {
-			ldtk_Project.error("Asset not found in Heaps res/ folder: " + resPath);
-		}
-		return hxd_Res.load(resPath).entry.getBytes();
-	}
-	,_instanciateLevel: function(project,arrayIndex,json) {
-		return null;
-	}
-	,_instanciateTileset: function(project,json) {
-		return null;
-	}
-	,searchDef: function(arr,uid,identifier) {
-		if(uid == null && identifier == null) {
-			return null;
-		}
-		var _g = 0;
-		while(_g < arr.length) {
-			var e = arr[_g];
-			++_g;
-			if(uid != null && e.uid == uid || identifier != null && e.identifier == identifier) {
-				return e;
-			}
-		}
-		return null;
-	}
-	,getLayerDefJson: function(uid,identifier) {
-		return this.searchDef(this.defs.layers,uid,identifier);
-	}
-	,__class__: ldtk_Project
-};
-var LdtkProject = function(overrideEmbedJson) {
-	this.all_levels = { Level_1 : null};
-	this.levels = [];
-	ldtk_Project.call(this);
-	this._enumTypePrefix = "Enum_";
-	this.projectDir = "res/heaps";
-	this.projectFilePath = "res/heaps/map.ldtk";
-	this.parseJson(overrideEmbedJson != null ? overrideEmbedJson : "{\n\t\"__header__\": {\n\t\t\"fileType\": \"LDtk Project JSON\",\n\t\t\"app\": \"LDtk\",\n\t\t\"doc\": \"https://ldtk.io/json\",\n\t\t\"schema\": \"https://ldtk.io/files/JSON_SCHEMA.json\",\n\t\t\"appAuthor\": \"Sebastien 'deepnight' Benard\",\n\t\t\"appVersion\": \"1.2.1\",\n\t\t\"url\": \"https://ldtk.io\"\n\t},\n\t\"iid\": \"2ed57400-7820-11ed-8a57-8f6658066982\",\n\t\"jsonVersion\": \"1.2.1\",\n\t\"appBuildId\": 464653,\n\t\"nextUid\": 5,\n\t\"identifierStyle\": \"Capitalize\",\n\t\"worldLayout\": \"Free\",\n\t\"worldGridWidth\": 256,\n\t\"worldGridHeight\": 256,\n\t\"defaultLevelWidth\": 256,\n\t\"defaultLevelHeight\": 256,\n\t\"defaultPivotX\": 0,\n\t\"defaultPivotY\": 0,\n\t\"defaultGridSize\": 16,\n\t\"bgColor\": \"#40465B\",\n\t\"defaultLevelBgColor\": \"#696A79\",\n\t\"minifyJson\": false,\n\t\"externalLevels\": false,\n\t\"exportTiled\": false,\n\t\"simplifiedExport\": false,\n\t\"imageExportMode\": \"None\",\n\t\"exportLevelBg\": true,\n\t\"pngFilePattern\": null,\n\t\"backupOnSave\": false,\n\t\"backupLimit\": 10,\n\t\"levelNamePattern\": \"Level_%idx1\",\n\t\"tutorialDesc\": null,\n\t\"customCommands\": [],\n\t\"flags\": [],\n\t\"defs\": { \"layers\": [\n\t\t{\n\t\t\t\"__type\": \"Entities\",\n\t\t\t\"identifier\": \"Entities\",\n\t\t\t\"type\": \"Entities\",\n\t\t\t\"uid\": 2,\n\t\t\t\"gridSize\": 8,\n\t\t\t\"guideGridWid\": 0,\n\t\t\t\"guideGridHei\": 0,\n\t\t\t\"displayOpacity\": 1,\n\t\t\t\"inactiveOpacity\": 0.6,\n\t\t\t\"hideInList\": false,\n\t\t\t\"hideFieldsWhenInactive\": true,\n\t\t\t\"canSelectWhenInactive\": true,\n\t\t\t\"pxOffsetX\": 0,\n\t\t\t\"pxOffsetY\": 0,\n\t\t\t\"parallaxFactorX\": 0,\n\t\t\t\"parallaxFactorY\": 0,\n\t\t\t\"parallaxScaling\": true,\n\t\t\t\"requiredTags\": [],\n\t\t\t\"excludedTags\": [],\n\t\t\t\"intGridValues\": [],\n\t\t\t\"autoRuleGroups\": [],\n\t\t\t\"autoSourceLayerDefUid\": null,\n\t\t\t\"tilesetDefUid\": null,\n\t\t\t\"tilePivotX\": 0,\n\t\t\t\"tilePivotY\": 0\n\t\t}\n\t], \"entities\": [\n\t\t{\n\t\t\t\"identifier\": \"Combine\",\n\t\t\t\"uid\": 3,\n\t\t\t\"tags\": [],\n\t\t\t\"width\": 64,\n\t\t\t\"height\": 64,\n\t\t\t\"resizableX\": false,\n\t\t\t\"resizableY\": false,\n\t\t\t\"keepAspectRatio\": false,\n\t\t\t\"tileOpacity\": 1,\n\t\t\t\"fillOpacity\": 1,\n\t\t\t\"lineOpacity\": 1,\n\t\t\t\"hollow\": false,\n\t\t\t\"color\": \"#FEAE34\",\n\t\t\t\"renderMode\": \"Rectangle\",\n\t\t\t\"showName\": true,\n\t\t\t\"tilesetId\": null,\n\t\t\t\"tileRenderMode\": \"FitInside\",\n\t\t\t\"tileRect\": null,\n\t\t\t\"nineSliceBorders\": [],\n\t\t\t\"maxCount\": 0,\n\t\t\t\"limitScope\": \"PerLevel\",\n\t\t\t\"limitBehavior\": \"MoveLastOne\",\n\t\t\t\"pivotX\": 0.8,\n\t\t\t\"pivotY\": 0.5,\n\t\t\t\"fieldDefs\": []\n\t\t}\n\t], \"tilesets\": [], \"enums\": [], \"externalEnums\": [], \"levelFields\": [] },\n\t\"levels\": [\n\t\t{\n\t\t\t\"identifier\": \"Level_1\",\n\t\t\t\"iid\": \"2ed59b10-7820-11ed-8a57-4bed449216cf\",\n\t\t\t\"uid\": 0,\n\t\t\t\"worldX\": 0,\n\t\t\t\"worldY\": -32,\n\t\t\t\"worldDepth\": 0,\n\t\t\t\"pxWid\": 768,\n\t\t\t\"pxHei\": 768,\n\t\t\t\"__bgColor\": \"#696A79\",\n\t\t\t\"bgColor\": null,\n\t\t\t\"useAutoIdentifier\": true,\n\t\t\t\"bgRelPath\": \"level1.png\",\n\t\t\t\"bgPos\": \"Contain\",\n\t\t\t\"bgPivotX\": 0.5,\n\t\t\t\"bgPivotY\": 0.5,\n\t\t\t\"__smartColor\": \"#ADADB5\",\n\t\t\t\"__bgPos\": { \"topLeftPx\": [0,0], \"scale\": [6,6], \"cropRect\": [0,0,128,128] },\n\t\t\t\"externalRelPath\": null,\n\t\t\t\"fieldInstances\": [],\n\t\t\t\"layerInstances\": [\n\t\t\t\t{\n\t\t\t\t\t\"__identifier\": \"Entities\",\n\t\t\t\t\t\"__type\": \"Entities\",\n\t\t\t\t\t\"__cWid\": 96,\n\t\t\t\t\t\"__cHei\": 96,\n\t\t\t\t\t\"__gridSize\": 8,\n\t\t\t\t\t\"__opacity\": 1,\n\t\t\t\t\t\"__pxTotalOffsetX\": 0,\n\t\t\t\t\t\"__pxTotalOffsetY\": 0,\n\t\t\t\t\t\"__tilesetDefUid\": null,\n\t\t\t\t\t\"__tilesetRelPath\": null,\n\t\t\t\t\t\"iid\": \"384e5620-7820-11ed-9d14-1b810d9730e8\",\n\t\t\t\t\t\"levelId\": 0,\n\t\t\t\t\t\"layerDefUid\": 2,\n\t\t\t\t\t\"pxOffsetX\": 0,\n\t\t\t\t\t\"pxOffsetY\": 0,\n\t\t\t\t\t\"visible\": true,\n\t\t\t\t\t\"optionalRules\": [],\n\t\t\t\t\t\"intGridCsv\": [],\n\t\t\t\t\t\"autoLayerTiles\": [],\n\t\t\t\t\t\"seed\": 8508788,\n\t\t\t\t\t\"overrideTilesetUid\": null,\n\t\t\t\t\t\"gridTiles\": [],\n\t\t\t\t\t\"entityInstances\": [\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"__identifier\": \"Combine\",\n\t\t\t\t\t\t\t\"__grid\": [38,60],\n\t\t\t\t\t\t\t\"__pivot\": [0.8,0.5],\n\t\t\t\t\t\t\t\"__tags\": [],\n\t\t\t\t\t\t\t\"__tile\": null,\n\t\t\t\t\t\t\t\"__smartColor\": \"#FEAE34\",\n\t\t\t\t\t\t\t\"iid\": \"fe903400-7820-11ed-9d14-e90854c21f44\",\n\t\t\t\t\t\t\t\"width\": 64,\n\t\t\t\t\t\t\t\"height\": 64,\n\t\t\t\t\t\t\t\"defUid\": 3,\n\t\t\t\t\t\t\t\"px\": [306,484],\n\t\t\t\t\t\t\t\"fieldInstances\": []\n\t\t\t\t\t\t}\n\t\t\t\t\t]\n\t\t\t\t}\n\t\t\t],\n\t\t\t\"__neighbours\": []\n\t\t}\n\t],\n\t\"worlds\": []\n}");
-};
-$hxClasses["LdtkProject"] = LdtkProject;
-LdtkProject.__name__ = "LdtkProject";
-LdtkProject.__super__ = ldtk_Project;
-LdtkProject.prototype = $extend(ldtk_Project.prototype,{
-	parseJson: function(json) {
-		ldtk_Project.prototype.parseJson.call(this,json);
-		this.levels = this._untypedLevels.slice();
-		var _g = 0;
-		var _g1 = this._untypedLevels;
-		while(_g < _g1.length) {
-			var l = _g1[_g];
-			++_g;
-			this.all_levels[l.identifier] = l;
-		}
-	}
-	,_instanciateTileset: function(project,json) {
-		var name = "Tileset_" + json.identifier;
-		var c = $hxClasses[name];
-		if(c == null) {
-			return null;
-		} else {
-			return Type.createInstance(c,[project,json]);
-		}
-	}
-	,_instanciateLevel: function(project,arrayIndex,json) {
-		return new LdtkProject_$Level(project,arrayIndex,json);
-	}
-	,_resolveExternalEnumValue: function(name,enumValueId) {
-		ldtk_Project.error("Unknown external enum name: " + name);
-		return null;
-	}
-	,getLevel: function(uid,id) {
-		if(uid == null && id == null) {
-			return null;
-		}
-		var _g = 0;
-		var _g1 = this._untypedLevels;
-		while(_g < _g1.length) {
-			var l = _g1[_g];
-			++_g;
-			if(id != null && l.identifier == id || uid != null && l.uid == uid) {
-				return l;
-			}
-		}
-		return null;
-	}
-	,getLevelIdentifier: function(id) {
-		return this.getLevel(null,id);
-	}
-	,getLevelUid: function(uid) {
-		return this.getLevel(uid);
-	}
-	,getLevelAt: function(worldX,worldY) {
-		var _g = 0;
-		var _g1 = this._untypedLevels;
-		while(_g < _g1.length) {
-			var l = _g1[_g];
-			++_g;
-			if(worldX >= l.worldX && worldX < l.worldX + l.pxWid && worldY >= l.worldY && worldY < l.worldY + l.pxHei) {
-				return l;
-			}
-		}
-		return null;
-	}
-	,__class__: LdtkProject
+	,__class__: LevelSelectView
 });
 Math.__name__ = "Math";
 var MenuView = function() {
@@ -4603,9 +5425,8 @@ MenuView.prototype = $extend(GameState.prototype,{
 			centeringFlow.reflow();
 		},Colors.BLUE,null,0.8);
 		new TextButton(centeringFlow,"Start game",function() {
-			App.instance.switchState(new PlayView());
+			App.instance.switchState(new LevelSelectView());
 		},Colors.BLUE,null,0.8);
-		new Text("Highscore: " + App.loadHighScore(),centeringFlow,0.8);
 		centeringFlow.addSpacing(Gui.scaleAsInt(100));
 		new Text("version: " + hxd_Res.get_loader().loadCache("version.txt",hxd_res_Resource).entry.getText(),centeringFlow,0.5);
 	}
@@ -4620,11 +5441,13 @@ ObjExt.setPos = function(obj,pos) {
 	obj.posChanged = true;
 	obj.y = pos.y;
 };
-var PlayView = function() {
+var PlayView = function(levelIndex) {
 	this.fieldTileEmpty = hxd_Res.get_loader().loadCache("field-tiles.png",hxd_res_Image).toTile().sub(PlayView.FIELD_TILE_SIZE,0,PlayView.FIELD_TILE_SIZE,PlayView.FIELD_TILE_SIZE,PlayView.FIELD_TILE_SIZE * -0.5,PlayView.FIELD_TILE_SIZE * -0.5);
 	this.fieldTileFull = hxd_Res.get_loader().loadCache("field-tiles.png",hxd_res_Image).toTile().sub(0 * PlayView.FIELD_TILE_SIZE,0,PlayView.FIELD_TILE_SIZE,PlayView.FIELD_TILE_SIZE,PlayView.FIELD_TILE_SIZE * -0.5,PlayView.FIELD_TILE_SIZE * -0.5);
 	this.fieldElements = new haxe_ds__$HashMap_HashMapData();
 	GameState.call(this);
+	this.levelIndex = levelIndex;
+	this.levelData = App.ldtkProject.levels[levelIndex];
 };
 $hxClasses["PlayView"] = PlayView;
 PlayView.__name__ = "PlayView";
@@ -4637,7 +5460,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 		this.posChanged = true;
 		this.scaleY *= 2;
 		this.addEventListener($bind(this,this.onEvent));
-		var pixels = hxd_Res.get_loader().loadCache("level1.png",hxd_res_Image).getPixels();
+		var pixels = hxd_Res.get_loader().loadCache(this.levelData.bgImageInfos.relFilePath,hxd_res_Image).getPixels();
 		var field = new h2d_SpriteBatch(hxd_Res.get_loader().loadCache("field-tiles.png",hxd_res_Image).toTile(),this);
 		var _g = 0;
 		var _g1 = pixels.height;
@@ -4663,13 +5486,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 				}
 			}
 		}
-		var level1 = new h2d_Bitmap(hxd_Res.get_loader().loadCache("level1.png",hxd_res_Image).toTile(),this);
-		level1.posChanged = true;
-		level1.scaleX *= 6;
-		level1.posChanged = true;
-		level1.scaleY *= 6;
-		level1.alpha = 0.0;
-		var _this = new LdtkProject().all_levels.Level_1;
+		var _this = this.levelData;
 		_this.load();
 		var combine0 = Reflect.field(_this,"l_Entities").all_Combine[0];
 		var playerTile = hxd_Res.get_loader().loadCache("combine.png",hxd_res_Image).toTile();
@@ -4747,118 +5564,19 @@ PlayView.prototype = $extend(GameState.prototype,{
 			}
 		}
 		if(!this.fieldElements.keys.iterator().hasNext()) {
-			App.instance.switchState(new GameEndView());
+			if(App.save.unlockedLevel < this.levelIndex + 1) {
+				App.save.unlockedLevel = this.levelIndex + 1;
+				hxd_Save.save(App.save);
+			}
+			if(this.levelIndex + 1 < App.ldtkProject.levels.length) {
+				App.instance.switchState(new GameEndView());
+			} else {
+				App.instance.switchState(new PlayView(this.levelIndex + 1));
+			}
 		}
 	}
 	,__class__: PlayView
 });
-var Reflect = function() { };
-$hxClasses["Reflect"] = Reflect;
-Reflect.__name__ = "Reflect";
-Reflect.field = function(o,field) {
-	try {
-		return o[field];
-	} catch( _g ) {
-		return null;
-	}
-};
-Reflect.getProperty = function(o,field) {
-	var tmp;
-	if(o == null) {
-		return null;
-	} else {
-		var tmp1;
-		if(o.__properties__) {
-			tmp = o.__properties__["get_" + field];
-			tmp1 = tmp;
-		} else {
-			tmp1 = false;
-		}
-		if(tmp1) {
-			return o[tmp]();
-		} else {
-			return o[field];
-		}
-	}
-};
-Reflect.setProperty = function(o,field,value) {
-	var tmp;
-	var tmp1;
-	if(o.__properties__) {
-		tmp = o.__properties__["set_" + field];
-		tmp1 = tmp;
-	} else {
-		tmp1 = false;
-	}
-	if(tmp1) {
-		o[tmp](value);
-	} else {
-		o[field] = value;
-	}
-};
-Reflect.fields = function(o) {
-	var a = [];
-	if(o != null) {
-		var hasOwnProperty = Object.prototype.hasOwnProperty;
-		for( var f in o ) {
-		if(f != "__id__" && f != "hx__closures__" && hasOwnProperty.call(o,f)) {
-			a.push(f);
-		}
-		}
-	}
-	return a;
-};
-Reflect.isFunction = function(f) {
-	if(typeof(f) == "function") {
-		return !(f.__name__ || f.__ename__);
-	} else {
-		return false;
-	}
-};
-Reflect.compare = function(a,b) {
-	if(a == b) {
-		return 0;
-	} else if(a > b) {
-		return 1;
-	} else {
-		return -1;
-	}
-};
-Reflect.compareMethods = function(f1,f2) {
-	if(f1 == f2) {
-		return true;
-	}
-	if(!Reflect.isFunction(f1) || !Reflect.isFunction(f2)) {
-		return false;
-	}
-	if(f1.scope == f2.scope && f1.method == f2.method) {
-		return f1.method != null;
-	} else {
-		return false;
-	}
-};
-Reflect.isObject = function(v) {
-	if(v == null) {
-		return false;
-	}
-	var t = typeof(v);
-	if(!(t == "string" || t == "object" && v.__enum__ == null)) {
-		if(t == "function") {
-			return (v.__name__ || v.__ename__) != null;
-		} else {
-			return false;
-		}
-	} else {
-		return true;
-	}
-};
-Reflect.isEnumValue = function(v) {
-	if(v != null) {
-		return v.__enum__ != null;
-	} else {
-		return false;
-	}
-};
 var Std = function() { };
 $hxClasses["Std"] = Std;
 Std.__name__ = "Std";
@@ -5013,6 +5731,19 @@ StringTools.hex = function(n,digits) {
 	}
 	return s;
 };
+var ValueType = $hxEnums["ValueType"] = { __ename__:"ValueType",__constructs__:null
+	,TNull: {_hx_name:"TNull",_hx_index:0,__enum__:"ValueType",toString:$estr}
+	,TInt: {_hx_name:"TInt",_hx_index:1,__enum__:"ValueType",toString:$estr}
+	,TFloat: {_hx_name:"TFloat",_hx_index:2,__enum__:"ValueType",toString:$estr}
+	,TBool: {_hx_name:"TBool",_hx_index:3,__enum__:"ValueType",toString:$estr}
+	,TObject: {_hx_name:"TObject",_hx_index:4,__enum__:"ValueType",toString:$estr}
+	,TFunction: {_hx_name:"TFunction",_hx_index:5,__enum__:"ValueType",toString:$estr}
+	,TClass: ($_=function(c) { return {_hx_index:6,c:c,__enum__:"ValueType",toString:$estr}; },$_._hx_name="TClass",$_.__params__ = ["c"],$_)
+	,TEnum: ($_=function(e) { return {_hx_index:7,e:e,__enum__:"ValueType",toString:$estr}; },$_._hx_name="TEnum",$_.__params__ = ["e"],$_)
+	,TUnknown: {_hx_name:"TUnknown",_hx_index:8,__enum__:"ValueType",toString:$estr}
+};
+ValueType.__constructs__ = [ValueType.TNull,ValueType.TInt,ValueType.TFloat,ValueType.TBool,ValueType.TObject,ValueType.TFunction,ValueType.TClass,ValueType.TEnum,ValueType.TUnknown];
+ValueType.__empty_constructs__ = [ValueType.TNull,ValueType.TInt,ValueType.TFloat,ValueType.TBool,ValueType.TObject,ValueType.TFunction,ValueType.TUnknown];
 var Type = function() { };
 $hxClasses["Type"] = Type;
 Type.__name__ = "Type";
@@ -5048,6 +5779,41 @@ Type.createEnumIndex = function(e,index,params) {
 		throw haxe_Exception.thrown(index + " is not a valid enum constructor index");
 	}
 	return Type.createEnum(e,c,params);
+};
+Type.typeof = function(v) {
+	switch(typeof(v)) {
+	case "boolean":
+		return ValueType.TBool;
+	case "function":
+		if(v.__name__ || v.__ename__) {
+			return ValueType.TObject;
+		}
+		return ValueType.TFunction;
+	case "number":
+		if(Math.ceil(v) == v % 2147483648.0) {
+			return ValueType.TInt;
+		}
+		return ValueType.TFloat;
+	case "object":
+		if(v == null) {
+			return ValueType.TNull;
+		}
+		var e = v.__enum__;
+		if(e != null) {
+			return ValueType.TEnum($hxEnums[e]);
+		}
+		var c = js_Boot.getClass(v);
+		if(c != null) {
+			return ValueType.TClass(c);
+		}
+		return ValueType.TObject;
+	case "string":
+		return ValueType.TClass(String);
+	case "undefined":
+		return ValueType.TNull;
+	default:
+		return ValueType.TUnknown;
+	}
 };
 Type.enumEq = function(a,b) {
 	if(a == b) {
@@ -5401,7 +6167,7 @@ dn_Delayer.__name__ = "dn.Delayer";
 dn_Delayer.prototype = {
 	__class__: dn_Delayer
 };
-var dn_PathSlashMode = $hxEnums["dn.PathSlashMode"] = { __ename__:true,__constructs__:null
+var dn_PathSlashMode = $hxEnums["dn.PathSlashMode"] = { __ename__:"dn.PathSlashMode",__constructs__:null
 	,Preserve: {_hx_name:"Preserve",_hx_index:0,__enum__:"dn.PathSlashMode",toString:$estr}
 	,OnlyBackslashes: {_hx_name:"OnlyBackslashes",_hx_index:1,__enum__:"dn.PathSlashMode",toString:$estr}
 	,OnlySlashes: {_hx_name:"OnlySlashes",_hx_index:2,__enum__:"dn.PathSlashMode",toString:$estr}
@@ -5605,7 +6371,7 @@ dn_FilePath.prototype = {
 	,__class__: dn_FilePath
 	,__properties__: {set_extension:"set_extension",set_fileName:"set_fileName"}
 };
-var dn_IdentifyFormat = $hxEnums["dn.IdentifyFormat"] = { __ename__:true,__constructs__:null
+var dn_IdentifyFormat = $hxEnums["dn.IdentifyFormat"] = { __ename__:"dn.IdentifyFormat",__constructs__:null
 	,Unknown: {_hx_name:"Unknown",_hx_index:0,__enum__:"dn.IdentifyFormat",toString:$estr}
 	,Png: {_hx_name:"Png",_hx_index:1,__enum__:"dn.IdentifyFormat",toString:$estr}
 	,Jpeg: {_hx_name:"Jpeg",_hx_index:2,__enum__:"dn.IdentifyFormat",toString:$estr}
@@ -5936,14 +6702,14 @@ dn_struct__$RecyclablePool_TestObject.prototype = {
 	}
 	,__class__: dn_struct__$RecyclablePool_TestObject
 };
-var format_gif_Block = $hxEnums["format.gif.Block"] = { __ename__:true,__constructs__:null
+var format_gif_Block = $hxEnums["format.gif.Block"] = { __ename__:"format.gif.Block",__constructs__:null
 	,BFrame: ($_=function(frame) { return {_hx_index:0,frame:frame,__enum__:"format.gif.Block",toString:$estr}; },$_._hx_name="BFrame",$_.__params__ = ["frame"],$_)
 	,BExtension: ($_=function(extension) { return {_hx_index:1,extension:extension,__enum__:"format.gif.Block",toString:$estr}; },$_._hx_name="BExtension",$_.__params__ = ["extension"],$_)
 	,BEOF: {_hx_name:"BEOF",_hx_index:2,__enum__:"format.gif.Block",toString:$estr}
 };
 format_gif_Block.__constructs__ = [format_gif_Block.BFrame,format_gif_Block.BExtension,format_gif_Block.BEOF];
 format_gif_Block.__empty_constructs__ = [format_gif_Block.BEOF];
-var format_gif_Extension = $hxEnums["format.gif.Extension"] = { __ename__:true,__constructs__:null
+var format_gif_Extension = $hxEnums["format.gif.Extension"] = { __ename__:"format.gif.Extension",__constructs__:null
 	,EGraphicControl: ($_=function(gce) { return {_hx_index:0,gce:gce,__enum__:"format.gif.Extension",toString:$estr}; },$_._hx_name="EGraphicControl",$_.__params__ = ["gce"],$_)
 	,EComment: ($_=function(text) { return {_hx_index:1,text:text,__enum__:"format.gif.Extension",toString:$estr}; },$_._hx_name="EComment",$_.__params__ = ["text"],$_)
 	,EText: ($_=function(pte) { return {_hx_index:2,pte:pte,__enum__:"format.gif.Extension",toString:$estr}; },$_._hx_name="EText",$_.__params__ = ["pte"],$_)
@@ -5952,20 +6718,20 @@ var format_gif_Extension = $hxEnums["format.gif.Extension"] = { __ename__:true,_
 };
 format_gif_Extension.__constructs__ = [format_gif_Extension.EGraphicControl,format_gif_Extension.EComment,format_gif_Extension.EText,format_gif_Extension.EApplicationExtension,format_gif_Extension.EUnknown];
 format_gif_Extension.__empty_constructs__ = [];
-var format_gif_ApplicationExtension = $hxEnums["format.gif.ApplicationExtension"] = { __ename__:true,__constructs__:null
+var format_gif_ApplicationExtension = $hxEnums["format.gif.ApplicationExtension"] = { __ename__:"format.gif.ApplicationExtension",__constructs__:null
 	,AENetscapeLooping: ($_=function(loops) { return {_hx_index:0,loops:loops,__enum__:"format.gif.ApplicationExtension",toString:$estr}; },$_._hx_name="AENetscapeLooping",$_.__params__ = ["loops"],$_)
 	,AEUnknown: ($_=function(name,version,data) { return {_hx_index:1,name:name,version:version,data:data,__enum__:"format.gif.ApplicationExtension",toString:$estr}; },$_._hx_name="AEUnknown",$_.__params__ = ["name","version","data"],$_)
 };
 format_gif_ApplicationExtension.__constructs__ = [format_gif_ApplicationExtension.AENetscapeLooping,format_gif_ApplicationExtension.AEUnknown];
 format_gif_ApplicationExtension.__empty_constructs__ = [];
-var format_gif_Version = $hxEnums["format.gif.Version"] = { __ename__:true,__constructs__:null
+var format_gif_Version = $hxEnums["format.gif.Version"] = { __ename__:"format.gif.Version",__constructs__:null
 	,GIF87a: {_hx_name:"GIF87a",_hx_index:0,__enum__:"format.gif.Version",toString:$estr}
 	,GIF89a: {_hx_name:"GIF89a",_hx_index:1,__enum__:"format.gif.Version",toString:$estr}
 	,Unknown: ($_=function(version) { return {_hx_index:2,version:version,__enum__:"format.gif.Version",toString:$estr}; },$_._hx_name="Unknown",$_.__params__ = ["version"],$_)
 };
 format_gif_Version.__constructs__ = [format_gif_Version.GIF87a,format_gif_Version.GIF89a,format_gif_Version.Unknown];
 format_gif_Version.__empty_constructs__ = [format_gif_Version.GIF87a,format_gif_Version.GIF89a];
-var format_gif_DisposalMethod = $hxEnums["format.gif.DisposalMethod"] = { __ename__:true,__constructs__:null
+var format_gif_DisposalMethod = $hxEnums["format.gif.DisposalMethod"] = { __ename__:"format.gif.DisposalMethod",__constructs__:null
 	,UNSPECIFIED: {_hx_name:"UNSPECIFIED",_hx_index:0,__enum__:"format.gif.DisposalMethod",toString:$estr}
 	,NO_ACTION: {_hx_name:"NO_ACTION",_hx_index:1,__enum__:"format.gif.DisposalMethod",toString:$estr}
 	,FILL_BACKGROUND: {_hx_name:"FILL_BACKGROUND",_hx_index:2,__enum__:"format.gif.DisposalMethod",toString:$estr}
@@ -6432,7 +7198,7 @@ format_gif_Tools.extractFullRGBA = function(data,frameIndex) {
 	}
 	return bytes;
 };
-var format_mp3_SamplingRate = $hxEnums["format.mp3.SamplingRate"] = { __ename__:true,__constructs__:null
+var format_mp3_SamplingRate = $hxEnums["format.mp3.SamplingRate"] = { __ename__:"format.mp3.SamplingRate",__constructs__:null
 	,SR_8000: {_hx_name:"SR_8000",_hx_index:0,__enum__:"format.mp3.SamplingRate",toString:$estr}
 	,SR_11025: {_hx_name:"SR_11025",_hx_index:1,__enum__:"format.mp3.SamplingRate",toString:$estr}
 	,SR_12000: {_hx_name:"SR_12000",_hx_index:2,__enum__:"format.mp3.SamplingRate",toString:$estr}
@@ -6445,7 +7211,7 @@ var format_mp3_SamplingRate = $hxEnums["format.mp3.SamplingRate"] = { __ename__:
 };
 format_mp3_SamplingRate.__constructs__ = [format_mp3_SamplingRate.SR_8000,format_mp3_SamplingRate.SR_11025,format_mp3_SamplingRate.SR_12000,format_mp3_SamplingRate.SR_22050,format_mp3_SamplingRate.SR_24000,format_mp3_SamplingRate.SR_32000,format_mp3_SamplingRate.SR_44100,format_mp3_SamplingRate.SR_48000,format_mp3_SamplingRate.SR_Bad];
 format_mp3_SamplingRate.__empty_constructs__ = [format_mp3_SamplingRate.SR_8000,format_mp3_SamplingRate.SR_11025,format_mp3_SamplingRate.SR_12000,format_mp3_SamplingRate.SR_22050,format_mp3_SamplingRate.SR_24000,format_mp3_SamplingRate.SR_32000,format_mp3_SamplingRate.SR_44100,format_mp3_SamplingRate.SR_48000,format_mp3_SamplingRate.SR_Bad];
-var format_mp3_Bitrate = $hxEnums["format.mp3.Bitrate"] = { __ename__:true,__constructs__:null
+var format_mp3_Bitrate = $hxEnums["format.mp3.Bitrate"] = { __ename__:"format.mp3.Bitrate",__constructs__:null
 	,BR_8: {_hx_name:"BR_8",_hx_index:0,__enum__:"format.mp3.Bitrate",toString:$estr}
 	,BR_16: {_hx_name:"BR_16",_hx_index:1,__enum__:"format.mp3.Bitrate",toString:$estr}
 	,BR_24: {_hx_name:"BR_24",_hx_index:2,__enum__:"format.mp3.Bitrate",toString:$estr}
@@ -6629,7 +7395,7 @@ format_mp3_CEmphasis.num2Enum = function(c) {
 		throw haxe_Exception.thrown("assert");
 	}
 };
-var format_mp3_MPEGVersion = $hxEnums["format.mp3.MPEGVersion"] = { __ename__:true,__constructs__:null
+var format_mp3_MPEGVersion = $hxEnums["format.mp3.MPEGVersion"] = { __ename__:"format.mp3.MPEGVersion",__constructs__:null
 	,MPEG_V1: {_hx_name:"MPEG_V1",_hx_index:0,__enum__:"format.mp3.MPEGVersion",toString:$estr}
 	,MPEG_V2: {_hx_name:"MPEG_V2",_hx_index:1,__enum__:"format.mp3.MPEGVersion",toString:$estr}
 	,MPEG_V25: {_hx_name:"MPEG_V25",_hx_index:2,__enum__:"format.mp3.MPEGVersion",toString:$estr}
@@ -6637,7 +7403,7 @@ var format_mp3_MPEGVersion = $hxEnums["format.mp3.MPEGVersion"] = { __ename__:tr
 };
 format_mp3_MPEGVersion.__constructs__ = [format_mp3_MPEGVersion.MPEG_V1,format_mp3_MPEGVersion.MPEG_V2,format_mp3_MPEGVersion.MPEG_V25,format_mp3_MPEGVersion.MPEG_Reserved];
 format_mp3_MPEGVersion.__empty_constructs__ = [format_mp3_MPEGVersion.MPEG_V1,format_mp3_MPEGVersion.MPEG_V2,format_mp3_MPEGVersion.MPEG_V25,format_mp3_MPEGVersion.MPEG_Reserved];
-var format_mp3_Layer = $hxEnums["format.mp3.Layer"] = { __ename__:true,__constructs__:null
+var format_mp3_Layer = $hxEnums["format.mp3.Layer"] = { __ename__:"format.mp3.Layer",__constructs__:null
 	,LayerReserved: {_hx_name:"LayerReserved",_hx_index:0,__enum__:"format.mp3.Layer",toString:$estr}
 	,Layer3: {_hx_name:"Layer3",_hx_index:1,__enum__:"format.mp3.Layer",toString:$estr}
 	,Layer2: {_hx_name:"Layer2",_hx_index:2,__enum__:"format.mp3.Layer",toString:$estr}
@@ -6645,7 +7411,7 @@ var format_mp3_Layer = $hxEnums["format.mp3.Layer"] = { __ename__:true,__constru
 };
 format_mp3_Layer.__constructs__ = [format_mp3_Layer.LayerReserved,format_mp3_Layer.Layer3,format_mp3_Layer.Layer2,format_mp3_Layer.Layer1];
 format_mp3_Layer.__empty_constructs__ = [format_mp3_Layer.LayerReserved,format_mp3_Layer.Layer3,format_mp3_Layer.Layer2,format_mp3_Layer.Layer1];
-var format_mp3_ChannelMode = $hxEnums["format.mp3.ChannelMode"] = { __ename__:true,__constructs__:null
+var format_mp3_ChannelMode = $hxEnums["format.mp3.ChannelMode"] = { __ename__:"format.mp3.ChannelMode",__constructs__:null
 	,Stereo: {_hx_name:"Stereo",_hx_index:0,__enum__:"format.mp3.ChannelMode",toString:$estr}
 	,JointStereo: {_hx_name:"JointStereo",_hx_index:1,__enum__:"format.mp3.ChannelMode",toString:$estr}
 	,DualChannel: {_hx_name:"DualChannel",_hx_index:2,__enum__:"format.mp3.ChannelMode",toString:$estr}
@@ -6653,7 +7419,7 @@ var format_mp3_ChannelMode = $hxEnums["format.mp3.ChannelMode"] = { __ename__:tr
 };
 format_mp3_ChannelMode.__constructs__ = [format_mp3_ChannelMode.Stereo,format_mp3_ChannelMode.JointStereo,format_mp3_ChannelMode.DualChannel,format_mp3_ChannelMode.Mono];
 format_mp3_ChannelMode.__empty_constructs__ = [format_mp3_ChannelMode.Stereo,format_mp3_ChannelMode.JointStereo,format_mp3_ChannelMode.DualChannel,format_mp3_ChannelMode.Mono];
-var format_mp3_Emphasis = $hxEnums["format.mp3.Emphasis"] = { __ename__:true,__constructs__:null
+var format_mp3_Emphasis = $hxEnums["format.mp3.Emphasis"] = { __ename__:"format.mp3.Emphasis",__constructs__:null
 	,NoEmphasis: {_hx_name:"NoEmphasis",_hx_index:0,__enum__:"format.mp3.Emphasis",toString:$estr}
 	,Ms50_15: {_hx_name:"Ms50_15",_hx_index:1,__enum__:"format.mp3.Emphasis",toString:$estr}
 	,CCIT_J17: {_hx_name:"CCIT_J17",_hx_index:2,__enum__:"format.mp3.Emphasis",toString:$estr}
@@ -6661,7 +7427,7 @@ var format_mp3_Emphasis = $hxEnums["format.mp3.Emphasis"] = { __ename__:true,__c
 };
 format_mp3_Emphasis.__constructs__ = [format_mp3_Emphasis.NoEmphasis,format_mp3_Emphasis.Ms50_15,format_mp3_Emphasis.CCIT_J17,format_mp3_Emphasis.InvalidEmphasis];
 format_mp3_Emphasis.__empty_constructs__ = [format_mp3_Emphasis.NoEmphasis,format_mp3_Emphasis.Ms50_15,format_mp3_Emphasis.CCIT_J17,format_mp3_Emphasis.InvalidEmphasis];
-var format_mp3_FrameType = $hxEnums["format.mp3.FrameType"] = { __ename__:true,__constructs__:null
+var format_mp3_FrameType = $hxEnums["format.mp3.FrameType"] = { __ename__:"format.mp3.FrameType",__constructs__:null
 	,FT_MP3: {_hx_name:"FT_MP3",_hx_index:0,__enum__:"format.mp3.FrameType",toString:$estr}
 	,FT_NONE: {_hx_name:"FT_NONE",_hx_index:1,__enum__:"format.mp3.FrameType",toString:$estr}
 };
@@ -6825,14 +7591,14 @@ format_mp3_Tools.getSampleCount = function(mpegVersion) {
 format_mp3_Tools.getSampleCountHdr = function(hdr) {
 	return format_mp3_Tools.getSampleCount(format_mp3_MPEG.enum2Num(hdr.version));
 };
-var format_png_Color = $hxEnums["format.png.Color"] = { __ename__:true,__constructs__:null
+var format_png_Color = $hxEnums["format.png.Color"] = { __ename__:"format.png.Color",__constructs__:null
 	,ColGrey: ($_=function(alpha) { return {_hx_index:0,alpha:alpha,__enum__:"format.png.Color",toString:$estr}; },$_._hx_name="ColGrey",$_.__params__ = ["alpha"],$_)
 	,ColTrue: ($_=function(alpha) { return {_hx_index:1,alpha:alpha,__enum__:"format.png.Color",toString:$estr}; },$_._hx_name="ColTrue",$_.__params__ = ["alpha"],$_)
 	,ColIndexed: {_hx_name:"ColIndexed",_hx_index:2,__enum__:"format.png.Color",toString:$estr}
 };
 format_png_Color.__constructs__ = [format_png_Color.ColGrey,format_png_Color.ColTrue,format_png_Color.ColIndexed];
 format_png_Color.__empty_constructs__ = [format_png_Color.ColIndexed];
-var format_png_Chunk = $hxEnums["format.png.Chunk"] = { __ename__:true,__constructs__:null
+var format_png_Chunk = $hxEnums["format.png.Chunk"] = { __ename__:"format.png.Chunk",__constructs__:null
 	,CEnd: {_hx_name:"CEnd",_hx_index:0,__enum__:"format.png.Chunk",toString:$estr}
 	,CHeader: ($_=function(h) { return {_hx_index:1,h:h,__enum__:"format.png.Chunk",toString:$estr}; },$_._hx_name="CHeader",$_.__params__ = ["h"],$_)
 	,CData: ($_=function(b) { return {_hx_index:2,b:b,__enum__:"format.png.Chunk",toString:$estr}; },$_._hx_name="CData",$_.__params__ = ["b"],$_)
@@ -7743,7 +8509,7 @@ format_png_Tools.extract32 = function(d,bytes,flipY) {
 	}
 	return bgra;
 };
-var format_tga_ImageOrigin = $hxEnums["format.tga.ImageOrigin"] = { __ename__:true,__constructs__:null
+var format_tga_ImageOrigin = $hxEnums["format.tga.ImageOrigin"] = { __ename__:"format.tga.ImageOrigin",__constructs__:null
 	,BottomLeft: {_hx_name:"BottomLeft",_hx_index:0,__enum__:"format.tga.ImageOrigin",toString:$estr}
 	,BottomRight: {_hx_name:"BottomRight",_hx_index:1,__enum__:"format.tga.ImageOrigin",toString:$estr}
 	,TopLeft: {_hx_name:"TopLeft",_hx_index:2,__enum__:"format.tga.ImageOrigin",toString:$estr}
@@ -7751,7 +8517,7 @@ var format_tga_ImageOrigin = $hxEnums["format.tga.ImageOrigin"] = { __ename__:tr
 };
 format_tga_ImageOrigin.__constructs__ = [format_tga_ImageOrigin.BottomLeft,format_tga_ImageOrigin.BottomRight,format_tga_ImageOrigin.TopLeft,format_tga_ImageOrigin.TopRight];
 format_tga_ImageOrigin.__empty_constructs__ = [format_tga_ImageOrigin.BottomLeft,format_tga_ImageOrigin.BottomRight,format_tga_ImageOrigin.TopLeft,format_tga_ImageOrigin.TopRight];
-var format_tga_ImageType = $hxEnums["format.tga.ImageType"] = { __ename__:true,__constructs__:null
+var format_tga_ImageType = $hxEnums["format.tga.ImageType"] = { __ename__:"format.tga.ImageType",__constructs__:null
 	,NoImage: {_hx_name:"NoImage",_hx_index:0,__enum__:"format.tga.ImageType",toString:$estr}
 	,UncompressedColorMapped: {_hx_name:"UncompressedColorMapped",_hx_index:1,__enum__:"format.tga.ImageType",toString:$estr}
 	,UncompressedTrueColor: {_hx_name:"UncompressedTrueColor",_hx_index:2,__enum__:"format.tga.ImageType",toString:$estr}
@@ -8063,7 +8829,7 @@ format_tools_Inflate.__name__ = "format.tools.Inflate";
 format_tools_Inflate.run = function(bytes) {
 	return haxe_zip_Uncompress.run(bytes);
 };
-var format_wav_WAVEFormat = $hxEnums["format.wav.WAVEFormat"] = { __ename__:true,__constructs__:null
+var format_wav_WAVEFormat = $hxEnums["format.wav.WAVEFormat"] = { __ename__:"format.wav.WAVEFormat",__constructs__:null
 	,WF_PCM: {_hx_name:"WF_PCM",_hx_index:0,__enum__:"format.wav.WAVEFormat",toString:$estr}
 };
 format_wav_WAVEFormat.__constructs__ = [format_wav_WAVEFormat.WF_PCM];
@@ -8211,7 +8977,7 @@ h2d_Bitmap.prototype = $extend(h2d_Drawable.prototype,{
 	,__class__: h2d_Bitmap
 	,__properties__: $extend(h2d_Drawable.prototype.__properties__,{set_tile:"set_tile"})
 });
-var h2d_BlendMode = $hxEnums["h2d.BlendMode"] = { __ename__:true,__constructs__:null
+var h2d_BlendMode = $hxEnums["h2d.BlendMode"] = { __ename__:"h2d.BlendMode",__constructs__:null
 	,None: {_hx_name:"None",_hx_index:0,__enum__:"h2d.BlendMode",toString:$estr}
 	,Alpha: {_hx_name:"Alpha",_hx_index:1,__enum__:"h2d.BlendMode",toString:$estr}
 	,Add: {_hx_name:"Add",_hx_index:2,__enum__:"h2d.BlendMode",toString:$estr}
@@ -8321,7 +9087,7 @@ h2d_Camera.prototype = {
 	}
 	,__class__: h2d_Camera
 };
-var h2d_FlowAlign = $hxEnums["h2d.FlowAlign"] = { __ename__:true,__constructs__:null
+var h2d_FlowAlign = $hxEnums["h2d.FlowAlign"] = { __ename__:"h2d.FlowAlign",__constructs__:null
 	,Top: {_hx_name:"Top",_hx_index:0,__enum__:"h2d.FlowAlign",toString:$estr}
 	,Left: {_hx_name:"Left",_hx_index:1,__enum__:"h2d.FlowAlign",toString:$estr}
 	,Right: {_hx_name:"Right",_hx_index:2,__enum__:"h2d.FlowAlign",toString:$estr}
@@ -8330,14 +9096,14 @@ var h2d_FlowAlign = $hxEnums["h2d.FlowAlign"] = { __ename__:true,__constructs__:
 };
 h2d_FlowAlign.__constructs__ = [h2d_FlowAlign.Top,h2d_FlowAlign.Left,h2d_FlowAlign.Right,h2d_FlowAlign.Middle,h2d_FlowAlign.Bottom];
 h2d_FlowAlign.__empty_constructs__ = [h2d_FlowAlign.Top,h2d_FlowAlign.Left,h2d_FlowAlign.Right,h2d_FlowAlign.Middle,h2d_FlowAlign.Bottom];
-var h2d_FlowLayout = $hxEnums["h2d.FlowLayout"] = { __ename__:true,__constructs__:null
+var h2d_FlowLayout = $hxEnums["h2d.FlowLayout"] = { __ename__:"h2d.FlowLayout",__constructs__:null
 	,Horizontal: {_hx_name:"Horizontal",_hx_index:0,__enum__:"h2d.FlowLayout",toString:$estr}
 	,Vertical: {_hx_name:"Vertical",_hx_index:1,__enum__:"h2d.FlowLayout",toString:$estr}
 	,Stack: {_hx_name:"Stack",_hx_index:2,__enum__:"h2d.FlowLayout",toString:$estr}
 };
 h2d_FlowLayout.__constructs__ = [h2d_FlowLayout.Horizontal,h2d_FlowLayout.Vertical,h2d_FlowLayout.Stack];
 h2d_FlowLayout.__empty_constructs__ = [h2d_FlowLayout.Horizontal,h2d_FlowLayout.Vertical,h2d_FlowLayout.Stack];
-var h2d_FlowOverflow = $hxEnums["h2d.FlowOverflow"] = { __ename__:true,__constructs__:null
+var h2d_FlowOverflow = $hxEnums["h2d.FlowOverflow"] = { __ename__:"h2d.FlowOverflow",__constructs__:null
 	,Expand: {_hx_name:"Expand",_hx_index:0,__enum__:"h2d.FlowOverflow",toString:$estr}
 	,Limit: {_hx_name:"Limit",_hx_index:1,__enum__:"h2d.FlowOverflow",toString:$estr}
 	,Hidden: {_hx_name:"Hidden",_hx_index:2,__enum__:"h2d.FlowOverflow",toString:$estr}
@@ -9563,7 +10329,7 @@ h2d_FontChar.prototype = {
 	}
 	,__class__: h2d_FontChar
 };
-var h2d_FontType = $hxEnums["h2d.FontType"] = { __ename__:true,__constructs__:null
+var h2d_FontType = $hxEnums["h2d.FontType"] = { __ename__:"h2d.FontType",__constructs__:null
 	,BitmapFont: {_hx_name:"BitmapFont",_hx_index:0,__enum__:"h2d.FontType",toString:$estr}
 	,SignedDistanceField: ($_=function(channel,alphaCutoff,smoothing) { return {_hx_index:1,channel:channel,alphaCutoff:alphaCutoff,smoothing:smoothing,__enum__:"h2d.FontType",toString:$estr}; },$_._hx_name="SignedDistanceField",$_.__params__ = ["channel","alphaCutoff","smoothing"],$_)
 };
@@ -11089,14 +11855,14 @@ h2d_Graphics.prototype = $extend(h2d_Drawable.prototype,{
 	}
 	,__class__: h2d_Graphics
 });
-var h2d_LineHeightMode = $hxEnums["h2d.LineHeightMode"] = { __ename__:true,__constructs__:null
+var h2d_LineHeightMode = $hxEnums["h2d.LineHeightMode"] = { __ename__:"h2d.LineHeightMode",__constructs__:null
 	,Accurate: {_hx_name:"Accurate",_hx_index:0,__enum__:"h2d.LineHeightMode",toString:$estr}
 	,TextOnly: {_hx_name:"TextOnly",_hx_index:1,__enum__:"h2d.LineHeightMode",toString:$estr}
 	,Constant: {_hx_name:"Constant",_hx_index:2,__enum__:"h2d.LineHeightMode",toString:$estr}
 };
 h2d_LineHeightMode.__constructs__ = [h2d_LineHeightMode.Accurate,h2d_LineHeightMode.TextOnly,h2d_LineHeightMode.Constant];
 h2d_LineHeightMode.__empty_constructs__ = [h2d_LineHeightMode.Accurate,h2d_LineHeightMode.TextOnly,h2d_LineHeightMode.Constant];
-var h2d_ImageVerticalAlign = $hxEnums["h2d.ImageVerticalAlign"] = { __ename__:true,__constructs__:null
+var h2d_ImageVerticalAlign = $hxEnums["h2d.ImageVerticalAlign"] = { __ename__:"h2d.ImageVerticalAlign",__constructs__:null
 	,Top: {_hx_name:"Top",_hx_index:0,__enum__:"h2d.ImageVerticalAlign",toString:$estr}
 	,Bottom: {_hx_name:"Bottom",_hx_index:1,__enum__:"h2d.ImageVerticalAlign",toString:$estr}
 	,Middle: {_hx_name:"Middle",_hx_index:2,__enum__:"h2d.ImageVerticalAlign",toString:$estr}
@@ -13102,7 +13868,7 @@ h2d_ScaleGrid.prototype = $extend(h2d_TileGroup.prototype,{
 	,__class__: h2d_ScaleGrid
 	,__properties__: $extend(h2d_TileGroup.prototype.__properties__,{set_height:"set_height",set_width:"set_width",set_borderBottom:"set_borderBottom",set_borderTop:"set_borderTop",set_borderRight:"set_borderRight",set_borderLeft:"set_borderLeft"})
 });
-var h2d_ScaleModeAlign = $hxEnums["h2d.ScaleModeAlign"] = { __ename__:true,__constructs__:null
+var h2d_ScaleModeAlign = $hxEnums["h2d.ScaleModeAlign"] = { __ename__:"h2d.ScaleModeAlign",__constructs__:null
 	,Left: {_hx_name:"Left",_hx_index:0,__enum__:"h2d.ScaleModeAlign",toString:$estr}
 	,Right: {_hx_name:"Right",_hx_index:1,__enum__:"h2d.ScaleModeAlign",toString:$estr}
 	,Center: {_hx_name:"Center",_hx_index:2,__enum__:"h2d.ScaleModeAlign",toString:$estr}
@@ -13111,7 +13877,7 @@ var h2d_ScaleModeAlign = $hxEnums["h2d.ScaleModeAlign"] = { __ename__:true,__con
 };
 h2d_ScaleModeAlign.__constructs__ = [h2d_ScaleModeAlign.Left,h2d_ScaleModeAlign.Right,h2d_ScaleModeAlign.Center,h2d_ScaleModeAlign.Top,h2d_ScaleModeAlign.Bottom];
 h2d_ScaleModeAlign.__empty_constructs__ = [h2d_ScaleModeAlign.Left,h2d_ScaleModeAlign.Right,h2d_ScaleModeAlign.Center,h2d_ScaleModeAlign.Top,h2d_ScaleModeAlign.Bottom];
-var h2d_ScaleMode = $hxEnums["h2d.ScaleMode"] = { __ename__:true,__constructs__:null
+var h2d_ScaleMode = $hxEnums["h2d.ScaleMode"] = { __ename__:"h2d.ScaleMode",__constructs__:null
 	,Resize: {_hx_name:"Resize",_hx_index:0,__enum__:"h2d.ScaleMode",toString:$estr}
 	,Stretch: ($_=function(width,height) { return {_hx_index:1,width:width,height:height,__enum__:"h2d.ScaleMode",toString:$estr}; },$_._hx_name="Stretch",$_.__params__ = ["width","height"],$_)
 	,LetterBox: ($_=function(width,height,integerScale,horizontalAlign,verticalAlign) { return {_hx_index:2,width:width,height:height,integerScale:integerScale,horizontalAlign:horizontalAlign,verticalAlign:verticalAlign,__enum__:"h2d.ScaleMode",toString:$estr}; },$_._hx_name="LetterBox",$_.__params__ = ["width","height","integerScale","horizontalAlign","verticalAlign"],$_)
@@ -13417,7 +14183,7 @@ h2d_SpriteBatch.prototype = $extend(h2d_Drawable.prototype,{
 	}
 	,__class__: h2d_SpriteBatch
 });
-var h2d_Align = $hxEnums["h2d.Align"] = { __ename__:true,__constructs__:null
+var h2d_Align = $hxEnums["h2d.Align"] = { __ename__:"h2d.Align",__constructs__:null
 	,Left: {_hx_name:"Left",_hx_index:0,__enum__:"h2d.Align",toString:$estr}
 	,Right: {_hx_name:"Right",_hx_index:1,__enum__:"h2d.Align",toString:$estr}
 	,Center: {_hx_name:"Center",_hx_index:2,__enum__:"h2d.Align",toString:$estr}
@@ -14217,7 +14983,7 @@ h2d_impl__$BatchDrawState_StateEntry.prototype = {
 	}
 	,__class__: h2d_impl__$BatchDrawState_StateEntry
 };
-var h3d_BufferFlag = $hxEnums["h3d.BufferFlag"] = { __ename__:true,__constructs__:null
+var h3d_BufferFlag = $hxEnums["h3d.BufferFlag"] = { __ename__:"h3d.BufferFlag",__constructs__:null
 	,Dynamic: {_hx_name:"Dynamic",_hx_index:0,__enum__:"h3d.BufferFlag",toString:$estr}
 	,Triangles: {_hx_name:"Triangles",_hx_index:1,__enum__:"h3d.BufferFlag",toString:$estr}
 	,Quads: {_hx_name:"Quads",_hx_index:2,__enum__:"h3d.BufferFlag",toString:$estr}
@@ -15871,7 +16637,7 @@ h3d_col_Sphere.prototype = {
 	}
 	,__class__: h3d_col_Sphere
 };
-var h3d_impl_Feature = $hxEnums["h3d.impl.Feature"] = { __ename__:true,__constructs__:null
+var h3d_impl_Feature = $hxEnums["h3d.impl.Feature"] = { __ename__:"h3d.impl.Feature",__constructs__:null
 	,StandardDerivatives: {_hx_name:"StandardDerivatives",_hx_index:0,__enum__:"h3d.impl.Feature",toString:$estr}
 	,FloatTextures: {_hx_name:"FloatTextures",_hx_index:1,__enum__:"h3d.impl.Feature",toString:$estr}
 	,AllocDepthBuffer: {_hx_name:"AllocDepthBuffer",_hx_index:2,__enum__:"h3d.impl.Feature",toString:$estr}
@@ -15886,7 +16652,7 @@ var h3d_impl_Feature = $hxEnums["h3d.impl.Feature"] = { __ename__:true,__constru
 };
 h3d_impl_Feature.__constructs__ = [h3d_impl_Feature.StandardDerivatives,h3d_impl_Feature.FloatTextures,h3d_impl_Feature.AllocDepthBuffer,h3d_impl_Feature.HardwareAccelerated,h3d_impl_Feature.MultipleRenderTargets,h3d_impl_Feature.Queries,h3d_impl_Feature.SRGBTextures,h3d_impl_Feature.ShaderModel3,h3d_impl_Feature.BottomLeftCoords,h3d_impl_Feature.Wireframe,h3d_impl_Feature.InstancedRendering];
 h3d_impl_Feature.__empty_constructs__ = [h3d_impl_Feature.StandardDerivatives,h3d_impl_Feature.FloatTextures,h3d_impl_Feature.AllocDepthBuffer,h3d_impl_Feature.HardwareAccelerated,h3d_impl_Feature.MultipleRenderTargets,h3d_impl_Feature.Queries,h3d_impl_Feature.SRGBTextures,h3d_impl_Feature.ShaderModel3,h3d_impl_Feature.BottomLeftCoords,h3d_impl_Feature.Wireframe,h3d_impl_Feature.InstancedRendering];
-var h3d_impl_RenderFlag = $hxEnums["h3d.impl.RenderFlag"] = { __ename__:true,__constructs__:null
+var h3d_impl_RenderFlag = $hxEnums["h3d.impl.RenderFlag"] = { __ename__:"h3d.impl.RenderFlag",__constructs__:null
 	,CameraHandness: {_hx_name:"CameraHandness",_hx_index:0,__enum__:"h3d.impl.RenderFlag",toString:$estr}
 };
 h3d_impl_RenderFlag.__constructs__ = [h3d_impl_RenderFlag.CameraHandness];
@@ -18069,7 +18835,7 @@ h3d_mat_BaseMaterial.prototype = $extend(hxd_impl_AnyProps.prototype,{
 	}
 	,__class__: h3d_mat_BaseMaterial
 });
-var h3d_mat_Face = $hxEnums["h3d.mat.Face"] = { __ename__:true,__constructs__:null
+var h3d_mat_Face = $hxEnums["h3d.mat.Face"] = { __ename__:"h3d.mat.Face",__constructs__:null
 	,None: {_hx_name:"None",_hx_index:0,__enum__:"h3d.mat.Face",toString:$estr}
 	,Back: {_hx_name:"Back",_hx_index:1,__enum__:"h3d.mat.Face",toString:$estr}
 	,Front: {_hx_name:"Front",_hx_index:2,__enum__:"h3d.mat.Face",toString:$estr}
@@ -18077,7 +18843,7 @@ var h3d_mat_Face = $hxEnums["h3d.mat.Face"] = { __ename__:true,__constructs__:nu
 };
 h3d_mat_Face.__constructs__ = [h3d_mat_Face.None,h3d_mat_Face.Back,h3d_mat_Face.Front,h3d_mat_Face.Both];
 h3d_mat_Face.__empty_constructs__ = [h3d_mat_Face.None,h3d_mat_Face.Back,h3d_mat_Face.Front,h3d_mat_Face.Both];
-var h3d_mat_Blend = $hxEnums["h3d.mat.Blend"] = { __ename__:true,__constructs__:null
+var h3d_mat_Blend = $hxEnums["h3d.mat.Blend"] = { __ename__:"h3d.mat.Blend",__constructs__:null
 	,One: {_hx_name:"One",_hx_index:0,__enum__:"h3d.mat.Blend",toString:$estr}
 	,Zero: {_hx_name:"Zero",_hx_index:1,__enum__:"h3d.mat.Blend",toString:$estr}
 	,SrcAlpha: {_hx_name:"SrcAlpha",_hx_index:2,__enum__:"h3d.mat.Blend",toString:$estr}
@@ -18096,7 +18862,7 @@ var h3d_mat_Blend = $hxEnums["h3d.mat.Blend"] = { __ename__:true,__constructs__:
 };
 h3d_mat_Blend.__constructs__ = [h3d_mat_Blend.One,h3d_mat_Blend.Zero,h3d_mat_Blend.SrcAlpha,h3d_mat_Blend.SrcColor,h3d_mat_Blend.DstAlpha,h3d_mat_Blend.DstColor,h3d_mat_Blend.OneMinusSrcAlpha,h3d_mat_Blend.OneMinusSrcColor,h3d_mat_Blend.OneMinusDstAlpha,h3d_mat_Blend.OneMinusDstColor,h3d_mat_Blend.ConstantColor,h3d_mat_Blend.ConstantAlpha,h3d_mat_Blend.OneMinusConstantColor,h3d_mat_Blend.OneMinusConstantAlpha,h3d_mat_Blend.SrcAlphaSaturate];
 h3d_mat_Blend.__empty_constructs__ = [h3d_mat_Blend.One,h3d_mat_Blend.Zero,h3d_mat_Blend.SrcAlpha,h3d_mat_Blend.SrcColor,h3d_mat_Blend.DstAlpha,h3d_mat_Blend.DstColor,h3d_mat_Blend.OneMinusSrcAlpha,h3d_mat_Blend.OneMinusSrcColor,h3d_mat_Blend.OneMinusDstAlpha,h3d_mat_Blend.OneMinusDstColor,h3d_mat_Blend.ConstantColor,h3d_mat_Blend.ConstantAlpha,h3d_mat_Blend.OneMinusConstantColor,h3d_mat_Blend.OneMinusConstantAlpha,h3d_mat_Blend.SrcAlphaSaturate];
-var h3d_mat_Compare = $hxEnums["h3d.mat.Compare"] = { __ename__:true,__constructs__:null
+var h3d_mat_Compare = $hxEnums["h3d.mat.Compare"] = { __ename__:"h3d.mat.Compare",__constructs__:null
 	,Always: {_hx_name:"Always",_hx_index:0,__enum__:"h3d.mat.Compare",toString:$estr}
 	,Never: {_hx_name:"Never",_hx_index:1,__enum__:"h3d.mat.Compare",toString:$estr}
 	,Equal: {_hx_name:"Equal",_hx_index:2,__enum__:"h3d.mat.Compare",toString:$estr}
@@ -18108,7 +18874,7 @@ var h3d_mat_Compare = $hxEnums["h3d.mat.Compare"] = { __ename__:true,__construct
 };
 h3d_mat_Compare.__constructs__ = [h3d_mat_Compare.Always,h3d_mat_Compare.Never,h3d_mat_Compare.Equal,h3d_mat_Compare.NotEqual,h3d_mat_Compare.Greater,h3d_mat_Compare.GreaterEqual,h3d_mat_Compare.Less,h3d_mat_Compare.LessEqual];
 h3d_mat_Compare.__empty_constructs__ = [h3d_mat_Compare.Always,h3d_mat_Compare.Never,h3d_mat_Compare.Equal,h3d_mat_Compare.NotEqual,h3d_mat_Compare.Greater,h3d_mat_Compare.GreaterEqual,h3d_mat_Compare.Less,h3d_mat_Compare.LessEqual];
-var h3d_mat_StencilOp = $hxEnums["h3d.mat.StencilOp"] = { __ename__:true,__constructs__:null
+var h3d_mat_StencilOp = $hxEnums["h3d.mat.StencilOp"] = { __ename__:"h3d.mat.StencilOp",__constructs__:null
 	,Keep: {_hx_name:"Keep",_hx_index:0,__enum__:"h3d.mat.StencilOp",toString:$estr}
 	,Zero: {_hx_name:"Zero",_hx_index:1,__enum__:"h3d.mat.StencilOp",toString:$estr}
 	,Replace: {_hx_name:"Replace",_hx_index:2,__enum__:"h3d.mat.StencilOp",toString:$estr}
@@ -18120,26 +18886,26 @@ var h3d_mat_StencilOp = $hxEnums["h3d.mat.StencilOp"] = { __ename__:true,__const
 };
 h3d_mat_StencilOp.__constructs__ = [h3d_mat_StencilOp.Keep,h3d_mat_StencilOp.Zero,h3d_mat_StencilOp.Replace,h3d_mat_StencilOp.Increment,h3d_mat_StencilOp.IncrementWrap,h3d_mat_StencilOp.Decrement,h3d_mat_StencilOp.DecrementWrap,h3d_mat_StencilOp.Invert];
 h3d_mat_StencilOp.__empty_constructs__ = [h3d_mat_StencilOp.Keep,h3d_mat_StencilOp.Zero,h3d_mat_StencilOp.Replace,h3d_mat_StencilOp.Increment,h3d_mat_StencilOp.IncrementWrap,h3d_mat_StencilOp.Decrement,h3d_mat_StencilOp.DecrementWrap,h3d_mat_StencilOp.Invert];
-var h3d_mat_MipMap = $hxEnums["h3d.mat.MipMap"] = { __ename__:true,__constructs__:null
+var h3d_mat_MipMap = $hxEnums["h3d.mat.MipMap"] = { __ename__:"h3d.mat.MipMap",__constructs__:null
 	,None: {_hx_name:"None",_hx_index:0,__enum__:"h3d.mat.MipMap",toString:$estr}
 	,Nearest: {_hx_name:"Nearest",_hx_index:1,__enum__:"h3d.mat.MipMap",toString:$estr}
 	,Linear: {_hx_name:"Linear",_hx_index:2,__enum__:"h3d.mat.MipMap",toString:$estr}
 };
 h3d_mat_MipMap.__constructs__ = [h3d_mat_MipMap.None,h3d_mat_MipMap.Nearest,h3d_mat_MipMap.Linear];
 h3d_mat_MipMap.__empty_constructs__ = [h3d_mat_MipMap.None,h3d_mat_MipMap.Nearest,h3d_mat_MipMap.Linear];
-var h3d_mat_Filter = $hxEnums["h3d.mat.Filter"] = { __ename__:true,__constructs__:null
+var h3d_mat_Filter = $hxEnums["h3d.mat.Filter"] = { __ename__:"h3d.mat.Filter",__constructs__:null
 	,Nearest: {_hx_name:"Nearest",_hx_index:0,__enum__:"h3d.mat.Filter",toString:$estr}
 	,Linear: {_hx_name:"Linear",_hx_index:1,__enum__:"h3d.mat.Filter",toString:$estr}
 };
 h3d_mat_Filter.__constructs__ = [h3d_mat_Filter.Nearest,h3d_mat_Filter.Linear];
 h3d_mat_Filter.__empty_constructs__ = [h3d_mat_Filter.Nearest,h3d_mat_Filter.Linear];
-var h3d_mat_Wrap = $hxEnums["h3d.mat.Wrap"] = { __ename__:true,__constructs__:null
+var h3d_mat_Wrap = $hxEnums["h3d.mat.Wrap"] = { __ename__:"h3d.mat.Wrap",__constructs__:null
 	,Clamp: {_hx_name:"Clamp",_hx_index:0,__enum__:"h3d.mat.Wrap",toString:$estr}
 	,Repeat: {_hx_name:"Repeat",_hx_index:1,__enum__:"h3d.mat.Wrap",toString:$estr}
 };
 h3d_mat_Wrap.__constructs__ = [h3d_mat_Wrap.Clamp,h3d_mat_Wrap.Repeat];
 h3d_mat_Wrap.__empty_constructs__ = [h3d_mat_Wrap.Clamp,h3d_mat_Wrap.Repeat];
-var h3d_mat_Operation = $hxEnums["h3d.mat.Operation"] = { __ename__:true,__constructs__:null
+var h3d_mat_Operation = $hxEnums["h3d.mat.Operation"] = { __ename__:"h3d.mat.Operation",__constructs__:null
 	,Add: {_hx_name:"Add",_hx_index:0,__enum__:"h3d.mat.Operation",toString:$estr}
 	,Sub: {_hx_name:"Sub",_hx_index:1,__enum__:"h3d.mat.Operation",toString:$estr}
 	,ReverseSub: {_hx_name:"ReverseSub",_hx_index:2,__enum__:"h3d.mat.Operation",toString:$estr}
@@ -18148,7 +18914,7 @@ var h3d_mat_Operation = $hxEnums["h3d.mat.Operation"] = { __ename__:true,__const
 };
 h3d_mat_Operation.__constructs__ = [h3d_mat_Operation.Add,h3d_mat_Operation.Sub,h3d_mat_Operation.ReverseSub,h3d_mat_Operation.Min,h3d_mat_Operation.Max];
 h3d_mat_Operation.__empty_constructs__ = [h3d_mat_Operation.Add,h3d_mat_Operation.Sub,h3d_mat_Operation.ReverseSub,h3d_mat_Operation.Min,h3d_mat_Operation.Max];
-var h3d_mat_TextureFlags = $hxEnums["h3d.mat.TextureFlags"] = { __ename__:true,__constructs__:null
+var h3d_mat_TextureFlags = $hxEnums["h3d.mat.TextureFlags"] = { __ename__:"h3d.mat.TextureFlags",__constructs__:null
 	,Target: {_hx_name:"Target",_hx_index:0,__enum__:"h3d.mat.TextureFlags",toString:$estr}
 	,Cube: {_hx_name:"Cube",_hx_index:1,__enum__:"h3d.mat.TextureFlags",toString:$estr}
 	,MipMapped: {_hx_name:"MipMapped",_hx_index:2,__enum__:"h3d.mat.TextureFlags",toString:$estr}
@@ -18180,7 +18946,7 @@ h3d_mat_Defaults.get_shadowShader = function() {
 h3d_mat_Defaults.set_shadowShader = function(s) {
 	return h3d_mat_Defaults.shadowShader = s;
 };
-var h3d_mat_DepthFormat = $hxEnums["h3d.mat.DepthFormat"] = { __ename__:true,__constructs__:null
+var h3d_mat_DepthFormat = $hxEnums["h3d.mat.DepthFormat"] = { __ename__:"h3d.mat.DepthFormat",__constructs__:null
 	,Depth16: {_hx_name:"Depth16",_hx_index:0,__enum__:"h3d.mat.DepthFormat",toString:$estr}
 	,Depth24: {_hx_name:"Depth24",_hx_index:1,__enum__:"h3d.mat.DepthFormat",toString:$estr}
 	,Depth24Stencil8: {_hx_name:"Depth24Stencil8",_hx_index:2,__enum__:"h3d.mat.DepthFormat",toString:$estr}
@@ -18705,7 +19471,7 @@ h3d_mat_Stencil.prototype = {
 	,__class__: h3d_mat_Stencil
 	,__properties__: {set_backDPfail:"set_backDPfail",set_backSTfail:"set_backSTfail",set_backPass:"set_backPass",set_backTest:"set_backTest",set_frontDPfail:"set_frontDPfail",set_frontSTfail:"set_frontSTfail",set_frontPass:"set_frontPass",set_frontTest:"set_frontTest",set_reference:"set_reference",set_writeMask:"set_writeMask",set_readMask:"set_readMask"}
 };
-var hxd_PixelFormat = $hxEnums["hxd.PixelFormat"] = { __ename__:true,__constructs__:null
+var hxd_PixelFormat = $hxEnums["hxd.PixelFormat"] = { __ename__:"hxd.PixelFormat",__constructs__:null
 	,ARGB: {_hx_name:"ARGB",_hx_index:0,__enum__:"hxd.PixelFormat",toString:$estr}
 	,BGRA: {_hx_name:"BGRA",_hx_index:1,__enum__:"hxd.PixelFormat",toString:$estr}
 	,RGBA: {_hx_name:"RGBA",_hx_index:2,__enum__:"hxd.PixelFormat",toString:$estr}
@@ -21604,7 +22370,7 @@ h3d_pass_ShaderManager.prototype = {
 	}
 	,__class__: h3d_pass_ShaderManager
 };
-var h3d_pass_RenderMode = $hxEnums["h3d.pass.RenderMode"] = { __ename__:true,__constructs__:null
+var h3d_pass_RenderMode = $hxEnums["h3d.pass.RenderMode"] = { __ename__:"h3d.pass.RenderMode",__constructs__:null
 	,None: {_hx_name:"None",_hx_index:0,__enum__:"h3d.pass.RenderMode",toString:$estr}
 	,Static: {_hx_name:"Static",_hx_index:1,__enum__:"h3d.pass.RenderMode",toString:$estr}
 	,Dynamic: {_hx_name:"Dynamic",_hx_index:2,__enum__:"h3d.pass.RenderMode",toString:$estr}
@@ -21612,7 +22378,7 @@ var h3d_pass_RenderMode = $hxEnums["h3d.pass.RenderMode"] = { __ename__:true,__c
 };
 h3d_pass_RenderMode.__constructs__ = [h3d_pass_RenderMode.None,h3d_pass_RenderMode.Static,h3d_pass_RenderMode.Dynamic,h3d_pass_RenderMode.Mixed];
 h3d_pass_RenderMode.__empty_constructs__ = [h3d_pass_RenderMode.None,h3d_pass_RenderMode.Static,h3d_pass_RenderMode.Dynamic,h3d_pass_RenderMode.Mixed];
-var h3d_pass_ShadowSamplingKind = $hxEnums["h3d.pass.ShadowSamplingKind"] = { __ename__:true,__constructs__:null
+var h3d_pass_ShadowSamplingKind = $hxEnums["h3d.pass.ShadowSamplingKind"] = { __ename__:"h3d.pass.ShadowSamplingKind",__constructs__:null
 	,None: {_hx_name:"None",_hx_index:0,__enum__:"h3d.pass.ShadowSamplingKind",toString:$estr}
 	,PCF: {_hx_name:"PCF",_hx_index:1,__enum__:"h3d.pass.ShadowSamplingKind",toString:$estr}
 	,ESM: {_hx_name:"ESM",_hx_index:2,__enum__:"h3d.pass.ShadowSamplingKind",toString:$estr}
@@ -25046,6 +25812,301 @@ haxe_MainLoop.tick = function() {
 	}
 	return wait;
 };
+var haxe_Serializer = function() {
+	this.buf = new StringBuf();
+	this.cache = [];
+	this.useCache = haxe_Serializer.USE_CACHE;
+	this.useEnumIndex = haxe_Serializer.USE_ENUM_INDEX;
+	this.shash = new haxe_ds_StringMap();
+	this.scount = 0;
+};
+$hxClasses["haxe.Serializer"] = haxe_Serializer;
+haxe_Serializer.__name__ = "haxe.Serializer";
+haxe_Serializer.run = function(v) {
+	var s = new haxe_Serializer();
+	s.serialize(v);
+	return s.toString();
+};
+haxe_Serializer.prototype = {
+	toString: function() {
+		return this.buf.b;
+	}
+	,serializeString: function(s) {
+		var x = this.shash.h[s];
+		if(x != null) {
+			this.buf.b += "R";
+			this.buf.b += x == null ? "null" : "" + x;
+			return;
+		}
+		this.shash.h[s] = this.scount++;
+		this.buf.b += "y";
+		s = encodeURIComponent(s);
+		this.buf.b += Std.string(s.length);
+		this.buf.b += ":";
+		this.buf.b += s == null ? "null" : "" + s;
+	}
+	,serializeRef: function(v) {
+		var vt = typeof(v);
+		var _g = 0;
+		var _g1 = this.cache.length;
+		while(_g < _g1) {
+			var i = _g++;
+			var ci = this.cache[i];
+			if(typeof(ci) == vt && ci == v) {
+				this.buf.b += "r";
+				this.buf.b += i == null ? "null" : "" + i;
+				return true;
+			}
+		}
+		this.cache.push(v);
+		return false;
+	}
+	,serializeFields: function(v) {
+		var _g = 0;
+		var _g1 = Reflect.fields(v);
+		while(_g < _g1.length) {
+			var f = _g1[_g];
+			++_g;
+			this.serializeString(f);
+			this.serialize(Reflect.field(v,f));
+		}
+		this.buf.b += "g";
+	}
+	,serialize: function(v) {
+		var _g = Type.typeof(v);
+		switch(_g._hx_index) {
+		case 0:
+			this.buf.b += "n";
+			break;
+		case 1:
+			var v1 = v;
+			if(v1 == 0) {
+				this.buf.b += "z";
+				return;
+			}
+			this.buf.b += "i";
+			this.buf.b += v1 == null ? "null" : "" + v1;
+			break;
+		case 2:
+			var v1 = v;
+			if(isNaN(v1)) {
+				this.buf.b += "k";
+			} else if(!isFinite(v1)) {
+				this.buf.b += v1 < 0 ? "m" : "p";
+			} else {
+				this.buf.b += "d";
+				this.buf.b += v1 == null ? "null" : "" + v1;
+			}
+			break;
+		case 3:
+			this.buf.b += v ? "t" : "f";
+			break;
+		case 4:
+			if(js_Boot.__instanceof(v,Class)) {
+				var className = v.__name__;
+				this.buf.b += "A";
+				this.serializeString(className);
+			} else if(js_Boot.__instanceof(v,Enum)) {
+				this.buf.b += "B";
+				this.serializeString(v.__ename__);
+			} else {
+				if(this.useCache && this.serializeRef(v)) {
+					return;
+				}
+				this.buf.b += "o";
+				this.serializeFields(v);
+			}
+			break;
+		case 5:
+			throw haxe_Exception.thrown("Cannot serialize function");
+		case 6:
+			var c = _g.c;
+			if(c == String) {
+				this.serializeString(v);
+				return;
+			}
+			if(this.useCache && this.serializeRef(v)) {
+				return;
+			}
+			switch(c) {
+			case Array:
+				var ucount = 0;
+				this.buf.b += "a";
+				var _g1 = 0;
+				var _g2 = v["length"];
+				while(_g1 < _g2) {
+					var i = _g1++;
+					if(v[i] == null) {
+						++ucount;
+					} else {
+						if(ucount > 0) {
+							if(ucount == 1) {
+								this.buf.b += "n";
+							} else {
+								this.buf.b += "u";
+								this.buf.b += ucount == null ? "null" : "" + ucount;
+							}
+							ucount = 0;
+						}
+						this.serialize(v[i]);
+					}
+				}
+				if(ucount > 0) {
+					if(ucount == 1) {
+						this.buf.b += "n";
+					} else {
+						this.buf.b += "u";
+						this.buf.b += ucount == null ? "null" : "" + ucount;
+					}
+				}
+				this.buf.b += "h";
+				break;
+			case Date:
+				this.buf.b += "v";
+				this.buf.b += Std.string(v.getTime());
+				break;
+			case haxe_ds_IntMap:
+				this.buf.b += "q";
+				var v1 = v;
+				var k = v1.keys();
+				while(k.hasNext()) {
+					var k1 = k.next();
+					this.buf.b += ":";
+					this.buf.b += k1 == null ? "null" : "" + k1;
+					this.serialize(v1.h[k1]);
+				}
+				this.buf.b += "h";
+				break;
+			case haxe_ds_List:
+				this.buf.b += "l";
+				var _g_head = v.h;
+				while(_g_head != null) {
+					var val = _g_head.item;
+					_g_head = _g_head.next;
+					this.serialize(val);
+				}
+				this.buf.b += "h";
+				break;
+			case haxe_ds_ObjectMap:
+				this.buf.b += "M";
+				var v1 = v;
+				var k = v1.keys();
+				while(k.hasNext()) {
+					var k1 = k.next();
+					var id = Reflect.field(k1,"__id__");
+					Reflect.deleteField(k1,"__id__");
+					this.serialize(k1);
+					k1["__id__"] = id;
+					this.serialize(v1.h[k1.__id__]);
+				}
+				this.buf.b += "h";
+				break;
+			case haxe_ds_StringMap:
+				this.buf.b += "b";
+				var v1 = v;
+				var _g_keys = Object.keys(v1.h);
+				var _g_length = _g_keys.length;
+				var _g_current = 0;
+				while(_g_current < _g_length) {
+					var k = _g_keys[_g_current++];
+					this.serializeString(k);
+					this.serialize(v1.h[k]);
+				}
+				this.buf.b += "h";
+				break;
+			case haxe_io_Bytes:
+				var v1 = v;
+				this.buf.b += "s";
+				this.buf.b += Std.string(Math.ceil(v1.length * 8 / 6));
+				this.buf.b += ":";
+				var i = 0;
+				var max = v1.length - 2;
+				var b64 = haxe_Serializer.BASE64_CODES;
+				if(b64 == null) {
+					b64 = new Array(haxe_Serializer.BASE64.length);
+					var _g1 = 0;
+					var _g2 = haxe_Serializer.BASE64.length;
+					while(_g1 < _g2) {
+						var i1 = _g1++;
+						b64[i1] = HxOverrides.cca(haxe_Serializer.BASE64,i1);
+					}
+					haxe_Serializer.BASE64_CODES = b64;
+				}
+				while(i < max) {
+					var b1 = v1.b[i++];
+					var b2 = v1.b[i++];
+					var b3 = v1.b[i++];
+					this.buf.b += String.fromCodePoint(b64[b1 >> 2]);
+					this.buf.b += String.fromCodePoint(b64[(b1 << 4 | b2 >> 4) & 63]);
+					this.buf.b += String.fromCodePoint(b64[(b2 << 2 | b3 >> 6) & 63]);
+					this.buf.b += String.fromCodePoint(b64[b3 & 63]);
+				}
+				if(i == max) {
+					var b1 = v1.b[i++];
+					var b2 = v1.b[i++];
+					this.buf.b += String.fromCodePoint(b64[b1 >> 2]);
+					this.buf.b += String.fromCodePoint(b64[(b1 << 4 | b2 >> 4) & 63]);
+					this.buf.b += String.fromCodePoint(b64[b2 << 2 & 63]);
+				} else if(i == max + 1) {
+					var b1 = v1.b[i++];
+					this.buf.b += String.fromCodePoint(b64[b1 >> 2]);
+					this.buf.b += String.fromCodePoint(b64[b1 << 4 & 63]);
+				}
+				break;
+			default:
+				if(this.useCache) {
+					this.cache.pop();
+				}
+				if(v.hxSerialize != null) {
+					this.buf.b += "C";
+					this.serializeString(c.__name__);
+					if(this.useCache) {
+						this.cache.push(v);
+					}
+					v.hxSerialize(this);
+					this.buf.b += "g";
+				} else {
+					this.buf.b += "c";
+					this.serializeString(c.__name__);
+					if(this.useCache) {
+						this.cache.push(v);
+					}
+					this.serializeFields(v);
+				}
+			}
+			break;
+		case 7:
+			var e = _g.e;
+			if(this.useCache) {
+				if(this.serializeRef(v)) {
+					return;
+				}
+				this.cache.pop();
+			}
+			this.buf.b += Std.string(this.useEnumIndex ? "j" : "w");
+			this.serializeString(e.__ename__);
+			if(this.useEnumIndex) {
+				this.buf.b += ":";
+				this.buf.b += Std.string(v._hx_index);
+			} else {
+				var e = v;
+				this.serializeString($hxEnums[e.__enum__].__constructs__[e._hx_index]._hx_name);
+			}
+			this.buf.b += ":";
+			var params = Type.enumParameters(v);
+			this.buf.b += Std.string(params.length);
+			var _g = 0;
+			while(_g < params.length) this.serialize(params[_g++]);
+			if(this.useCache) {
+				this.cache.push(v);
+			}
+			break;
+		default:
+			throw haxe_Exception.thrown("Cannot serialize " + Std.string(v));
+		}
+	}
+	,__class__: haxe_Serializer
+};
 var haxe_Timer = function(time_ms) {
 	var me = this;
 	this.id = setInterval(function() {
@@ -25073,345 +26134,6 @@ haxe_Timer.prototype = {
 	,run: function() {
 	}
 	,__class__: haxe_Timer
-};
-var haxe__$Unserializer_DefaultResolver = function() {
-};
-$hxClasses["haxe._Unserializer.DefaultResolver"] = haxe__$Unserializer_DefaultResolver;
-haxe__$Unserializer_DefaultResolver.__name__ = "haxe._Unserializer.DefaultResolver";
-haxe__$Unserializer_DefaultResolver.prototype = {
-	resolveClass: function(name) {
-		return $hxClasses[name];
-	}
-	,resolveEnum: function(name) {
-		return $hxEnums[name];
-	}
-	,__class__: haxe__$Unserializer_DefaultResolver
-};
-var haxe_Unserializer = function(buf) {
-	this.buf = buf;
-	this.length = this.buf.length;
-	this.pos = 0;
-	this.scache = [];
-	this.cache = [];
-	var r = haxe_Unserializer.DEFAULT_RESOLVER;
-	if(r == null) {
-		r = new haxe__$Unserializer_DefaultResolver();
-		haxe_Unserializer.DEFAULT_RESOLVER = r;
-	}
-	this.resolver = r;
-};
-$hxClasses["haxe.Unserializer"] = haxe_Unserializer;
-haxe_Unserializer.__name__ = "haxe.Unserializer";
-haxe_Unserializer.initCodes = function() {
-	var codes = [];
-	var _g = 0;
-	var _g1 = haxe_Unserializer.BASE64.length;
-	while(_g < _g1) {
-		var i = _g++;
-		codes[haxe_Unserializer.BASE64.charCodeAt(i)] = i;
-	}
-	return codes;
-};
-haxe_Unserializer.run = function(v) {
-	return new haxe_Unserializer(v).unserialize();
-};
-haxe_Unserializer.prototype = {
-	readDigits: function() {
-		var k = 0;
-		var s = false;
-		var fpos = this.pos;
-		while(true) {
-			var c = this.buf.charCodeAt(this.pos);
-			if(c != c) {
-				break;
-			}
-			if(c == 45) {
-				if(this.pos != fpos) {
-					break;
-				}
-				s = true;
-				this.pos++;
-				continue;
-			}
-			if(c < 48 || c > 57) {
-				break;
-			}
-			k = k * 10 + (c - 48);
-			this.pos++;
-		}
-		if(s) {
-			k *= -1;
-		}
-		return k;
-	}
-	,readFloat: function() {
-		var p1 = this.pos;
-		while(true) {
-			var c = this.buf.charCodeAt(this.pos);
-			if(c != c) {
-				break;
-			}
-			if(c >= 43 && c < 58 || c == 101 || c == 69) {
-				this.pos++;
-			} else {
-				break;
-			}
-		}
-		return parseFloat(HxOverrides.substr(this.buf,p1,this.pos - p1));
-	}
-	,unserializeObject: function(o) {
-		while(true) {
-			if(this.pos >= this.length) {
-				throw haxe_Exception.thrown("Invalid object");
-			}
-			if(this.buf.charCodeAt(this.pos) == 103) {
-				break;
-			}
-			var k = this.unserialize();
-			if(typeof(k) != "string") {
-				throw haxe_Exception.thrown("Invalid object key");
-			}
-			o[k] = this.unserialize();
-		}
-		this.pos++;
-	}
-	,unserializeEnum: function(edecl,tag) {
-		if(this.buf.charCodeAt(this.pos++) != 58) {
-			throw haxe_Exception.thrown("Invalid enum format");
-		}
-		var nargs = this.readDigits();
-		if(nargs == 0) {
-			return Type.createEnum(edecl,tag);
-		}
-		var args = [];
-		while(nargs-- > 0) args.push(this.unserialize());
-		return Type.createEnum(edecl,tag,args);
-	}
-	,unserialize: function() {
-		switch(this.buf.charCodeAt(this.pos++)) {
-		case 65:
-			var name = this.unserialize();
-			var cl = this.resolver.resolveClass(name);
-			if(cl == null) {
-				throw haxe_Exception.thrown("Class not found " + name);
-			}
-			return cl;
-		case 66:
-			var name = this.unserialize();
-			var e = this.resolver.resolveEnum(name);
-			if(e == null) {
-				throw haxe_Exception.thrown("Enum not found " + name);
-			}
-			return e;
-		case 67:
-			var name = this.unserialize();
-			var cl = this.resolver.resolveClass(name);
-			if(cl == null) {
-				throw haxe_Exception.thrown("Class not found " + name);
-			}
-			var o = Object.create(cl.prototype);
-			this.cache.push(o);
-			o.hxUnserialize(this);
-			if(this.buf.charCodeAt(this.pos++) != 103) {
-				throw haxe_Exception.thrown("Invalid custom data");
-			}
-			return o;
-		case 77:
-			var h = new haxe_ds_ObjectMap();
-			this.cache.push(h);
-			while(this.buf.charCodeAt(this.pos) != 104) h.set(this.unserialize(),this.unserialize());
-			this.pos++;
-			return h;
-		case 82:
-			var n = this.readDigits();
-			if(n < 0 || n >= this.scache.length) {
-				throw haxe_Exception.thrown("Invalid string reference");
-			}
-			return this.scache[n];
-		case 97:
-			var a = [];
-			this.cache.push(a);
-			while(true) {
-				var c = this.buf.charCodeAt(this.pos);
-				if(c == 104) {
-					this.pos++;
-					break;
-				}
-				if(c == 117) {
-					this.pos++;
-					var n = this.readDigits();
-					a[a.length + n - 1] = null;
-				} else {
-					a.push(this.unserialize());
-				}
-			}
-			return a;
-		case 98:
-			var h = new haxe_ds_StringMap();
-			this.cache.push(h);
-			while(this.buf.charCodeAt(this.pos) != 104) {
-				var s = this.unserialize();
-				var value = this.unserialize();
-				h.h[s] = value;
-			}
-			this.pos++;
-			return h;
-		case 99:
-			var name = this.unserialize();
-			var cl = this.resolver.resolveClass(name);
-			if(cl == null) {
-				throw haxe_Exception.thrown("Class not found " + name);
-			}
-			var o = Object.create(cl.prototype);
-			this.cache.push(o);
-			this.unserializeObject(o);
-			return o;
-		case 100:
-			return this.readFloat();
-		case 102:
-			return false;
-		case 105:
-			return this.readDigits();
-		case 106:
-			var name = this.unserialize();
-			var edecl = this.resolver.resolveEnum(name);
-			if(edecl == null) {
-				throw haxe_Exception.thrown("Enum not found " + name);
-			}
-			this.pos++;
-			var index = this.readDigits();
-			var _this = edecl.__constructs__;
-			var result = new Array(_this.length);
-			var _g = 0;
-			var _g1 = _this.length;
-			while(_g < _g1) {
-				var i = _g++;
-				result[i] = _this[i]._hx_name;
-			}
-			var tag = result[index];
-			if(tag == null) {
-				throw haxe_Exception.thrown("Unknown enum index " + name + "@" + index);
-			}
-			var e = this.unserializeEnum(edecl,tag);
-			this.cache.push(e);
-			return e;
-		case 107:
-			return NaN;
-		case 108:
-			var l = new haxe_ds_List();
-			this.cache.push(l);
-			while(this.buf.charCodeAt(this.pos) != 104) l.add(this.unserialize());
-			this.pos++;
-			return l;
-		case 109:
-			return -Infinity;
-		case 110:
-			return null;
-		case 111:
-			var o = { };
-			this.cache.push(o);
-			this.unserializeObject(o);
-			return o;
-		case 112:
-			return Infinity;
-		case 113:
-			var h = new haxe_ds_IntMap();
-			this.cache.push(h);
-			var c = this.buf.charCodeAt(this.pos++);
-			while(c == 58) {
-				var i = this.readDigits();
-				var value = this.unserialize();
-				h.h[i] = value;
-				c = this.buf.charCodeAt(this.pos++);
-			}
-			if(c != 104) {
-				throw haxe_Exception.thrown("Invalid IntMap format");
-			}
-			return h;
-		case 114:
-			var n = this.readDigits();
-			if(n < 0 || n >= this.cache.length) {
-				throw haxe_Exception.thrown("Invalid reference");
-			}
-			return this.cache[n];
-		case 115:
-			var len = this.readDigits();
-			var buf = this.buf;
-			if(this.buf.charCodeAt(this.pos++) != 58 || this.length - this.pos < len) {
-				throw haxe_Exception.thrown("Invalid bytes length");
-			}
-			var codes = haxe_Unserializer.CODES;
-			if(codes == null) {
-				codes = haxe_Unserializer.initCodes();
-				haxe_Unserializer.CODES = codes;
-			}
-			var i = this.pos;
-			var rest = len & 3;
-			var max = i + (len - rest);
-			var bytes = new haxe_io_Bytes(new ArrayBuffer((len >> 2) * 3 + (rest >= 2 ? rest - 1 : 0)));
-			var bpos = 0;
-			while(i < max) {
-				var c1 = codes[buf.charCodeAt(i++)];
-				var c2 = codes[buf.charCodeAt(i++)];
-				bytes.b[bpos++] = c1 << 2 | c2 >> 4;
-				var c3 = codes[buf.charCodeAt(i++)];
-				bytes.b[bpos++] = c2 << 4 | c3 >> 2;
-				var c4 = codes[buf.charCodeAt(i++)];
-				bytes.b[bpos++] = c3 << 6 | c4;
-			}
-			if(rest >= 2) {
-				var c1 = codes[buf.charCodeAt(i++)];
-				var c2 = codes[buf.charCodeAt(i++)];
-				bytes.b[bpos++] = c1 << 2 | c2 >> 4;
-				if(rest == 3) {
-					var c3 = codes[buf.charCodeAt(i++)];
-					bytes.b[bpos++] = c2 << 4 | c3 >> 2;
-				}
-			}
-			this.pos += len;
-			this.cache.push(bytes);
-			return bytes;
-		case 116:
-			return true;
-		case 118:
-			var d;
-			if(this.buf.charCodeAt(this.pos) >= 48 && this.buf.charCodeAt(this.pos) <= 57 && this.buf.charCodeAt(this.pos + 1) >= 48 && this.buf.charCodeAt(this.pos + 1) <= 57 && this.buf.charCodeAt(this.pos + 2) >= 48 && this.buf.charCodeAt(this.pos + 2) <= 57 && this.buf.charCodeAt(this.pos + 3) >= 48 && this.buf.charCodeAt(this.pos + 3) <= 57 && this.buf.charCodeAt(this.pos + 4) == 45) {
-				d = HxOverrides.strDate(HxOverrides.substr(this.buf,this.pos,19));
-				this.pos += 19;
-			} else {
-				d = new Date(this.readFloat());
-			}
-			this.cache.push(d);
-			return d;
-		case 119:
-			var name = this.unserialize();
-			var edecl = this.resolver.resolveEnum(name);
-			if(edecl == null) {
-				throw haxe_Exception.thrown("Enum not found " + name);
-			}
-			var e = this.unserializeEnum(edecl,this.unserialize());
-			this.cache.push(e);
-			return e;
-		case 120:
-			throw haxe_Exception.thrown(this.unserialize());
-		case 121:
-			var len = this.readDigits();
-			if(this.buf.charCodeAt(this.pos++) != 58 || this.length - this.pos < len) {
-				throw haxe_Exception.thrown("Invalid string length");
-			}
-			var s = HxOverrides.substr(this.buf,this.pos,len);
-			this.pos += len;
-			s = decodeURIComponent(s.split("+").join(" "));
-			this.scache.push(s);
-			return s;
-		case 122:
-			return 0;
-		default:
-		}
-		this.pos--;
-		throw haxe_Exception.thrown("Invalid char " + this.buf.charAt(this.pos) + " at position " + this.pos);
-	}
-	,__class__: haxe_Unserializer
 };
 var haxe_ValueException = function(value,previous,native) {
 	haxe_Exception.call(this,String(value),previous,native);
@@ -25462,166 +26184,6 @@ haxe_crypto_Adler32.prototype = {
 	}
 	,__class__: haxe_crypto_Adler32
 };
-var haxe_io_Bytes = function(data) {
-	this.length = data.byteLength;
-	this.b = new Uint8Array(data);
-	this.b.bufferValue = data;
-	data.hxBytes = this;
-	data.bytes = this.b;
-};
-$hxClasses["haxe.io.Bytes"] = haxe_io_Bytes;
-haxe_io_Bytes.__name__ = "haxe.io.Bytes";
-haxe_io_Bytes.ofString = function(s,encoding) {
-	if(encoding == haxe_io_Encoding.RawNative) {
-		var buf = new Uint8Array(s.length << 1);
-		var _g = 0;
-		var _g1 = s.length;
-		while(_g < _g1) {
-			var i = _g++;
-			var c = s.charCodeAt(i);
-			buf[i << 1] = c & 255;
-			buf[i << 1 | 1] = c >> 8;
-		}
-		return new haxe_io_Bytes(buf.buffer);
-	}
-	var a = [];
-	var i = 0;
-	while(i < s.length) {
-		var c = s.charCodeAt(i++);
-		if(55296 <= c && c <= 56319) {
-			c = c - 55232 << 10 | s.charCodeAt(i++) & 1023;
-		}
-		if(c <= 127) {
-			a.push(c);
-		} else if(c <= 2047) {
-			a.push(192 | c >> 6);
-			a.push(128 | c & 63);
-		} else if(c <= 65535) {
-			a.push(224 | c >> 12);
-			a.push(128 | c >> 6 & 63);
-			a.push(128 | c & 63);
-		} else {
-			a.push(240 | c >> 18);
-			a.push(128 | c >> 12 & 63);
-			a.push(128 | c >> 6 & 63);
-			a.push(128 | c & 63);
-		}
-	}
-	return new haxe_io_Bytes(new Uint8Array(a).buffer);
-};
-haxe_io_Bytes.ofData = function(b) {
-	var hb = b.hxBytes;
-	if(hb != null) {
-		return hb;
-	}
-	return new haxe_io_Bytes(b);
-};
-haxe_io_Bytes.prototype = {
-	blit: function(pos,src,srcpos,len) {
-		if(pos < 0 || srcpos < 0 || len < 0 || pos + len > this.length || srcpos + len > src.length) {
-			throw haxe_Exception.thrown(haxe_io_Error.OutsideBounds);
-		}
-		if(srcpos == 0 && len == src.b.byteLength) {
-			this.b.set(src.b,pos);
-		} else {
-			this.b.set(src.b.subarray(srcpos,srcpos + len),pos);
-		}
-	}
-	,fill: function(pos,len,value) {
-		var _g = 0;
-		while(_g < len) {
-			++_g;
-			this.b[pos++] = value;
-		}
-	}
-	,getFloat: function(pos) {
-		if(this.data == null) {
-			this.data = new DataView(this.b.buffer,this.b.byteOffset,this.b.byteLength);
-		}
-		return this.data.getFloat32(pos,true);
-	}
-	,setFloat: function(pos,v) {
-		if(this.data == null) {
-			this.data = new DataView(this.b.buffer,this.b.byteOffset,this.b.byteLength);
-		}
-		this.data.setFloat32(pos,v,true);
-	}
-	,getUInt16: function(pos) {
-		if(this.data == null) {
-			this.data = new DataView(this.b.buffer,this.b.byteOffset,this.b.byteLength);
-		}
-		return this.data.getUint16(pos,true);
-	}
-	,setUInt16: function(pos,v) {
-		if(this.data == null) {
-			this.data = new DataView(this.b.buffer,this.b.byteOffset,this.b.byteLength);
-		}
-		this.data.setUint16(pos,v,true);
-	}
-	,getInt32: function(pos) {
-		if(this.data == null) {
-			this.data = new DataView(this.b.buffer,this.b.byteOffset,this.b.byteLength);
-		}
-		return this.data.getInt32(pos,true);
-	}
-	,setInt32: function(pos,v) {
-		if(this.data == null) {
-			this.data = new DataView(this.b.buffer,this.b.byteOffset,this.b.byteLength);
-		}
-		this.data.setInt32(pos,v,true);
-	}
-	,getString: function(pos,len,encoding) {
-		if(pos < 0 || len < 0 || pos + len > this.length) {
-			throw haxe_Exception.thrown(haxe_io_Error.OutsideBounds);
-		}
-		if(encoding == null) {
-			encoding = haxe_io_Encoding.UTF8;
-		}
-		var s = "";
-		var b = this.b;
-		var i = pos;
-		var max = pos + len;
-		switch(encoding._hx_index) {
-		case 0:
-			while(i < max) {
-				var c = b[i++];
-				if(c < 128) {
-					if(c == 0) {
-						break;
-					}
-					s += String.fromCodePoint(c);
-				} else if(c < 224) {
-					var code = (c & 63) << 6 | b[i++] & 127;
-					s += String.fromCodePoint(code);
-				} else if(c < 240) {
-					var code1 = (c & 31) << 12 | (b[i++] & 127) << 6 | b[i++] & 127;
-					s += String.fromCodePoint(code1);
-				} else {
-					var u = (c & 15) << 18 | (b[i++] & 127) << 12 | (b[i++] & 127) << 6 | b[i++] & 127;
-					s += String.fromCodePoint(u);
-				}
-			}
-			break;
-		case 1:
-			while(i < max) {
-				var c = b[i++] | b[i++] << 8;
-				s += String.fromCodePoint(c);
-			}
-			break;
-		}
-		return s;
-	}
-	,toString: function() {
-		return this.getString(0,this.length);
-	}
-	,__class__: haxe_io_Bytes
-};
-var haxe_io_Encoding = $hxEnums["haxe.io.Encoding"] = { __ename__:true,__constructs__:null
-	,UTF8: {_hx_name:"UTF8",_hx_index:0,__enum__:"haxe.io.Encoding",toString:$estr}
-	,RawNative: {_hx_name:"RawNative",_hx_index:1,__enum__:"haxe.io.Encoding",toString:$estr}
-};
-haxe_io_Encoding.__constructs__ = [haxe_io_Encoding.UTF8,haxe_io_Encoding.RawNative];
-haxe_io_Encoding.__empty_constructs__ = [haxe_io_Encoding.UTF8,haxe_io_Encoding.RawNative];
 var haxe_crypto_Base64 = function() { };
 $hxClasses["haxe.crypto.Base64"] = haxe_crypto_Base64;
 haxe_crypto_Base64.__name__ = "haxe.crypto.Base64";
@@ -25846,104 +26408,6 @@ haxe_crypto_Md5.prototype = {
 		return [a,b,c,d];
 	}
 	,__class__: haxe_crypto_Md5
-};
-var haxe_crypto_Sha1 = function() {
-};
-$hxClasses["haxe.crypto.Sha1"] = haxe_crypto_Sha1;
-haxe_crypto_Sha1.__name__ = "haxe.crypto.Sha1";
-haxe_crypto_Sha1.encode = function(s) {
-	var sh = new haxe_crypto_Sha1();
-	return sh.hex(sh.doEncode(haxe_crypto_Sha1.str2blks(s)));
-};
-haxe_crypto_Sha1.str2blks = function(s) {
-	var s1 = haxe_io_Bytes.ofString(s);
-	var nblk = (s1.length + 8 >> 6) + 1;
-	var blks = [];
-	var _g = 0;
-	var _g1 = nblk * 16;
-	while(_g < _g1) blks[_g++] = 0;
-	var _g = 0;
-	var _g1 = s1.length;
-	while(_g < _g1) {
-		var i = _g++;
-		blks[i >> 2] |= s1.b[i] << 24 - ((i & 3) << 3);
-	}
-	var i = s1.length;
-	blks[i >> 2] |= 128 << 24 - ((i & 3) << 3);
-	blks[nblk * 16 - 1] = s1.length * 8;
-	return blks;
-};
-haxe_crypto_Sha1.prototype = {
-	doEncode: function(x) {
-		var w = [];
-		var a = 1732584193;
-		var b = -271733879;
-		var c = -1732584194;
-		var d = 271733878;
-		var e = -1009589776;
-		var i = 0;
-		while(i < x.length) {
-			var olda = a;
-			var oldb = b;
-			var oldc = c;
-			var oldd = d;
-			var olde = e;
-			var j = 0;
-			while(j < 80) {
-				if(j < 16) {
-					w[j] = x[i + j];
-				} else {
-					var num = w[j - 3] ^ w[j - 8] ^ w[j - 14] ^ w[j - 16];
-					w[j] = num << 1 | num >>> 31;
-				}
-				var t = (a << 5 | a >>> 27) + this.ft(j,b,c,d) + e + w[j];
-				e = d;
-				d = c;
-				c = b << 30 | b >>> 2;
-				b = a;
-				a = t + this.kt(j);
-				++j;
-			}
-			a += olda;
-			b += oldb;
-			c += oldc;
-			d += oldd;
-			e += olde;
-			i += 16;
-		}
-		return [a,b,c,d,e];
-	}
-	,ft: function(t,b,c,d) {
-		if(t < 20) {
-			return b & c | ~b & d;
-		}
-		if(t < 40) {
-			return b ^ c ^ d;
-		}
-		if(t < 60) {
-			return b & c | b & d | c & d;
-		}
-		return b ^ c ^ d;
-	}
-	,kt: function(t) {
-		if(t < 20) {
-			return 1518500249;
-		}
-		if(t < 40) {
-			return 1859775393;
-		}
-		if(t < 60) {
-			return -1894007588;
-		}
-		return -899497514;
-	}
-	,hex: function(a) {
-		var str = "";
-		var _g = 0;
-		while(_g < a.length) str += StringTools.hex(a[_g++],8);
-		return str.toLowerCase();
-	}
-	,__class__: haxe_crypto_Sha1
 };
 var haxe_ds_ArraySort = function() { };
 $hxClasses["haxe.ds.ArraySort"] = haxe_ds_ArraySort;
@@ -26364,7 +26828,7 @@ haxe_ds_ObjectMap.prototype = {
 	}
 	,__class__: haxe_ds_ObjectMap
 };
-var haxe_ds_Option = $hxEnums["haxe.ds.Option"] = { __ename__:true,__constructs__:null
+var haxe_ds_Option = $hxEnums["haxe.ds.Option"] = { __ename__:"haxe.ds.Option",__constructs__:null
 	,Some: ($_=function(v) { return {_hx_index:0,v:v,__enum__:"haxe.ds.Option",toString:$estr}; },$_._hx_name="Some",$_.__params__ = ["v"],$_)
 	,None: {_hx_name:"None",_hx_index:1,__enum__:"haxe.ds.Option",toString:$estr}
 };
@@ -26731,7 +27195,7 @@ haxe_io_Eof.prototype = {
 	}
 	,__class__: haxe_io_Eof
 };
-var haxe_io_Error = $hxEnums["haxe.io.Error"] = { __ename__:true,__constructs__:null
+var haxe_io_Error = $hxEnums["haxe.io.Error"] = { __ename__:"haxe.io.Error",__constructs__:null
 	,Blocked: {_hx_name:"Blocked",_hx_index:0,__enum__:"haxe.io.Error",toString:$estr}
 	,Overflow: {_hx_name:"Overflow",_hx_index:1,__enum__:"haxe.io.Error",toString:$estr}
 	,OutsideBounds: {_hx_name:"OutsideBounds",_hx_index:2,__enum__:"haxe.io.Error",toString:$estr}
@@ -26919,7 +27383,7 @@ haxe_iterators_ArrayIterator.prototype = {
 	}
 	,__class__: haxe_iterators_ArrayIterator
 };
-var haxe_macro_Binop = $hxEnums["haxe.macro.Binop"] = { __ename__:true,__constructs__:null
+var haxe_macro_Binop = $hxEnums["haxe.macro.Binop"] = { __ename__:"haxe.macro.Binop",__constructs__:null
 	,OpAdd: {_hx_name:"OpAdd",_hx_index:0,__enum__:"haxe.macro.Binop",toString:$estr}
 	,OpMult: {_hx_name:"OpMult",_hx_index:1,__enum__:"haxe.macro.Binop",toString:$estr}
 	,OpDiv: {_hx_name:"OpDiv",_hx_index:2,__enum__:"haxe.macro.Binop",toString:$estr}
@@ -26947,7 +27411,7 @@ var haxe_macro_Binop = $hxEnums["haxe.macro.Binop"] = { __ename__:true,__constru
 };
 haxe_macro_Binop.__constructs__ = [haxe_macro_Binop.OpAdd,haxe_macro_Binop.OpMult,haxe_macro_Binop.OpDiv,haxe_macro_Binop.OpSub,haxe_macro_Binop.OpAssign,haxe_macro_Binop.OpEq,haxe_macro_Binop.OpNotEq,haxe_macro_Binop.OpGt,haxe_macro_Binop.OpGte,haxe_macro_Binop.OpLt,haxe_macro_Binop.OpLte,haxe_macro_Binop.OpAnd,haxe_macro_Binop.OpOr,haxe_macro_Binop.OpXor,haxe_macro_Binop.OpBoolAnd,haxe_macro_Binop.OpBoolOr,haxe_macro_Binop.OpShl,haxe_macro_Binop.OpShr,haxe_macro_Binop.OpUShr,haxe_macro_Binop.OpMod,haxe_macro_Binop.OpAssignOp,haxe_macro_Binop.OpInterval,haxe_macro_Binop.OpArrow,haxe_macro_Binop.OpIn];
 haxe_macro_Binop.__empty_constructs__ = [haxe_macro_Binop.OpAdd,haxe_macro_Binop.OpMult,haxe_macro_Binop.OpDiv,haxe_macro_Binop.OpSub,haxe_macro_Binop.OpAssign,haxe_macro_Binop.OpEq,haxe_macro_Binop.OpNotEq,haxe_macro_Binop.OpGt,haxe_macro_Binop.OpGte,haxe_macro_Binop.OpLt,haxe_macro_Binop.OpLte,haxe_macro_Binop.OpAnd,haxe_macro_Binop.OpOr,haxe_macro_Binop.OpXor,haxe_macro_Binop.OpBoolAnd,haxe_macro_Binop.OpBoolOr,haxe_macro_Binop.OpShl,haxe_macro_Binop.OpShr,haxe_macro_Binop.OpUShr,haxe_macro_Binop.OpMod,haxe_macro_Binop.OpInterval,haxe_macro_Binop.OpArrow,haxe_macro_Binop.OpIn];
-var haxe_macro_Unop = $hxEnums["haxe.macro.Unop"] = { __ename__:true,__constructs__:null
+var haxe_macro_Unop = $hxEnums["haxe.macro.Unop"] = { __ename__:"haxe.macro.Unop",__constructs__:null
 	,OpIncrement: {_hx_name:"OpIncrement",_hx_index:0,__enum__:"haxe.macro.Unop",toString:$estr}
 	,OpDecrement: {_hx_name:"OpDecrement",_hx_index:1,__enum__:"haxe.macro.Unop",toString:$estr}
 	,OpNot: {_hx_name:"OpNot",_hx_index:2,__enum__:"haxe.macro.Unop",toString:$estr}
@@ -27529,7 +27993,7 @@ haxe_xml_Printer.prototype = {
 	}
 	,__class__: haxe_xml_Printer
 };
-var haxe_zip_Huffman = $hxEnums["haxe.zip.Huffman"] = { __ename__:true,__constructs__:null
+var haxe_zip_Huffman = $hxEnums["haxe.zip.Huffman"] = { __ename__:"haxe.zip.Huffman",__constructs__:null
 	,Found: ($_=function(i) { return {_hx_index:0,i:i,__enum__:"haxe.zip.Huffman",toString:$estr}; },$_._hx_name="Found",$_.__params__ = ["i"],$_)
 	,NeedBit: ($_=function(left,right) { return {_hx_index:1,left:left,right:right,__enum__:"haxe.zip.Huffman",toString:$estr}; },$_._hx_name="NeedBit",$_.__params__ = ["left","right"],$_)
 	,NeedBits: ($_=function(n,table) { return {_hx_index:2,n:n,table:table,__enum__:"haxe.zip.Huffman",toString:$estr}; },$_._hx_name="NeedBits",$_.__params__ = ["n","table"],$_)
@@ -27692,7 +28156,7 @@ haxe_zip__$InflateImpl_Window.prototype = {
 	}
 	,__class__: haxe_zip__$InflateImpl_Window
 };
-var haxe_zip__$InflateImpl_State = $hxEnums["haxe.zip._InflateImpl.State"] = { __ename__:true,__constructs__:null
+var haxe_zip__$InflateImpl_State = $hxEnums["haxe.zip._InflateImpl.State"] = { __ename__:"haxe.zip._InflateImpl.State",__constructs__:null
 	,Head: {_hx_name:"Head",_hx_index:0,__enum__:"haxe.zip._InflateImpl.State",toString:$estr}
 	,Block: {_hx_name:"Block",_hx_index:1,__enum__:"haxe.zip._InflateImpl.State",toString:$estr}
 	,CData: {_hx_name:"CData",_hx_index:2,__enum__:"haxe.zip._InflateImpl.State",toString:$estr}
@@ -28148,7 +28612,7 @@ hxd_Charset.prototype = {
 	}
 	,__class__: hxd_Charset
 };
-var hxd_Cursor = $hxEnums["hxd.Cursor"] = { __ename__:true,__constructs__:null
+var hxd_Cursor = $hxEnums["hxd.Cursor"] = { __ename__:"hxd.Cursor",__constructs__:null
 	,Default: {_hx_name:"Default",_hx_index:0,__enum__:"hxd.Cursor",toString:$estr}
 	,Button: {_hx_name:"Button",_hx_index:1,__enum__:"hxd.Cursor",toString:$estr}
 	,Move: {_hx_name:"Move",_hx_index:2,__enum__:"hxd.Cursor",toString:$estr}
@@ -28195,7 +28659,7 @@ hxd_CustomCursor.prototype = {
 	}
 	,__class__: hxd_CustomCursor
 };
-var hxd_EventKind = $hxEnums["hxd.EventKind"] = { __ename__:true,__constructs__:null
+var hxd_EventKind = $hxEnums["hxd.EventKind"] = { __ename__:"hxd.EventKind",__constructs__:null
 	,EPush: {_hx_name:"EPush",_hx_index:0,__enum__:"hxd.EventKind",toString:$estr}
 	,ERelease: {_hx_name:"ERelease",_hx_index:1,__enum__:"hxd.EventKind",toString:$estr}
 	,EMove: {_hx_name:"EMove",_hx_index:2,__enum__:"hxd.EventKind",toString:$estr}
@@ -28281,7 +28745,7 @@ hxd_Key.onEvent = function(e) {
 	default:
 	}
 };
-var hxd_Flags = $hxEnums["hxd.Flags"] = { __ename__:true,__constructs__:null
+var hxd_Flags = $hxEnums["hxd.Flags"] = { __ename__:"hxd.Flags",__constructs__:null
 	,ReadOnly: {_hx_name:"ReadOnly",_hx_index:0,__enum__:"hxd.Flags",toString:$estr}
 	,AlphaPremultiplied: {_hx_name:"AlphaPremultiplied",_hx_index:1,__enum__:"hxd.Flags",toString:$estr}
 	,FlipY: {_hx_name:"FlipY",_hx_index:2,__enum__:"hxd.Flags",toString:$estr}
@@ -28693,54 +29157,6 @@ hxd_Res.get_loader = function() {
 hxd_Res.set_loader = function(l) {
 	return hxd_res_Loader.currentInstance = l;
 };
-var hxd_Save = function() { };
-$hxClasses["hxd.Save"] = hxd_Save;
-hxd_Save.__name__ = "hxd.Save";
-hxd_Save.makeCRC = function(data) {
-	return HxOverrides.substr(haxe_crypto_Sha1.encode(data + haxe_crypto_Sha1.encode(data + hxd_Save.SALT)),4,32);
-};
-hxd_Save.loadData = function(data,checkSum,defValue) {
-	if(checkSum) {
-		if(HxOverrides.cca(data,data.length - 33) != 35) {
-			throw haxe_Exception.thrown("Missing CRC");
-		}
-		var crc = HxOverrides.substr(data,data.length - 32,null);
-		data = HxOverrides.substr(data,0,-33);
-		if(hxd_Save.makeCRC(data) != crc) {
-			throw haxe_Exception.thrown("Invalid CRC");
-		}
-	}
-	var obj = haxe_Unserializer.run(data);
-	if(defValue != null && Reflect.isObject(obj) && Reflect.isObject(defValue)) {
-		var _g = 0;
-		var _g1 = Reflect.fields(defValue);
-		while(_g < _g1.length) {
-			var f = _g1[_g];
-			++_g;
-			if(Object.prototype.hasOwnProperty.call(obj,f)) {
-				continue;
-			}
-			obj[f] = Reflect.field(defValue,f);
-		}
-	}
-	return obj;
-};
-hxd_Save.load = function(defValue,name,checkSum) {
-	if(checkSum == null) {
-		checkSum = false;
-	}
-	if(name == null) {
-		name = "save";
-	}
-	try {
-		return hxd_Save.loadData(hxd_Save.readSaveData(name),checkSum,defValue);
-	} catch( _g ) {
-		return defValue;
-	}
-};
-hxd_Save.readSaveData = function(name) {
-	return window.localStorage.getItem(name);
-};
 var hxd_SceneEvents = function($window) {
 	this.defaultCursor = hxd_Cursor.Default;
 	this.mouseCheckMove = true;
@@ -29127,7 +29543,7 @@ hxd_SceneEvents.prototype = {
 	}
 	,__class__: hxd_SceneEvents
 };
-var hxd_Platform = $hxEnums["hxd.Platform"] = { __ename__:true,__constructs__:null
+var hxd_Platform = $hxEnums["hxd.Platform"] = { __ename__:"hxd.Platform",__constructs__:null
 	,IOS: {_hx_name:"IOS",_hx_index:0,__enum__:"hxd.Platform",toString:$estr}
 	,Android: {_hx_name:"Android",_hx_index:1,__enum__:"hxd.Platform",toString:$estr}
 	,WebGL: {_hx_name:"WebGL",_hx_index:2,__enum__:"hxd.Platform",toString:$estr}
@@ -29137,7 +29553,7 @@ var hxd_Platform = $hxEnums["hxd.Platform"] = { __ename__:true,__constructs__:nu
 };
 hxd_Platform.__constructs__ = [hxd_Platform.IOS,hxd_Platform.Android,hxd_Platform.WebGL,hxd_Platform.PC,hxd_Platform.Console,hxd_Platform.FlashPlayer];
 hxd_Platform.__empty_constructs__ = [hxd_Platform.IOS,hxd_Platform.Android,hxd_Platform.WebGL,hxd_Platform.PC,hxd_Platform.Console,hxd_Platform.FlashPlayer];
-var hxd_SystemValue = $hxEnums["hxd.SystemValue"] = { __ename__:true,__constructs__:null
+var hxd_SystemValue = $hxEnums["hxd.SystemValue"] = { __ename__:"hxd.SystemValue",__constructs__:null
 	,IsTouch: {_hx_name:"IsTouch",_hx_index:0,__enum__:"hxd.SystemValue",toString:$estr}
 	,IsWindowed: {_hx_name:"IsWindowed",_hx_index:1,__enum__:"hxd.SystemValue",toString:$estr}
 	,IsMobile: {_hx_name:"IsMobile",_hx_index:2,__enum__:"hxd.SystemValue",toString:$estr}
@@ -29597,7 +30013,7 @@ hxd_System.get_platform = function() {
 		return hxd_Platform.PC;
 	}
 };
-var hxd_DisplayMode = $hxEnums["hxd.DisplayMode"] = { __ename__:true,__constructs__:null
+var hxd_DisplayMode = $hxEnums["hxd.DisplayMode"] = { __ename__:"hxd.DisplayMode",__constructs__:null
 	,Windowed: {_hx_name:"Windowed",_hx_index:0,__enum__:"hxd.DisplayMode",toString:$estr}
 	,Borderless: {_hx_name:"Borderless",_hx_index:1,__enum__:"hxd.DisplayMode",toString:$estr}
 	,Fullscreen: {_hx_name:"Fullscreen",_hx_index:2,__enum__:"hxd.DisplayMode",toString:$estr}
@@ -31047,7 +31463,7 @@ hxd_fmt_pak_Data.__name__ = "hxd.fmt.pak.Data";
 hxd_fmt_pak_Data.prototype = {
 	__class__: hxd_fmt_pak_Data
 };
-var hxd_fmt_pak_FileSeekMode = $hxEnums["hxd.fmt.pak.FileSeekMode"] = { __ename__:true,__constructs__:null
+var hxd_fmt_pak_FileSeekMode = $hxEnums["hxd.fmt.pak.FileSeekMode"] = { __ename__:"hxd.fmt.pak.FileSeekMode",__constructs__:null
 	,SeekBegin: {_hx_name:"SeekBegin",_hx_index:0,__enum__:"hxd.fmt.pak.FileSeekMode",toString:$estr}
 	,SeekEnd: {_hx_name:"SeekEnd",_hx_index:1,__enum__:"hxd.fmt.pak.FileSeekMode",toString:$estr}
 	,SeedCurrent: {_hx_name:"SeedCurrent",_hx_index:2,__enum__:"hxd.fmt.pak.FileSeekMode",toString:$estr}
@@ -31647,7 +32063,7 @@ hxd_res_BitmapFont.prototype = $extend(hxd_res_Resource.prototype,{
 	}
 	,__class__: hxd_res_BitmapFont
 });
-var hxd_res_ImageInfoFlag = $hxEnums["hxd.res.ImageInfoFlag"] = { __ename__:true,__constructs__:null
+var hxd_res_ImageInfoFlag = $hxEnums["hxd.res.ImageInfoFlag"] = { __ename__:"hxd.res.ImageInfoFlag",__constructs__:null
 	,IsCube: {_hx_name:"IsCube",_hx_index:0,__enum__:"hxd.res.ImageInfoFlag",toString:$estr}
 	,Dxt10Header: {_hx_name:"Dxt10Header",_hx_index:1,__enum__:"hxd.res.ImageInfoFlag",toString:$estr}
 };
@@ -32313,7 +32729,7 @@ hxd_res_Loader.prototype = {
 	}
 	,__class__: hxd_res_Loader
 };
-var hxd_res_Filter = $hxEnums["hxd.res.Filter"] = { __ename__:true,__constructs__:null
+var hxd_res_Filter = $hxEnums["hxd.res.Filter"] = { __ename__:"hxd.res.Filter",__constructs__:null
 	,Fast: {_hx_name:"Fast",_hx_index:0,__enum__:"hxd.res.Filter",toString:$estr}
 	,Chromatic: {_hx_name:"Chromatic",_hx_index:1,__enum__:"hxd.res.Filter",toString:$estr}
 };
@@ -34181,7 +34597,7 @@ hxd_snd_ChannelGroup.__super__ = hxd_snd_ChannelBase;
 hxd_snd_ChannelGroup.prototype = $extend(hxd_snd_ChannelBase.prototype,{
 	__class__: hxd_snd_ChannelGroup
 });
-var hxd_snd_SampleFormat = $hxEnums["hxd.snd.SampleFormat"] = { __ename__:true,__constructs__:null
+var hxd_snd_SampleFormat = $hxEnums["hxd.snd.SampleFormat"] = { __ename__:"hxd.snd.SampleFormat",__constructs__:null
 	,UI8: {_hx_name:"UI8",_hx_index:0,__enum__:"hxd.snd.SampleFormat",toString:$estr}
 	,I16: {_hx_name:"I16",_hx_index:1,__enum__:"hxd.snd.SampleFormat",toString:$estr}
 	,F32: {_hx_name:"F32",_hx_index:2,__enum__:"hxd.snd.SampleFormat",toString:$estr}
@@ -34411,7 +34827,7 @@ hxd_snd_EffectDriver.prototype = {
 	}
 	,__class__: hxd_snd_EffectDriver
 };
-var hxd_snd_DriverFeature = $hxEnums["hxd.snd.DriverFeature"] = { __ename__:true,__constructs__:null
+var hxd_snd_DriverFeature = $hxEnums["hxd.snd.DriverFeature"] = { __ename__:"hxd.snd.DriverFeature",__constructs__:null
 	,MasterVolume: {_hx_name:"MasterVolume",_hx_index:0,__enum__:"hxd.snd.DriverFeature",toString:$estr}
 };
 hxd_snd_DriverFeature.__constructs__ = [hxd_snd_DriverFeature.MasterVolume];
@@ -36068,7 +36484,7 @@ hxd_snd_webaudio_SpatializationDriver.prototype = $extend(hxd_snd_EffectDriver.p
 	}
 	,__class__: hxd_snd_webaudio_SpatializationDriver
 });
-var hxsl_Type = $hxEnums["hxsl.Type"] = { __ename__:true,__constructs__:null
+var hxsl_Type = $hxEnums["hxsl.Type"] = { __ename__:"hxsl.Type",__constructs__:null
 	,TVoid: {_hx_name:"TVoid",_hx_index:0,__enum__:"hxsl.Type",toString:$estr}
 	,TInt: {_hx_name:"TInt",_hx_index:1,__enum__:"hxsl.Type",toString:$estr}
 	,TBool: {_hx_name:"TBool",_hx_index:2,__enum__:"hxsl.Type",toString:$estr}
@@ -36091,14 +36507,14 @@ var hxsl_Type = $hxEnums["hxsl.Type"] = { __ename__:true,__constructs__:null
 };
 hxsl_Type.__constructs__ = [hxsl_Type.TVoid,hxsl_Type.TInt,hxsl_Type.TBool,hxsl_Type.TFloat,hxsl_Type.TString,hxsl_Type.TVec,hxsl_Type.TMat3,hxsl_Type.TMat4,hxsl_Type.TMat3x4,hxsl_Type.TBytes,hxsl_Type.TSampler2D,hxsl_Type.TSampler2DArray,hxsl_Type.TSamplerCube,hxsl_Type.TStruct,hxsl_Type.TFun,hxsl_Type.TArray,hxsl_Type.TBuffer,hxsl_Type.TChannel,hxsl_Type.TMat2];
 hxsl_Type.__empty_constructs__ = [hxsl_Type.TVoid,hxsl_Type.TInt,hxsl_Type.TBool,hxsl_Type.TFloat,hxsl_Type.TString,hxsl_Type.TMat3,hxsl_Type.TMat4,hxsl_Type.TMat3x4,hxsl_Type.TSampler2D,hxsl_Type.TSampler2DArray,hxsl_Type.TSamplerCube,hxsl_Type.TMat2];
-var hxsl_VecType = $hxEnums["hxsl.VecType"] = { __ename__:true,__constructs__:null
+var hxsl_VecType = $hxEnums["hxsl.VecType"] = { __ename__:"hxsl.VecType",__constructs__:null
 	,VInt: {_hx_name:"VInt",_hx_index:0,__enum__:"hxsl.VecType",toString:$estr}
 	,VFloat: {_hx_name:"VFloat",_hx_index:1,__enum__:"hxsl.VecType",toString:$estr}
 	,VBool: {_hx_name:"VBool",_hx_index:2,__enum__:"hxsl.VecType",toString:$estr}
 };
 hxsl_VecType.__constructs__ = [hxsl_VecType.VInt,hxsl_VecType.VFloat,hxsl_VecType.VBool];
 hxsl_VecType.__empty_constructs__ = [hxsl_VecType.VInt,hxsl_VecType.VFloat,hxsl_VecType.VBool];
-var hxsl_SizeDecl = $hxEnums["hxsl.SizeDecl"] = { __ename__:true,__constructs__:null
+var hxsl_SizeDecl = $hxEnums["hxsl.SizeDecl"] = { __ename__:"hxsl.SizeDecl",__constructs__:null
 	,SConst: ($_=function(v) { return {_hx_index:0,v:v,__enum__:"hxsl.SizeDecl",toString:$estr}; },$_._hx_name="SConst",$_.__params__ = ["v"],$_)
 	,SVar: ($_=function(v) { return {_hx_index:1,v:v,__enum__:"hxsl.SizeDecl",toString:$estr}; },$_._hx_name="SVar",$_.__params__ = ["v"],$_)
 };
@@ -36119,7 +36535,7 @@ hxsl_Error.prototype = {
 	}
 	,__class__: hxsl_Error
 };
-var hxsl_VarKind = $hxEnums["hxsl.VarKind"] = { __ename__:true,__constructs__:null
+var hxsl_VarKind = $hxEnums["hxsl.VarKind"] = { __ename__:"hxsl.VarKind",__constructs__:null
 	,Global: {_hx_name:"Global",_hx_index:0,__enum__:"hxsl.VarKind",toString:$estr}
 	,Input: {_hx_name:"Input",_hx_index:1,__enum__:"hxsl.VarKind",toString:$estr}
 	,Param: {_hx_name:"Param",_hx_index:2,__enum__:"hxsl.VarKind",toString:$estr}
@@ -36130,7 +36546,7 @@ var hxsl_VarKind = $hxEnums["hxsl.VarKind"] = { __ename__:true,__constructs__:nu
 };
 hxsl_VarKind.__constructs__ = [hxsl_VarKind.Global,hxsl_VarKind.Input,hxsl_VarKind.Param,hxsl_VarKind.Var,hxsl_VarKind.Local,hxsl_VarKind.Output,hxsl_VarKind.Function];
 hxsl_VarKind.__empty_constructs__ = [hxsl_VarKind.Global,hxsl_VarKind.Input,hxsl_VarKind.Param,hxsl_VarKind.Var,hxsl_VarKind.Local,hxsl_VarKind.Output,hxsl_VarKind.Function];
-var hxsl_VarQualifier = $hxEnums["hxsl.VarQualifier"] = { __ename__:true,__constructs__:null
+var hxsl_VarQualifier = $hxEnums["hxsl.VarQualifier"] = { __ename__:"hxsl.VarQualifier",__constructs__:null
 	,Const: ($_=function(max) { return {_hx_index:0,max:max,__enum__:"hxsl.VarQualifier",toString:$estr}; },$_._hx_name="Const",$_.__params__ = ["max"],$_)
 	,Private: {_hx_name:"Private",_hx_index:1,__enum__:"hxsl.VarQualifier",toString:$estr}
 	,Nullable: {_hx_name:"Nullable",_hx_index:2,__enum__:"hxsl.VarQualifier",toString:$estr}
@@ -36147,14 +36563,14 @@ var hxsl_VarQualifier = $hxEnums["hxsl.VarQualifier"] = { __ename__:true,__const
 };
 hxsl_VarQualifier.__constructs__ = [hxsl_VarQualifier.Const,hxsl_VarQualifier.Private,hxsl_VarQualifier.Nullable,hxsl_VarQualifier.PerObject,hxsl_VarQualifier.Name,hxsl_VarQualifier.Shared,hxsl_VarQualifier.Precision,hxsl_VarQualifier.Range,hxsl_VarQualifier.Ignore,hxsl_VarQualifier.PerInstance,hxsl_VarQualifier.Doc,hxsl_VarQualifier.Borrow,hxsl_VarQualifier.Sampler];
 hxsl_VarQualifier.__empty_constructs__ = [hxsl_VarQualifier.Private,hxsl_VarQualifier.Nullable,hxsl_VarQualifier.PerObject,hxsl_VarQualifier.Shared,hxsl_VarQualifier.Ignore];
-var hxsl_Prec = $hxEnums["hxsl.Prec"] = { __ename__:true,__constructs__:null
+var hxsl_Prec = $hxEnums["hxsl.Prec"] = { __ename__:"hxsl.Prec",__constructs__:null
 	,Low: {_hx_name:"Low",_hx_index:0,__enum__:"hxsl.Prec",toString:$estr}
 	,Medium: {_hx_name:"Medium",_hx_index:1,__enum__:"hxsl.Prec",toString:$estr}
 	,High: {_hx_name:"High",_hx_index:2,__enum__:"hxsl.Prec",toString:$estr}
 };
 hxsl_Prec.__constructs__ = [hxsl_Prec.Low,hxsl_Prec.Medium,hxsl_Prec.High];
 hxsl_Prec.__empty_constructs__ = [hxsl_Prec.Low,hxsl_Prec.Medium,hxsl_Prec.High];
-var hxsl_Const = $hxEnums["hxsl.Const"] = { __ename__:true,__constructs__:null
+var hxsl_Const = $hxEnums["hxsl.Const"] = { __ename__:"hxsl.Const",__constructs__:null
 	,CNull: {_hx_name:"CNull",_hx_index:0,__enum__:"hxsl.Const",toString:$estr}
 	,CBool: ($_=function(b) { return {_hx_index:1,b:b,__enum__:"hxsl.Const",toString:$estr}; },$_._hx_name="CBool",$_.__params__ = ["b"],$_)
 	,CInt: ($_=function(v) { return {_hx_index:2,v:v,__enum__:"hxsl.Const",toString:$estr}; },$_._hx_name="CInt",$_.__params__ = ["v"],$_)
@@ -36163,7 +36579,7 @@ var hxsl_Const = $hxEnums["hxsl.Const"] = { __ename__:true,__constructs__:null
 };
 hxsl_Const.__constructs__ = [hxsl_Const.CNull,hxsl_Const.CBool,hxsl_Const.CInt,hxsl_Const.CFloat,hxsl_Const.CString];
 hxsl_Const.__empty_constructs__ = [hxsl_Const.CNull];
-var hxsl_FunctionKind = $hxEnums["hxsl.FunctionKind"] = { __ename__:true,__constructs__:null
+var hxsl_FunctionKind = $hxEnums["hxsl.FunctionKind"] = { __ename__:"hxsl.FunctionKind",__constructs__:null
 	,Vertex: {_hx_name:"Vertex",_hx_index:0,__enum__:"hxsl.FunctionKind",toString:$estr}
 	,Fragment: {_hx_name:"Fragment",_hx_index:1,__enum__:"hxsl.FunctionKind",toString:$estr}
 	,Init: {_hx_name:"Init",_hx_index:2,__enum__:"hxsl.FunctionKind",toString:$estr}
@@ -36171,7 +36587,7 @@ var hxsl_FunctionKind = $hxEnums["hxsl.FunctionKind"] = { __ename__:true,__const
 };
 hxsl_FunctionKind.__constructs__ = [hxsl_FunctionKind.Vertex,hxsl_FunctionKind.Fragment,hxsl_FunctionKind.Init,hxsl_FunctionKind.Helper];
 hxsl_FunctionKind.__empty_constructs__ = [hxsl_FunctionKind.Vertex,hxsl_FunctionKind.Fragment,hxsl_FunctionKind.Init,hxsl_FunctionKind.Helper];
-var hxsl_TGlobal = $hxEnums["hxsl.TGlobal"] = { __ename__:true,__constructs__:null
+var hxsl_TGlobal = $hxEnums["hxsl.TGlobal"] = { __ename__:"hxsl.TGlobal",__constructs__:null
 	,Radians: {_hx_name:"Radians",_hx_index:0,__enum__:"hxsl.TGlobal",toString:$estr}
 	,Degrees: {_hx_name:"Degrees",_hx_index:1,__enum__:"hxsl.TGlobal",toString:$estr}
 	,Sin: {_hx_name:"Sin",_hx_index:2,__enum__:"hxsl.TGlobal",toString:$estr}
@@ -36247,7 +36663,7 @@ var hxsl_TGlobal = $hxEnums["hxsl.TGlobal"] = { __ename__:true,__constructs__:nu
 };
 hxsl_TGlobal.__constructs__ = [hxsl_TGlobal.Radians,hxsl_TGlobal.Degrees,hxsl_TGlobal.Sin,hxsl_TGlobal.Cos,hxsl_TGlobal.Tan,hxsl_TGlobal.Asin,hxsl_TGlobal.Acos,hxsl_TGlobal.Atan,hxsl_TGlobal.Pow,hxsl_TGlobal.Exp,hxsl_TGlobal.Log,hxsl_TGlobal.Exp2,hxsl_TGlobal.Log2,hxsl_TGlobal.Sqrt,hxsl_TGlobal.Inversesqrt,hxsl_TGlobal.Abs,hxsl_TGlobal.Sign,hxsl_TGlobal.Floor,hxsl_TGlobal.Ceil,hxsl_TGlobal.Fract,hxsl_TGlobal.Mod,hxsl_TGlobal.Min,hxsl_TGlobal.Max,hxsl_TGlobal.Clamp,hxsl_TGlobal.Mix,hxsl_TGlobal.Step,hxsl_TGlobal.Smoothstep,hxsl_TGlobal.Length,hxsl_TGlobal.Distance,hxsl_TGlobal.Dot,hxsl_TGlobal.Cross,hxsl_TGlobal.Normalize,hxsl_TGlobal.LReflect,hxsl_TGlobal.Texture,hxsl_TGlobal.TextureLod,hxsl_TGlobal.Texel,hxsl_TGlobal.TextureSize,hxsl_TGlobal.ToInt,hxsl_TGlobal.ToFloat,hxsl_TGlobal.ToBool,hxsl_TGlobal.Vec2,hxsl_TGlobal.Vec3,hxsl_TGlobal.Vec4,hxsl_TGlobal.IVec2,hxsl_TGlobal.IVec3,hxsl_TGlobal.IVec4,hxsl_TGlobal.BVec2,hxsl_TGlobal.BVec3,hxsl_TGlobal.BVec4,hxsl_TGlobal.Mat2,hxsl_TGlobal.Mat3,hxsl_TGlobal.Mat4,hxsl_TGlobal.Mat3x4,hxsl_TGlobal.Saturate,hxsl_TGlobal.Pack,hxsl_TGlobal.Unpack,hxsl_TGlobal.PackNormal,hxsl_TGlobal.UnpackNormal,hxsl_TGlobal.ScreenToUv,hxsl_TGlobal.UvToScreen,hxsl_TGlobal.DFdx,hxsl_TGlobal.DFdy,hxsl_TGlobal.Fwidth,hxsl_TGlobal.ChannelRead,hxsl_TGlobal.ChannelReadLod,hxsl_TGlobal.ChannelFetch,hxsl_TGlobal.ChannelTextureSize,hxsl_TGlobal.Trace,hxsl_TGlobal.VertexID,hxsl_TGlobal.InstanceID,hxsl_TGlobal.FragCoord,hxsl_TGlobal.FrontFacing];
 hxsl_TGlobal.__empty_constructs__ = [hxsl_TGlobal.Radians,hxsl_TGlobal.Degrees,hxsl_TGlobal.Sin,hxsl_TGlobal.Cos,hxsl_TGlobal.Tan,hxsl_TGlobal.Asin,hxsl_TGlobal.Acos,hxsl_TGlobal.Atan,hxsl_TGlobal.Pow,hxsl_TGlobal.Exp,hxsl_TGlobal.Log,hxsl_TGlobal.Exp2,hxsl_TGlobal.Log2,hxsl_TGlobal.Sqrt,hxsl_TGlobal.Inversesqrt,hxsl_TGlobal.Abs,hxsl_TGlobal.Sign,hxsl_TGlobal.Floor,hxsl_TGlobal.Ceil,hxsl_TGlobal.Fract,hxsl_TGlobal.Mod,hxsl_TGlobal.Min,hxsl_TGlobal.Max,hxsl_TGlobal.Clamp,hxsl_TGlobal.Mix,hxsl_TGlobal.Step,hxsl_TGlobal.Smoothstep,hxsl_TGlobal.Length,hxsl_TGlobal.Distance,hxsl_TGlobal.Dot,hxsl_TGlobal.Cross,hxsl_TGlobal.Normalize,hxsl_TGlobal.LReflect,hxsl_TGlobal.Texture,hxsl_TGlobal.TextureLod,hxsl_TGlobal.Texel,hxsl_TGlobal.TextureSize,hxsl_TGlobal.ToInt,hxsl_TGlobal.ToFloat,hxsl_TGlobal.ToBool,hxsl_TGlobal.Vec2,hxsl_TGlobal.Vec3,hxsl_TGlobal.Vec4,hxsl_TGlobal.IVec2,hxsl_TGlobal.IVec3,hxsl_TGlobal.IVec4,hxsl_TGlobal.BVec2,hxsl_TGlobal.BVec3,hxsl_TGlobal.BVec4,hxsl_TGlobal.Mat2,hxsl_TGlobal.Mat3,hxsl_TGlobal.Mat4,hxsl_TGlobal.Mat3x4,hxsl_TGlobal.Saturate,hxsl_TGlobal.Pack,hxsl_TGlobal.Unpack,hxsl_TGlobal.PackNormal,hxsl_TGlobal.UnpackNormal,hxsl_TGlobal.ScreenToUv,hxsl_TGlobal.UvToScreen,hxsl_TGlobal.DFdx,hxsl_TGlobal.DFdy,hxsl_TGlobal.Fwidth,hxsl_TGlobal.ChannelRead,hxsl_TGlobal.ChannelReadLod,hxsl_TGlobal.ChannelFetch,hxsl_TGlobal.ChannelTextureSize,hxsl_TGlobal.Trace,hxsl_TGlobal.VertexID,hxsl_TGlobal.InstanceID,hxsl_TGlobal.FragCoord,hxsl_TGlobal.FrontFacing];
-var hxsl_Component = $hxEnums["hxsl.Component"] = { __ename__:true,__constructs__:null
+var hxsl_Component = $hxEnums["hxsl.Component"] = { __ename__:"hxsl.Component",__constructs__:null
 	,X: {_hx_name:"X",_hx_index:0,__enum__:"hxsl.Component",toString:$estr}
 	,Y: {_hx_name:"Y",_hx_index:1,__enum__:"hxsl.Component",toString:$estr}
 	,Z: {_hx_name:"Z",_hx_index:2,__enum__:"hxsl.Component",toString:$estr}
@@ -36255,7 +36671,7 @@ var hxsl_Component = $hxEnums["hxsl.Component"] = { __ename__:true,__constructs_
 };
 hxsl_Component.__constructs__ = [hxsl_Component.X,hxsl_Component.Y,hxsl_Component.Z,hxsl_Component.W];
 hxsl_Component.__empty_constructs__ = [hxsl_Component.X,hxsl_Component.Y,hxsl_Component.Z,hxsl_Component.W];
-var hxsl_TExprDef = $hxEnums["hxsl.TExprDef"] = { __ename__:true,__constructs__:null
+var hxsl_TExprDef = $hxEnums["hxsl.TExprDef"] = { __ename__:"hxsl.TExprDef",__constructs__:null
 	,TConst: ($_=function(c) { return {_hx_index:0,c:c,__enum__:"hxsl.TExprDef",toString:$estr}; },$_._hx_name="TConst",$_.__params__ = ["c"],$_)
 	,TVar: ($_=function(v) { return {_hx_index:1,v:v,__enum__:"hxsl.TExprDef",toString:$estr}; },$_._hx_name="TVar",$_.__params__ = ["v"],$_)
 	,TGlobal: ($_=function(g) { return {_hx_index:2,g:g,__enum__:"hxsl.TExprDef",toString:$estr}; },$_._hx_name="TGlobal",$_.__params__ = ["g"],$_)
@@ -37308,7 +37724,7 @@ hxsl_Cache.prototype = {
 	}
 	,__class__: hxsl_Cache
 };
-var hxsl_Channel = $hxEnums["hxsl.Channel"] = { __ename__:true,__constructs__:null
+var hxsl_Channel = $hxEnums["hxsl.Channel"] = { __ename__:"hxsl.Channel",__constructs__:null
 	,Unknown: {_hx_name:"Unknown",_hx_index:0,__enum__:"hxsl.Channel",toString:$estr}
 	,R: {_hx_name:"R",_hx_index:1,__enum__:"hxsl.Channel",toString:$estr}
 	,G: {_hx_name:"G",_hx_index:2,__enum__:"hxsl.Channel",toString:$estr}
@@ -39821,7 +40237,7 @@ hxsl__$Flatten_Alloc.__name__ = "hxsl._Flatten.Alloc";
 hxsl__$Flatten_Alloc.prototype = {
 	__class__: hxsl__$Flatten_Alloc
 };
-var hxsl_ARead = $hxEnums["hxsl.ARead"] = { __ename__:true,__constructs__:null
+var hxsl_ARead = $hxEnums["hxsl.ARead"] = { __ename__:"hxsl.ARead",__constructs__:null
 	,AIndex: ($_=function(a) { return {_hx_index:0,a:a,__enum__:"hxsl.ARead",toString:$estr}; },$_._hx_name="AIndex",$_.__params__ = ["a"],$_)
 	,AOffset: ($_=function(a,stride,delta) { return {_hx_index:1,a:a,stride:stride,delta:delta,__enum__:"hxsl.ARead",toString:$estr}; },$_._hx_name="AOffset",$_.__params__ = ["a","stride","delta"],$_)
 };
@@ -42921,7 +43337,7 @@ hxsl_Linker.prototype = {
 	}
 	,__class__: hxsl_Linker
 };
-var hxsl_Output = $hxEnums["hxsl.Output"] = { __ename__:true,__constructs__:null
+var hxsl_Output = $hxEnums["hxsl.Output"] = { __ename__:"hxsl.Output",__constructs__:null
 	,Const: ($_=function(v) { return {_hx_index:0,v:v,__enum__:"hxsl.Output",toString:$estr}; },$_._hx_name="Const",$_.__params__ = ["v"],$_)
 	,Value: ($_=function(v,size) { return {_hx_index:1,v:v,size:size,__enum__:"hxsl.Output",toString:$estr}; },$_._hx_name="Value",$_.__params__ = ["v","size"],$_)
 	,PackNormal: ($_=function(v) { return {_hx_index:2,v:v,__enum__:"hxsl.Output",toString:$estr}; },$_._hx_name="PackNormal",$_.__params__ = ["v"],$_)
@@ -44351,7 +44767,7 @@ js_html__$CanvasElement_CanvasUtil.getContextWebGL = function(canvas,attribs) {
 	return null;
 };
 Math.__name__ = "Math";
-var ldtk_WorldLayout = $hxEnums["ldtk.WorldLayout"] = { __ename__:true,__constructs__:null
+var ldtk_WorldLayout = $hxEnums["ldtk.WorldLayout"] = { __ename__:"ldtk.WorldLayout",__constructs__:null
 	,Free: {_hx_name:"Free",_hx_index:0,__enum__:"ldtk.WorldLayout",toString:$estr}
 	,GridVania: {_hx_name:"GridVania",_hx_index:1,__enum__:"ldtk.WorldLayout",toString:$estr}
 	,LinearHorizontal: {_hx_name:"LinearHorizontal",_hx_index:2,__enum__:"ldtk.WorldLayout",toString:$estr}
@@ -44359,7 +44775,7 @@ var ldtk_WorldLayout = $hxEnums["ldtk.WorldLayout"] = { __ename__:true,__constru
 };
 ldtk_WorldLayout.__constructs__ = [ldtk_WorldLayout.Free,ldtk_WorldLayout.GridVania,ldtk_WorldLayout.LinearHorizontal,ldtk_WorldLayout.LinearVertical];
 ldtk_WorldLayout.__empty_constructs__ = [ldtk_WorldLayout.Free,ldtk_WorldLayout.GridVania,ldtk_WorldLayout.LinearHorizontal,ldtk_WorldLayout.LinearVertical];
-var ldtk_LayerType = $hxEnums["ldtk.LayerType"] = { __ename__:true,__constructs__:null
+var ldtk_LayerType = $hxEnums["ldtk.LayerType"] = { __ename__:"ldtk.LayerType",__constructs__:null
 	,IntGrid: {_hx_name:"IntGrid",_hx_index:0,__enum__:"ldtk.LayerType",toString:$estr}
 	,Entities: {_hx_name:"Entities",_hx_index:1,__enum__:"ldtk.LayerType",toString:$estr}
 	,Tiles: {_hx_name:"Tiles",_hx_index:2,__enum__:"ldtk.LayerType",toString:$estr}
@@ -44385,7 +44801,7 @@ ldtk_Layer_$AutoLayer.__super__ = ldtk_Layer;
 ldtk_Layer_$AutoLayer.prototype = $extend(ldtk_Layer.prototype,{
 	__class__: ldtk_Layer_$AutoLayer
 });
-var ldtk_NeighbourDir = $hxEnums["ldtk.NeighbourDir"] = { __ename__:true,__constructs__:null
+var ldtk_NeighbourDir = $hxEnums["ldtk.NeighbourDir"] = { __ename__:"ldtk.NeighbourDir",__constructs__:null
 	,North: {_hx_name:"North",_hx_index:0,__enum__:"ldtk.NeighbourDir",toString:$estr}
 	,South: {_hx_name:"South",_hx_index:1,__enum__:"ldtk.NeighbourDir",toString:$estr}
 	,West: {_hx_name:"West",_hx_index:2,__enum__:"ldtk.NeighbourDir",toString:$estr}
@@ -45304,6 +45720,11 @@ HerbalTeaApp.debugShowFps = false;
 HerbalTeaApp.avgUpdateTime = 0.0;
 HerbalTeaApp.avgRenderTime = 0.0;
 HerbalTeaApp.cutout = { top : 0, bottom : 0, left : 0, right : 0};
+hxd_Save.SALT = "s*al!t";
+haxe_Unserializer.DEFAULT_RESOLVER = new haxe__$Unserializer_DefaultResolver();
+haxe_Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
+App.ldtkProject = new LdtkProject();
+App.save = hxd_Save.load({ unlockedLevel : 0});
 h2d_HtmlText.REG_SPACES = new EReg("[\r\n\t ]+","g");
 Colors.BLUE = -13291603;
 Colors.LIGHT_GREY = -10066330;
@@ -45403,8 +45824,9 @@ h3d_shader_VertexColorAlpha.SRC = "HXSLG2gzZC5zaGFkZXIuVmVydGV4Q29sb3JBbHBoYQQBB
 h3d_shader_VolumeDecal.SRC = "HXSLFmgzZC5zaGFkZXIuVm9sdW1lRGVjYWwYAQZjYW1lcmENAQoCBHZpZXcHAAEAAwRwcm9qBwABAAQIcG9zaXRpb24FCwABAAUIcHJvakZsaXADAAEABghwcm9qRGlhZwULAAEABwh2aWV3UHJvagcAAQAID2ludmVyc2VWaWV3UHJvagcAAQAJBXpOZWFyAwABAAoEekZhcgMAAQALA2RpcgULAwEAAAAADAZnbG9iYWwNAgQNBHRpbWUDAAwADglwaXhlbFNpemUFCgAMAA8JbW9kZWxWaWV3BwAMAQMQEG1vZGVsVmlld0ludmVyc2UHAAwBAwAAABEFaW5wdXQNAwISCHBvc2l0aW9uBQsBEQATBm5vcm1hbAULAREAAQAAFAZvdXRwdXQNBAUVCHBvc2l0aW9uBQwEFAAWBWNvbG9yBQwEFAAXBWRlcHRoAwQUABgGbm9ybWFsBQsEFAAZCXdvcmxkRGlzdAMEFAAEAAAaEHJlbGF0aXZlUG9zaXRpb24FCwQAABsTdHJhbnNmb3JtZWRQb3NpdGlvbgULBAAAHBhwaXhlbFRyYW5zZm9ybWVkUG9zaXRpb24FCwQAAB0RdHJhbnNmb3JtZWROb3JtYWwFCwQAAB4RcHJvamVjdGVkUG9zaXRpb24FDAQAAB8KcGl4ZWxDb2xvcgUMBAAAIAVkZXB0aAMEAAAhCHNjcmVlblVWBQoEAAAiCXNwZWNQb3dlcgMEAAAjCXNwZWNDb2xvcgULBAAAJAl3b3JsZERpc3QDBAAAJQhkZXB0aE1hcBEBAAAAJgVzY2FsZQUKAgAAJwZub3JtYWwFCwIAACgHdGFuZ2VudAULAgAAKQppc0NlbnRlcmVkAgIAAQAAAAAAKgxjYWxjdWxhdGVkVVYFCgQAACsSdHJhbnNmb3JtZWRUYW5nZW50BQwEAAAsDl9faW5pdF9fdmVydGV4DgYAAC0IZnJhZ21lbnQOBgAAAgIsAAAFAgYEAh0FCwkDHw4BBAYBAicFCwkDMg4BAg8HBgULBQsFCwULBgQCKwUMCQMqDgIJAx8OAQQGAQIoBQsJAzIOAQIPBwYFCwULBQsBAwAAAAAAAPA/AwUMBQwAAS0AAAUJCC4GbWF0cml4BwQAAAYBAggHAhAHBwAILwlzY3JlZW5Qb3MFCgQAAAYCCgIeBQwRAAUKCgIeBQwMAAMFCgAIMANydXYFDAQAAAkDKg4DAi8FCgkDPw4CAiURAQkDOg4BAi8FCgUKAwEDAAAAAAAA8D8DBQwACDEEd3BvcwUMBAAABgECMAUMAi4HBQwACDIEcHBvcwUMBAAABgECMAUMAggHBQwABgQCHAULBgIKAjIFDJIABQsKAjIFDAwAAwULBQsGBAIqBQoGAQImBQoEBgIKAjEFDBEABQoKAjEFDAwAAwUKBQoFCgUKCwIpAgaAAioFCgEDAAAAAAAA4D8DBQoAAAsGCQkDFQ4CCQMVDgIKAioFCgAAAwoCKgUKBAADAwkDFQ4CBgMBAwAAAAAAAPA/AwoCKgUKAAADAwYDAQMAAAAAAADwPwMKAioFCgQAAwMDAwEDAAAAAAAAAAADAgwAAAAA";
 haxe_EntryPoint.pending = [];
 haxe_EntryPoint.threadCount = 0;
-haxe_Unserializer.DEFAULT_RESOLVER = new haxe__$Unserializer_DefaultResolver();
-haxe_Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
+haxe_Serializer.USE_CACHE = false;
+haxe_Serializer.USE_ENUM_INDEX = false;
+haxe_Serializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
 haxe_crypto_Base64.CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 haxe_crypto_Base64.BYTES = haxe_io_Bytes.ofString(haxe_crypto_Base64.CHARS);
 haxe_io_FPHelper.helper = new DataView(new ArrayBuffer(8));
@@ -45438,7 +45860,6 @@ hxd_Charset.complementChars = (function($this) {
 hxd_Key.initDone = false;
 hxd_Key.keyPressed = [];
 hxd_Key.ALLOW_KEY_REPEAT = false;
-hxd_Save.SALT = "s*al!t";
 hxd_Timer.wantedFPS = 60.;
 hxd_Timer.maxDeltaTime = 0.5;
 hxd_Timer.smoothFactor = 0.95;
