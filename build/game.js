@@ -5511,17 +5511,17 @@ PlayView.prototype = $extend(GameState.prototype,{
 	,onEvent: function(event) {
 	}
 	,update: function(dt) {
-		if(hxd_Key.isDown(37)) {
-			var fh = this.player;
-			fh.posChanged = true;
-			fh.rotation -= dt;
-		}
-		if(hxd_Key.isDown(39)) {
-			var fh = this.player;
-			fh.posChanged = true;
-			fh.rotation += dt;
-		}
 		if(hxd_Key.isDown(38)) {
+			if(hxd_Key.isDown(37)) {
+				var fh = this.player;
+				fh.posChanged = true;
+				fh.rotation -= dt;
+			}
+			if(hxd_Key.isDown(39)) {
+				var fh = this.player;
+				fh.posChanged = true;
+				fh.rotation += dt;
+			}
 			var _this = Utils.direction(this.player.rotation);
 			var v = dt * 50.0;
 			var x = _this.x * v;
@@ -5569,9 +5569,9 @@ PlayView.prototype = $extend(GameState.prototype,{
 				hxd_Save.save(App.save);
 			}
 			if(this.levelIndex + 1 < App.ldtkProject.levels.length) {
-				App.instance.switchState(new GameEndView());
-			} else {
 				App.instance.switchState(new PlayView(this.levelIndex + 1));
+			} else {
+				App.instance.switchState(new GameEndView());
 			}
 		}
 	}
