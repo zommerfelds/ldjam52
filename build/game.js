@@ -3974,7 +3974,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 		level1.scaleY *= 6;
 		level1.alpha = 0.0;
 		var playerTile = hxd_Res.get_loader().loadCache("combine.png",hxd_res_Image).toTile();
-		playerTile.dx = -(0.5 * playerTile.width);
+		playerTile.dx = -(0.8 * playerTile.width);
 		playerTile.dy = -(0.5 * playerTile.height);
 		this.player = new h2d_Bitmap(playerTile,this);
 		var _this = this.player;
@@ -3985,7 +3985,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 		_this.y = 64 * PlayView.FIELD_TILE_SIZE;
 		var cutterOffset = new h2d_Object(this.player);
 		cutterOffset.posChanged = true;
-		cutterOffset.x = 15;
+		cutterOffset.x = 0;
 		var cutterTile = h2d_Tile.fromColor(0,10,60);
 		cutterTile.dx = -(0.5 * cutterTile.width);
 		cutterTile.dy = -(0.5 * cutterTile.height);
@@ -4007,7 +4007,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 		}
 		if(hxd_Key.isDown(38)) {
 			var _this = Utils.direction(this.player.rotation);
-			var v = dt * 40.0;
+			var v = dt * 50.0;
 			var x = _this.x * v;
 			var y = _this.y * v;
 			if(y == null) {
@@ -4018,28 +4018,28 @@ PlayView.prototype = $extend(GameState.prototype,{
 			}
 			var _this = Utils.point(this.player);
 			ObjExt.setPos(this.player,new h2d_col_Point(_this.x + x,_this.y + y));
-		}
-		var bounds = this.cutter.getBounds(this);
-		var xMin = Math.floor(bounds.xMin / PlayView.FIELD_TILE_SIZE);
-		var xMax = Math.ceil(bounds.xMax / PlayView.FIELD_TILE_SIZE);
-		var yMin = Math.floor(bounds.yMin / PlayView.FIELD_TILE_SIZE);
-		var yMax = Math.ceil(bounds.yMax / PlayView.FIELD_TILE_SIZE);
-		var localBounds = this.cutter.getBounds(this.cutter);
-		var points = [this.globalToLocal(this.cutter.localToGlobal(new h2d_col_Point(localBounds.xMin,localBounds.yMin))),this.globalToLocal(this.cutter.localToGlobal(new h2d_col_Point(localBounds.xMax,localBounds.yMin))),this.globalToLocal(this.cutter.localToGlobal(new h2d_col_Point(localBounds.xMax,localBounds.yMax))),this.globalToLocal(this.cutter.localToGlobal(new h2d_col_Point(localBounds.xMin,localBounds.yMax)))];
-		var collider = h2d_col_Polygon.getCollider(points == null ? [] : points);
-		var _g = yMin;
-		var _g1 = yMax + 1;
-		while(_g < _g1) {
-			var y = _g++;
-			var _g2 = xMin;
-			var _g3 = xMax + 1;
-			while(_g2 < _g3) {
-				var x = _g2++;
-				var _this = this.fieldElements.values;
-				var key = new Point2d(x,y).hashCode();
-				var element = _this.h[key];
-				if(element != null && collider.contains(new h2d_col_Point(x * PlayView.FIELD_TILE_SIZE,y * PlayView.FIELD_TILE_SIZE))) {
-					element.t = this.fieldTileEmpty;
+			var bounds = this.cutter.getBounds(this);
+			var xMin = Math.floor(bounds.xMin / PlayView.FIELD_TILE_SIZE);
+			var xMax = Math.ceil(bounds.xMax / PlayView.FIELD_TILE_SIZE);
+			var yMin = Math.floor(bounds.yMin / PlayView.FIELD_TILE_SIZE);
+			var yMax = Math.ceil(bounds.yMax / PlayView.FIELD_TILE_SIZE);
+			var localBounds = this.cutter.getBounds(this.cutter);
+			var points = [this.globalToLocal(this.cutter.localToGlobal(new h2d_col_Point(localBounds.xMin,localBounds.yMin))),this.globalToLocal(this.cutter.localToGlobal(new h2d_col_Point(localBounds.xMax,localBounds.yMin))),this.globalToLocal(this.cutter.localToGlobal(new h2d_col_Point(localBounds.xMax,localBounds.yMax))),this.globalToLocal(this.cutter.localToGlobal(new h2d_col_Point(localBounds.xMin,localBounds.yMax)))];
+			var collider = h2d_col_Polygon.getCollider(points == null ? [] : points);
+			var _g = yMin;
+			var _g1 = yMax + 1;
+			while(_g < _g1) {
+				var y = _g++;
+				var _g2 = xMin;
+				var _g3 = xMax + 1;
+				while(_g2 < _g3) {
+					var x = _g2++;
+					var _this = this.fieldElements.values;
+					var key = new Point2d(x,y).hashCode();
+					var element = _this.h[key];
+					if(element != null && collider.contains(new h2d_col_Point(x * PlayView.FIELD_TILE_SIZE,y * PlayView.FIELD_TILE_SIZE))) {
+						element.t = this.fieldTileEmpty;
+					}
 				}
 			}
 		}
