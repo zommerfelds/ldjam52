@@ -8,12 +8,16 @@ import h2d.col.Polygon;
 import haxe.ds.HashMap;
 import hxd.Key;
 import hxd.Res;
+import hxd.Save;
+import hxd.res.Image;
 
 using ObjExt;
 
 class PlayView extends GameState {
 	var player:Object;
 	var cutter:Object;
+	final levelData:LdtkProject.LdtkProject_Level;
+	final levelIndex:Int;
 
 	static final FIELD_TILE_SIZE = 6;
 
@@ -23,13 +27,20 @@ class PlayView extends GameState {
 	final fieldTileEmpty = Res.field_tiles.toTile()
 		.sub(1 * FIELD_TILE_SIZE, 0, FIELD_TILE_SIZE, FIELD_TILE_SIZE, FIELD_TILE_SIZE * -0.5, FIELD_TILE_SIZE * -0.5);
 
+	public function new(levelIndex) {
+		super();
+		this.levelIndex = levelIndex;
+
+		levelData = App.ldtkProject.levels[levelIndex];
+	}
+
 	override function init() {
 		App.instance.engine.backgroundColor = 0x809F66;
 		scale(2);
 
 		addEventListener(onEvent);
 
-		final pixels = Res.level1.getPixels();
+		final pixels = Res.loader.loadCache(levelData.bgImageInfos.relFilePath, Image).getPixels();
 		final field = new SpriteBatch(Res.field_tiles.toTile(), this);
 		for (x in 0...pixels.height) {
 			for (y in 0...pixels.width) {
@@ -44,12 +55,7 @@ class PlayView extends GameState {
 			}
 		}
 
-		final level1 = new Bitmap(Res.level1.toTile(), this);
-		level1.scale(6);
-		level1.alpha = 0.0;
-
-		final project = new LdtkProject();
-		final combine0 = project.all_levels.Level_1.l_Entities.all_Combine[0];
+		final combine0 = levelData.l_Entities.all_Combine[0];
 
 		final playerTile = Res.combine.toTile();
 		playerTile.setCenterRatio(0.8, 0.5);
@@ -105,7 +111,16 @@ class PlayView extends GameState {
 			}
 		}
 		if (!fieldElements.keys().hasNext()) {
-			App.instance.switchState(new GameEndView());
+			if (App.save.unlockedLevel < levelIndex + 1) {
+				App.save.unlockedLevel = levelIndex + 1;
+				Save.save(App.save);
+			}
+
+			if (levelIndex + 1 < App.ldtkProject.levels.length) {
+				App.instance.switchState(new GameEndView());
+			} else {
+				App.instance.switchState(new PlayView(levelIndex + 1));
+			}
 		}
 	}
 }

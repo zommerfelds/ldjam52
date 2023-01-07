@@ -20,10 +20,8 @@ class MenuView extends GameState {
 			centeringFlow.reflow();
 		}, Gui.Colors.BLUE, 0.8);
 		new Gui.TextButton(centeringFlow, "Start game", () -> {
-			App.instance.switchState(new PlayView());
+			App.instance.switchState(new LevelSelectView());
 		}, Gui.Colors.BLUE, 0.8);
-
-		new Gui.Text("Highscore: " + App.loadHighScore(), centeringFlow, 0.8);
 
 		centeringFlow.addSpacing(Gui.scaleAsInt(100));
 

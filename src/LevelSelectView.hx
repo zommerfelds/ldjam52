@@ -1,0 +1,28 @@
+class LevelSelectView extends GameState {
+	override function init() {
+		final centeringFlow = new h2d.Flow(this);
+		centeringFlow.backgroundTile = h2d.Tile.fromColor(0x082036);
+		centeringFlow.fillWidth = true;
+		centeringFlow.fillHeight = true;
+		centeringFlow.horizontalAlign = Middle;
+		centeringFlow.verticalAlign = Middle;
+		centeringFlow.maxWidth = width;
+		centeringFlow.layout = Vertical;
+		centeringFlow.verticalSpacing = Gui.scaleAsInt(50);
+
+		new Gui.Text("Select level", centeringFlow);
+
+		centeringFlow.addSpacing(Gui.scaleAsInt(100));
+
+		var i = 0;
+		for (level in App.ldtkProject.levels) {
+			final iCopy = i;
+			final locked = i > App.save.unlockedLevel;
+			final button = new Gui.TextButton(centeringFlow, level.identifier, () -> {
+				App.instance.switchState(new PlayView(iCopy));
+			}, Gui.Colors.BLUE, 0.8);
+			button.enabled = !locked;
+			i++;
+		}
+	}
+}
