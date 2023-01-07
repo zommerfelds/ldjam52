@@ -75,13 +75,14 @@ class PlayView extends GameState {
 	function onEvent(event:hxd.Event) {}
 
 	override function update(dt:Float) {
-		if (Key.isDown(Key.LEFT)) {
-			player.rotation -= dt * 1.0;
-		}
-		if (Key.isDown(Key.RIGHT)) {
-			player.rotation += dt * 1.0;
-		}
 		if (Key.isDown(Key.UP)) {
+			if (Key.isDown(Key.LEFT)) {
+				player.rotation -= dt * 1.0;
+			}
+			if (Key.isDown(Key.RIGHT)) {
+				player.rotation += dt * 1.0;
+			}
+
 			final vel = Utils.direction(player.rotation).multiply(dt * 50.0);
 			player.setPos(Utils.point(player).add(vel));
 
@@ -117,9 +118,9 @@ class PlayView extends GameState {
 			}
 
 			if (levelIndex + 1 < App.ldtkProject.levels.length) {
-				App.instance.switchState(new GameEndView());
-			} else {
 				App.instance.switchState(new PlayView(levelIndex + 1));
+			} else {
+				App.instance.switchState(new GameEndView());
 			}
 		}
 	}
