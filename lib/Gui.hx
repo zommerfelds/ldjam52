@@ -209,3 +209,13 @@ class TextButton extends Button {
 		return r;
 	}
 }
+
+class TileButton extends Button {
+	public function new(tile:h2d.Tile, parent, onClickFn, disableOnClick = false, scale = 4.0) {
+		final backgroundColor = 0x000000;
+		super(parent, onClickFn, backgroundColor, disableOnClick);
+
+		final bitmap = new h2d.Bitmap(tile, content);
+		bitmap.scale(scale);
+	}
+}
