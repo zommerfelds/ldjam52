@@ -5611,9 +5611,10 @@ var CombineInput = $hxEnums["CombineInput"] = { __ename__:"CombineInput",__const
 	,TurnLeft: {_hx_name:"TurnLeft",_hx_index:0,__enum__:"CombineInput",toString:$estr}
 	,TurnRight: {_hx_name:"TurnRight",_hx_index:1,__enum__:"CombineInput",toString:$estr}
 	,Forward: {_hx_name:"Forward",_hx_index:2,__enum__:"CombineInput",toString:$estr}
+	,Backward: {_hx_name:"Backward",_hx_index:3,__enum__:"CombineInput",toString:$estr}
 };
-CombineInput.__constructs__ = [CombineInput.TurnLeft,CombineInput.TurnRight,CombineInput.Forward];
-CombineInput.__empty_constructs__ = [CombineInput.TurnLeft,CombineInput.TurnRight,CombineInput.Forward];
+CombineInput.__constructs__ = [CombineInput.TurnLeft,CombineInput.TurnRight,CombineInput.Forward,CombineInput.Backward];
+CombineInput.__empty_constructs__ = [CombineInput.TurnLeft,CombineInput.TurnRight,CombineInput.Forward,CombineInput.Backward];
 var PlayView = function(levelIndex) {
 	this.fieldTilesGrass = [6,7,8];
 	this.fieldTilesEmpty = [3,4,5];
@@ -5630,7 +5631,7 @@ var PlayView = function(levelIndex) {
 	this.selectedHighlight = new h2d_Graphics();
 	GameState.call(this);
 	this.levelIndex = levelIndex;
-	haxe_Log.trace("foo",{ fileName : "src/PlayView.hx", lineNumber : 71, className : "PlayView", methodName : "new", customParams : [this.fieldTiles.length]});
+	haxe_Log.trace("foo",{ fileName : "src/PlayView.hx", lineNumber : 72, className : "PlayView", methodName : "new", customParams : [this.fieldTiles.length]});
 	this.levelData = App.ldtkProject.levels[levelIndex];
 };
 $hxClasses["PlayView"] = PlayView;
@@ -5768,6 +5769,29 @@ PlayView.prototype = $extend(GameState.prototype,{
 		buttonBack.x = 795;
 		buttonBack.posChanged = true;
 		buttonBack.y = 300;
+		var buttonReset = new TextButton(this,"RESET",function() {
+			_gthis.activeCombine = null;
+			var _g = 0;
+			var _g1 = _gthis.combines;
+			while(_g < _g1.length) {
+				var c = _g1[_g];
+				++_g;
+				c.anim.set_colorAdd(null);
+				c.recordedInput = [];
+			}
+			_gthis.selectedHighlight.set_visible(false);
+			_gthis.paused = true;
+			_gthis.resetTime();
+		},0,false,0.25);
+		buttonReset.content.set_padding(0);
+		buttonReset.content.set_horizontalAlign(h2d_FlowAlign.Middle);
+		buttonReset.content.set_minHeight(60);
+		buttonReset.content.set_minWidth(100);
+		buttonReset.redrawButton();
+		buttonReset.posChanged = true;
+		buttonReset.x = 880;
+		buttonReset.posChanged = true;
+		buttonReset.y = 300;
 		var buttonMenu = new TextButton(this,"MENU",function() {
 			App.instance.switchState(new LevelSelectView());
 		},0,true,0.25);
@@ -5777,7 +5801,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 		buttonMenu.content.set_minWidth(100);
 		buttonMenu.redrawButton();
 		buttonMenu.posChanged = true;
-		buttonMenu.x = 880;
+		buttonMenu.x = 1040;
 		buttonMenu.posChanged = true;
 		buttonMenu.y = 300;
 		this.statusText = new Text("",this,0.3);
@@ -5858,6 +5882,9 @@ PlayView.prototype = $extend(GameState.prototype,{
 					if(hxd_Key.isDown(39)) {
 						inputs.push(CombineInput.TurnRight);
 					}
+					if(hxd_Key.isDown(40)) {
+						inputs.push(CombineInput.Backward);
+					}
 					this.activeCombine.recordedInput.splice(this.currentFrame + 1,this.activeCombine.recordedInput.length);
 					while(this.activeCombine.recordedInput.length < this.currentFrame) this.activeCombine.recordedInput.push([]);
 					this.activeCombine.recordedInput[this.currentFrame] = inputs;
@@ -5872,9 +5899,10 @@ PlayView.prototype = $extend(GameState.prototype,{
 					w.posChanged = true;
 					w.rotation = 0.0;
 				}
-				if(inputs.indexOf(CombineInput.Forward) != -1) {
-					var originalPos = Utils.point(combine.obj);
-					var originalRotation = combine.obj.rotation;
+				var originalPos = Utils.point(combine.obj);
+				var originalRotation = combine.obj.rotation;
+				var vel = null;
+				if(inputs.indexOf(CombineInput.Forward) != -1 || inputs.indexOf(CombineInput.Backward) != -1) {
 					if(inputs.indexOf(CombineInput.TurnLeft) != -1) {
 						var fh = combine.obj;
 						fh.posChanged = true;
@@ -5901,17 +5929,19 @@ PlayView.prototype = $extend(GameState.prototype,{
 							w2.rotation = -0.4;
 						}
 					}
+				}
+				if(inputs.indexOf(CombineInput.Forward) != -1) {
 					var _this = Utils.direction(combine.obj.rotation);
 					var v = PlayView.FRAME_TIME * 50.0;
-					var x = _this.x * v;
-					var y = _this.y * v;
-					if(y == null) {
-						y = 0.;
-					}
-					if(x == null) {
-						x = 0.;
-					}
-					ObjExt.setPos(combine.obj,new h2d_col_Point(originalPos.x + x,originalPos.y + y));
+					vel = new h2d_col_Point(_this.x * v,_this.y * v);
+				}
+				if(inputs.indexOf(CombineInput.Backward) != -1) {
+					var _this1 = Utils.direction(combine.obj.rotation);
+					var v1 = -PlayView.FRAME_TIME * 50.0;
+					vel = new h2d_col_Point(_this1.x * v1,_this1.y * v1);
+				}
+				if(vel != null) {
+					ObjExt.setPos(combine.obj,new h2d_col_Point(originalPos.x + vel.x,originalPos.y + vel.y));
 					var shape = this.getShape(combine.hitBox);
 					var _g8 = 0;
 					var _g9 = this.combines;
@@ -5923,13 +5953,15 @@ PlayView.prototype = $extend(GameState.prototype,{
 						}
 						if(shape.test(this.getShape(other.hitBox),null) != null) {
 							ObjExt.setPos(combine.obj,originalPos);
-							var _this1 = combine.obj;
-							_this1.posChanged = true;
-							_this1.rotation = originalRotation;
+							var _this2 = combine.obj;
+							_this2.posChanged = true;
+							_this2.rotation = originalRotation;
 							inputs.splice(0,inputs.length);
 							break;
 						}
 					}
+				}
+				if(inputs.indexOf(CombineInput.Forward) != -1) {
 					var bounds = combine.cutter.getBounds(this);
 					var xMin = Math.floor(bounds.xMin / PlayView.FIELD_TILE_SIZE);
 					var xMax = Math.ceil(bounds.xMax / PlayView.FIELD_TILE_SIZE);
@@ -5939,15 +5971,15 @@ PlayView.prototype = $extend(GameState.prototype,{
 					var _g10 = yMin;
 					var _g11 = yMax + 1;
 					while(_g10 < _g11) {
-						var y1 = _g10++;
+						var y = _g10++;
 						var _g12 = xMin;
 						var _g13 = xMax + 1;
 						while(_g12 < _g13) {
-							var x1 = _g12++;
-							var _this2 = this.fieldElements.values;
-							var key = new Point2d(x1,y1).hashCode();
-							var element = _this2.h[key];
-							if(element != null && differ_Collision.pointInPoly(x1 * PlayView.FIELD_TILE_SIZE,y1 * PlayView.FIELD_TILE_SIZE,cutterShape) && element.e.t == element.fullTile) {
+							var x = _g12++;
+							var _this3 = this.fieldElements.values;
+							var key = new Point2d(x,y).hashCode();
+							var element = _this3.h[key];
+							if(element != null && differ_Collision.pointInPoly(x * PlayView.FIELD_TILE_SIZE,y * PlayView.FIELD_TILE_SIZE,cutterShape) && element.e.t == element.fullTile) {
 								this.completedFields++;
 								element.e.t = element.emptyTile;
 							}
