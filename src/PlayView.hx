@@ -49,17 +49,18 @@ class PlayView extends GameState {
 	static final FRAME_TIME = 1 / 60.0;
 	static final FIELD_TILE_SIZE = 6;
 
-	final fieldElements = new HashMap<Point2d, BatchElement>();
+	final fieldElements = new HashMap<Point2d, {e:BatchElement, fullTile:Tile, emptyTile:Tile}>();
 	var completedFields = 0;
 	var numFields = 0;
-	final fieldTileFull = Res.field_tiles.toTile()
-		.sub(0 * FIELD_TILE_SIZE, 0, FIELD_TILE_SIZE, FIELD_TILE_SIZE, FIELD_TILE_SIZE * -0.5, FIELD_TILE_SIZE * -0.5);
-	final fieldTileEmpty = Res.field_tiles.toTile()
-		.sub(1 * FIELD_TILE_SIZE, 0, FIELD_TILE_SIZE, FIELD_TILE_SIZE, FIELD_TILE_SIZE * -0.5, FIELD_TILE_SIZE * -0.5);
+	final fieldTiles = Res.field_tiles.toTile().gridFlatten(FIELD_TILE_SIZE, FIELD_TILE_SIZE * -0.5, FIELD_TILE_SIZE * -0.5);
+	final fieldTilesFull = [0, 1, 2];
+	final fieldTilesEmpty = [3, 4, 5];
 
 	public function new(levelIndex) {
 		super();
 		this.levelIndex = levelIndex;
+
+		trace("foo", fieldTiles.length);
 
 		levelData = App.ldtkProject.levels[levelIndex];
 	}
@@ -76,11 +77,13 @@ class PlayView extends GameState {
 			for (y in 0...pixels.width) {
 				final isField = pixels.getPixel(x, y) & 0xFFFFFF == 0;
 				if (isField) {
-					final element = new BatchElement(fieldTileFull);
+					final fullTile = fieldTiles[fieldTilesFull[Std.random(fieldTilesFull.length)]];
+					final emptyTile = fieldTiles[fieldTilesEmpty[Std.random(fieldTilesEmpty.length)]];
+					final element = new BatchElement(fullTile);
 					element.x = x * FIELD_TILE_SIZE;
 					element.y = y * FIELD_TILE_SIZE;
 					field.add(element);
-					fieldElements.set(new Point2d(x, y), element);
+					fieldElements.set(new Point2d(x, y), {e: element, fullTile: fullTile, emptyTile: emptyTile});
 					numFields++;
 				}
 			}
@@ -121,31 +124,40 @@ class PlayView extends GameState {
 				paused = true;
 				// resetTime();
 			};
+			final select = new Graphics(combineObj);
+			select.beginFill(0xffffffff, 0.3);
+			select.drawCircle(-20, 0, combineTile.width * 0.6);
+			new FuncObject(() -> {
+				interactive.visible = (currentFrame == 0);
+				select.visible = (activeCombine == null);
+			}, combineObj);
 			combines.push(combine);
 		}
 
-		selectedHighlight.beginFill(0xffffffff, 0.3);
+		selectedHighlight.lineStyle(2, 0xffffffff);
 		selectedHighlight.drawCircle(-20, 0, combineTile.width * 0.6);
 
 		final BUTTON_TILE_SIZE = 11;
-		final buttonPlayTile = Res.buttons.toTile()
-			.sub(0 * BUTTON_TILE_SIZE, 0, BUTTON_TILE_SIZE, BUTTON_TILE_SIZE, BUTTON_TILE_SIZE * -0.5, BUTTON_TILE_SIZE * -0.5);
-		final buttonPlay = new TileButton(buttonPlayTile, this, () -> {
-			paused = false;
-		});
-		buttonPlay.x = 800;
-		buttonPlay.y = 400;
-		final buttonPauseTile = Res.buttons.toTile()
-			.sub(2 * BUTTON_TILE_SIZE, 0, BUTTON_TILE_SIZE, BUTTON_TILE_SIZE, BUTTON_TILE_SIZE * -0.5, BUTTON_TILE_SIZE * -0.5);
-		final buttonPause = new TileButton(buttonPauseTile, this, () -> {
-			paused = true;
-		});
-		buttonPause.x = buttonPlay.x;
-		buttonPause.y = buttonPlay.y;
-		new FuncObject(() -> {
-			buttonPlay.visible = paused;
-			buttonPause.visible = !paused;
-		}, buttonPlay);
+		/*
+			final buttonPlayTile = Res.buttons.toTile()
+				.sub(0 * BUTTON_TILE_SIZE, 0, BUTTON_TILE_SIZE, BUTTON_TILE_SIZE, BUTTON_TILE_SIZE * -0.5, BUTTON_TILE_SIZE * -0.5);
+			final buttonPlay = new TileButton(buttonPlayTile, this, () -> {
+				paused = false;
+			});
+			buttonPlay.x = 800;
+			buttonPlay.y = 400;
+			final buttonPauseTile = Res.buttons.toTile()
+				.sub(2 * BUTTON_TILE_SIZE, 0, BUTTON_TILE_SIZE, BUTTON_TILE_SIZE, BUTTON_TILE_SIZE * -0.5, BUTTON_TILE_SIZE * -0.5);
+			final buttonPause = new TileButton(buttonPauseTile, this, () -> {
+				paused = true;
+			});
+			buttonPause.x = buttonPlay.x;
+			buttonPause.y = buttonPlay.y;
+			new FuncObject(() -> {
+				buttonPlay.visible = paused;
+				buttonPause.visible = !paused;
+			}, buttonPlay);
+		 */
 		final buttonBackTile = Res.buttons.toTile()
 			.sub(1 * BUTTON_TILE_SIZE, 0, BUTTON_TILE_SIZE, BUTTON_TILE_SIZE, BUTTON_TILE_SIZE * -0.5, BUTTON_TILE_SIZE * -0.5);
 		final buttonBack = new TileButton(buttonBackTile, this, () -> {
@@ -174,7 +186,7 @@ class PlayView extends GameState {
 		timeAcc = 0;
 		completedFields = 0;
 		for (e in fieldElements) {
-			e.t = fieldTileFull;
+			e.e.t = e.fullTile;
 		}
 		for (c in combines) {
 			c.obj.setPos(c.startPos);
@@ -254,9 +266,9 @@ class PlayView extends GameState {
 							final element = fieldElements.get(new Point2d(x, y));
 							if (element != null
 								&& collider.contains(new Point(x * FIELD_TILE_SIZE, y * FIELD_TILE_SIZE))
-								&& element.t == fieldTileFull) {
+								&& element.e.t == element.fullTile) {
 								completedFields++;
-								element.t = fieldTileEmpty;
+								element.e.t = element.emptyTile;
 							}
 						}
 					}
