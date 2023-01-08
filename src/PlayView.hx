@@ -1,5 +1,5 @@
-import Gui.TextButton;
 import Gui.Text;
+import Gui.TextButton;
 import Gui.TileButton;
 import Utils.Point2d;
 import differ.Collision;
@@ -27,6 +27,7 @@ enum CombineInput {
 	TurnLeft;
 	TurnRight;
 	Forward;
+	Backward;
 }
 
 typedef Combine = {
@@ -164,8 +165,8 @@ class PlayView extends GameState {
 				// resetTime();
 			};
 			/*final select = new Graphics(combineObj);
-			select.beginFill(0xffffffff, 0.3);
-			select.drawCircle(-20, 0, combineFrames[0].width * 0.6);*/
+				select.beginFill(0xffffffff, 0.3);
+				select.drawCircle(-20, 0, combineFrames[0].width * 0.6); */
 			new FuncObject(() -> {
 				interactive.visible = (currentFrame == 0);
 				// select.visible = (activeCombine == null);
@@ -210,16 +211,35 @@ class PlayView extends GameState {
 		});
 		buttonBack.x = 795;
 		buttonBack.y = 300;
+		final buttonReset = new TextButton(this, "RESET", () -> {
+			activeCombine = null;
+			for (c in combines) {
+				c.anim.colorAdd = null;
+				c.recordedInput = [];
+			}
+			selectedHighlight.visible = false;
+			paused = true;
+			resetTime();
+		}, 0x000000, false, 0.25);
+		buttonReset.content.padding = 0;
+		// buttonReset.content.paddingBottom = 10;
+		buttonReset.content.horizontalAlign = Middle;
+		buttonReset.content.minHeight = 60;
+		buttonReset.content.minWidth = 100;
+		buttonReset.redrawButton();
+		buttonReset.x = 880;
+		buttonReset.y = 300;
+
 		final buttonMenu = new TextButton(this, "MENU", () -> {
 			App.instance.switchState(new LevelSelectView());
 		}, 0x000000, true, 0.25);
 		buttonMenu.content.padding = 0;
-		//buttonMenu.content.paddingBottom = 10;
+		// buttonMenu.content.paddingBottom = 10;
 		buttonMenu.content.horizontalAlign = Middle;
 		buttonMenu.content.minHeight = 60;
 		buttonMenu.content.minWidth = 100;
 		buttonMenu.redrawButton();
-		buttonMenu.x = 880;
+		buttonMenu.x = 1040;
 		buttonMenu.y = 300;
 
 		statusText = new Text("", this, 0.3);
@@ -286,6 +306,9 @@ class PlayView extends GameState {
 					if (Key.isDown(Key.RIGHT)) {
 						inputs.push(TurnRight);
 					}
+					if (Key.isDown(Key.DOWN)) {
+						inputs.push(Backward);
+					}
 					activeCombine.recordedInput.splice(currentFrame + 1, activeCombine.recordedInput.length);
 					while (activeCombine.recordedInput.length < currentFrame) {
 						activeCombine.recordedInput.push([]);
@@ -299,10 +322,10 @@ class PlayView extends GameState {
 				for (w in combine.wheels) {
 					w.rotation = 0.0;
 				}
-				if (inputs.contains(Forward)) {
-					final originalPos = Utils.point(combine.obj);
-					final originalRotation = combine.obj.rotation;
-
+				final originalPos = Utils.point(combine.obj);
+				final originalRotation = combine.obj.rotation;
+				var vel = null;
+				if (inputs.contains(Forward) || inputs.contains(Backward)) {
 					if (inputs.contains(TurnLeft)) {
 						combine.obj.rotation -= FRAME_TIME * 1.0;
 						for (w in combine.wheels) {
@@ -315,8 +338,16 @@ class PlayView extends GameState {
 							w.rotation = -0.4;
 						}
 					}
+				}
 
-					final vel = Utils.direction(combine.obj.rotation).multiply(FRAME_TIME * 50.0);
+				if (inputs.contains(Forward)) {
+					vel = Utils.direction(combine.obj.rotation).multiply(FRAME_TIME * 50.0);
+				}
+				if (inputs.contains(Backward)) {
+					vel = Utils.direction(combine.obj.rotation).multiply(-FRAME_TIME * 50.0);
+				}
+
+				if (vel != null) {
 					combine.obj.setPos(originalPos.add(vel));
 
 					final shape = getShape(combine.hitBox);
@@ -331,7 +362,8 @@ class PlayView extends GameState {
 							break;
 						}
 					}
-
+				}
+				if (inputs.contains(Forward)) {
 					final bounds = combine.cutter.getBounds(this);
 					final xMin = Math.floor(bounds.xMin / FIELD_TILE_SIZE);
 					final xMax = Math.ceil(bounds.xMax / FIELD_TILE_SIZE);
