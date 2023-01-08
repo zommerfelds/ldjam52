@@ -16,6 +16,7 @@ class LevelSelectView extends GameState {
 
 		centeringFlow.addSpacing(Gui.scaleAsInt(100));
 
+		var totalTime = 0.0;
 		var i = 0;
 		for (level in App.ldtkProject.levels) {
 			final iCopy = i;
@@ -23,6 +24,7 @@ class LevelSelectView extends GameState {
 			var label = level.identifier;
 			if (App.save.levelRecords.get(i) != null) {
 				label += ' (${MyUtils.formatTime(App.save.levelRecords.get(i))})';
+				totalTime += App.save.levelRecords.get(i);
 			}
 			final button = new Gui.TextButton(centeringFlow, label, () -> {
 				App.instance.switchState(new PlayView(iCopy));
@@ -32,7 +34,8 @@ class LevelSelectView extends GameState {
 		}
 
 		if (App.save.unlockedLevel >= App.ldtkProject.levels.length) {
-			new Text("You beat all levels! Thank you for playing. :)", centeringFlow);
+			new Text("You beat all levels! Thank you for playing. :)<br/>Total best time: " + MyUtils.formatTime(totalTime),
+				centeringFlow).textAlign = MultilineCenter;
 		}
 	}
 }

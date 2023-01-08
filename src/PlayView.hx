@@ -74,7 +74,9 @@ class PlayView extends GameState {
 	}
 
 	override function init() {
-		App.instance.engine.backgroundColor = 0xaec025;
+		App.instance.engine.backgroundColor = 0xccdb5e;
+		x = 20;
+		y = 20;
 		scale(2);
 
 		addEventListener(onEvent);
@@ -252,6 +254,10 @@ class PlayView extends GameState {
 		statusText.x = 800;
 		statusText.y = 290;
 		statusText.maxWidth = 350;
+
+		final gr = new Graphics(this);
+		gr.lineStyle(1, 0x000000);
+		gr.drawRect(-0.5 * FIELD_TILE_SIZE, -0.5 * FIELD_TILE_SIZE, 128 * FIELD_TILE_SIZE, 128 * FIELD_TILE_SIZE);
 	}
 
 	function resetTime() {
