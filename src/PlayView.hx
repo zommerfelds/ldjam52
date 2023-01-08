@@ -108,6 +108,8 @@ class PlayView extends GameState {
 			}
 		}
 
+		levelData.l_Props.render(staticTiles);
+
 		final combineFrames = Res.combine.toTile().gridFlatten(64, -54, -32);
 
 		for (combineData in levelData.l_Entities.all_Combine) {
