@@ -18,7 +18,11 @@ class LevelSelectView extends GameState {
 		for (level in App.ldtkProject.levels) {
 			final iCopy = i;
 			final locked = i > App.save.unlockedLevel;
-			final button = new Gui.TextButton(centeringFlow, level.identifier, () -> {
+			var label = level.identifier;
+			if (App.save.levelRecords.get(i) != null) {
+				label += ' (${MyUtils.formatTime(App.save.levelRecords.get(i))})';
+			}
+			final button = new Gui.TextButton(centeringFlow, label, () -> {
 				App.instance.switchState(new PlayView(iCopy));
 			}, Gui.Colors.BLUE, 0.8);
 			button.enabled = !locked;

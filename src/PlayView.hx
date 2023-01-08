@@ -227,7 +227,7 @@ class PlayView extends GameState {
 		buttonReset.content.minHeight = 60;
 		buttonReset.content.minWidth = 100;
 		buttonReset.redrawButton();
-		buttonReset.x = 880;
+		buttonReset.x = 870;
 		buttonReset.y = 300;
 
 		final buttonMenu = new TextButton(this, "MENU", () -> {
@@ -265,12 +265,7 @@ class PlayView extends GameState {
 	function onEvent(event:hxd.Event) {}
 
 	override function update(dt:Float) {
-		final date = Date.fromTime(currentFrame * FRAME_TIME * 1000);
-		statusText.text = DateTools.format(date, "%M:%S.")
-			+ ("" + Std.int(((currentFrame * FRAME_TIME) % 1.0) * 100)).lpad("0", 2)
-			+ "<br/>"
-			+ Utils.floatToStr(completedFields / numFields * 100, 1)
-			+ "%";
+		statusText.text = MyUtils.formatTime(currentFrame * FRAME_TIME) + "<br/>" + Utils.floatToStr(completedFields / numFields * 100, 1) + "%";
 		if (paused) {
 			if (activeCombine == null) {
 				statusText.text += "<br/>Click on a combine harvester to start.";
@@ -325,18 +320,30 @@ class PlayView extends GameState {
 				final originalPos = Utils.point(combine.obj);
 				final originalRotation = combine.obj.rotation;
 				var vel = null;
-				if (inputs.contains(Forward) || inputs.contains(Backward)) {
+				if (inputs.contains(TurnLeft)) {
+					for (w in combine.wheels) {
+						w.rotation = 0.4;
+					}
+				}
+				if (inputs.contains(TurnRight)) {
+					for (w in combine.wheels) {
+						w.rotation = -0.4;
+					}
+				}
+				if (inputs.contains(Forward)) {
 					if (inputs.contains(TurnLeft)) {
 						combine.obj.rotation -= FRAME_TIME * 1.0;
-						for (w in combine.wheels) {
-							w.rotation = 0.4;
-						}
 					}
 					if (inputs.contains(TurnRight)) {
 						combine.obj.rotation += FRAME_TIME * 1.0;
-						for (w in combine.wheels) {
-							w.rotation = -0.4;
-						}
+					}
+				}
+				if (inputs.contains(Backward)) {
+					if (inputs.contains(TurnLeft)) {
+						combine.obj.rotation += FRAME_TIME * 1.0;
+					}
+					if (inputs.contains(TurnRight)) {
+						combine.obj.rotation -= FRAME_TIME * 1.0;
 					}
 				}
 
@@ -385,11 +392,13 @@ class PlayView extends GameState {
 				if (completedFields == numFields) {
 					if (App.save.unlockedLevel < levelIndex + 1) {
 						App.save.unlockedLevel = levelIndex + 1;
+						App.save.levelRecords.set(levelIndex, currentFrame * FRAME_TIME);
 						Save.save(App.save);
 					}
 
 					if (levelIndex + 1 < App.ldtkProject.levels.length) {
-						App.instance.switchState(new PlayView(levelIndex + 1));
+						// App.instance.switchState(new PlayView(levelIndex + 1));
+						App.instance.switchState(new LevelSelectView());
 					} else {
 						App.instance.switchState(new GameEndView());
 					}

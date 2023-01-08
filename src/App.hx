@@ -1,3 +1,6 @@
+import hxd.Save;
+
+@:expose
 class App extends HerbalTeaApp {
 	public static var instance:App;
 	public static final ldtkProject = new LdtkProject();
@@ -6,7 +9,7 @@ class App extends HerbalTeaApp {
 		instance = new App();
 	}
 
-	public static final save = hxd.Save.load({unlockedLevel: 0});
+	public static final save = hxd.Save.load({unlockedLevel: 0, levelRecords: new Map<Int, Float>()});
 
 	override function onload() {
 		final params = new js.html.URLSearchParams(js.Browser.window.location.search);
@@ -24,5 +27,10 @@ class App extends HerbalTeaApp {
 		}
 
 		switchState(view);
+	}
+
+	// Can be used for debugging in JavaScript console.
+	static function writeSave() {
+		Save.save(save);
 	}
 }
