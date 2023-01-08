@@ -1,4 +1,4 @@
-(function ($global) { "use strict";
+(function ($hx_exports, $global) { "use strict";
 var $hxClasses = {},$estr = function() { return js_Boot.__string_rec(this,''); },$hxEnums = $hxEnums || {},$_;
 function $extend(from, fields) {
 	var proto = Object.create(from);
@@ -1628,13 +1628,16 @@ Reflect.deleteField = function(o,field) {
 	delete(o[field]);
 	return true;
 };
-var App = function() {
+var App = $hx_exports["App"] = function() {
 	HerbalTeaApp.call(this);
 };
 $hxClasses["App"] = App;
 App.__name__ = "App";
 App.main = function() {
 	App.instance = new App();
+};
+App.writeSave = function() {
+	hxd_Save.save(App.save);
 };
 App.__super__ = HerbalTeaApp;
 App.prototype = $extend(HerbalTeaApp.prototype,{
@@ -5549,7 +5552,11 @@ LevelSelectView.prototype = $extend(GameState.prototype,{
 		var _g1 = App.ldtkProject.levels;
 		while(_g < _g1.length) {
 			var locked = i > App.save.unlockedLevel;
-			new TextButton(centeringFlow,_g1[_g++].identifier,(function(iCopy) {
+			var label = _g1[_g++].identifier;
+			if(App.save.levelRecords.h[i] != null) {
+				label += " (" + MyUtils.formatTime(App.save.levelRecords.h[i]) + ")";
+			}
+			new TextButton(centeringFlow,label,(function(iCopy) {
 				return function() {
 					App.instance.switchState(new PlayView(iCopy[0]));
 				};
@@ -5597,6 +5604,9 @@ $hxClasses["MyUtils"] = MyUtils;
 MyUtils.__name__ = "MyUtils";
 MyUtils.differVector = function(pt) {
 	return new differ_math_Vector(pt.x,pt.y);
+};
+MyUtils.formatTime = function(timeSecs) {
+	return DateTools.format(new Date(timeSecs * 1000),"%M:%S.") + StringTools.lpad("" + (timeSecs % 1.0 * 100 | 0),"0",2);
 };
 var ObjExt = function() { };
 $hxClasses["ObjExt"] = ObjExt;
@@ -5789,7 +5799,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 		buttonReset.content.set_minWidth(100);
 		buttonReset.redrawButton();
 		buttonReset.posChanged = true;
-		buttonReset.x = 880;
+		buttonReset.x = 870;
 		buttonReset.posChanged = true;
 		buttonReset.y = 300;
 		var buttonMenu = new TextButton(this,"MENU",function() {
@@ -5837,8 +5847,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 	,onEvent: function(event) {
 	}
 	,update: function(dt) {
-		var date = new Date(this.currentFrame * PlayView.FRAME_TIME * 1000);
-		this.statusText.set_text(DateTools.format(date,"%M:%S.") + StringTools.lpad("" + (this.currentFrame * PlayView.FRAME_TIME % 1.0 * 100 | 0),"0",2) + "<br/>" + Utils.floatToStr(this.completedFields / this.numFields * 100,1) + "%");
+		this.statusText.set_text(MyUtils.formatTime(this.currentFrame * PlayView.FRAME_TIME) + "<br/>" + Utils.floatToStr(this.completedFields / this.numFields * 100,1) + "%");
 		if(this.paused) {
 			if(this.activeCombine == null) {
 				var fh = this.statusText;
@@ -5902,32 +5911,48 @@ PlayView.prototype = $extend(GameState.prototype,{
 				var originalPos = Utils.point(combine.obj);
 				var originalRotation = combine.obj.rotation;
 				var vel = null;
-				if(inputs.indexOf(CombineInput.Forward) != -1 || inputs.indexOf(CombineInput.Backward) != -1) {
+				if(inputs.indexOf(CombineInput.TurnLeft) != -1) {
+					var _g4 = 0;
+					var _g5 = combine.wheels;
+					while(_g4 < _g5.length) {
+						var w1 = _g5[_g4];
+						++_g4;
+						w1.posChanged = true;
+						w1.rotation = 0.4;
+					}
+				}
+				if(inputs.indexOf(CombineInput.TurnRight) != -1) {
+					var _g6 = 0;
+					var _g7 = combine.wheels;
+					while(_g6 < _g7.length) {
+						var w2 = _g7[_g6];
+						++_g6;
+						w2.posChanged = true;
+						w2.rotation = -0.4;
+					}
+				}
+				if(inputs.indexOf(CombineInput.Forward) != -1) {
 					if(inputs.indexOf(CombineInput.TurnLeft) != -1) {
 						var fh = combine.obj;
 						fh.posChanged = true;
 						fh.rotation -= PlayView.FRAME_TIME;
-						var _g4 = 0;
-						var _g5 = combine.wheels;
-						while(_g4 < _g5.length) {
-							var w1 = _g5[_g4];
-							++_g4;
-							w1.posChanged = true;
-							w1.rotation = 0.4;
-						}
 					}
 					if(inputs.indexOf(CombineInput.TurnRight) != -1) {
 						var fh1 = combine.obj;
 						fh1.posChanged = true;
 						fh1.rotation += PlayView.FRAME_TIME;
-						var _g6 = 0;
-						var _g7 = combine.wheels;
-						while(_g6 < _g7.length) {
-							var w2 = _g7[_g6];
-							++_g6;
-							w2.posChanged = true;
-							w2.rotation = -0.4;
-						}
+					}
+				}
+				if(inputs.indexOf(CombineInput.Backward) != -1) {
+					if(inputs.indexOf(CombineInput.TurnLeft) != -1) {
+						var fh2 = combine.obj;
+						fh2.posChanged = true;
+						fh2.rotation += PlayView.FRAME_TIME;
+					}
+					if(inputs.indexOf(CombineInput.TurnRight) != -1) {
+						var fh3 = combine.obj;
+						fh3.posChanged = true;
+						fh3.rotation -= PlayView.FRAME_TIME;
 					}
 				}
 				if(inputs.indexOf(CombineInput.Forward) != -1) {
@@ -5989,10 +6014,11 @@ PlayView.prototype = $extend(GameState.prototype,{
 				if(this.completedFields == this.numFields) {
 					if(App.save.unlockedLevel < this.levelIndex + 1) {
 						App.save.unlockedLevel = this.levelIndex + 1;
+						App.save.levelRecords.h[this.levelIndex] = this.currentFrame * PlayView.FRAME_TIME;
 						hxd_Save.save(App.save);
 					}
 					if(this.levelIndex + 1 < App.ldtkProject.levels.length) {
-						App.instance.switchState(new PlayView(this.levelIndex + 1));
+						App.instance.switchState(new LevelSelectView());
 					} else {
 						App.instance.switchState(new GameEndView());
 					}
@@ -46503,7 +46529,7 @@ hxd_Save.SALT = "s*al!t";
 haxe_Unserializer.DEFAULT_RESOLVER = new haxe__$Unserializer_DefaultResolver();
 haxe_Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
 App.ldtkProject = new LdtkProject();
-App.save = hxd_Save.load({ unlockedLevel : 0});
+App.save = hxd_Save.load({ unlockedLevel : 0, levelRecords : new haxe_ds_IntMap()});
 DateTools.DAY_SHORT_NAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
 DateTools.DAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 DateTools.MONTH_SHORT_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -46756,6 +46782,6 @@ motion_Actuate.targetLibraries = new haxe_ds_ObjectMap();
 	App.main();
 	haxe_EntryPoint.run();
 }
-})(typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
+})(typeof exports != "undefined" ? exports : typeof window != "undefined" ? window : typeof self != "undefined" ? self : this, typeof window != "undefined" ? window : typeof global != "undefined" ? global : typeof self != "undefined" ? self : this);
 
 //# sourceMappingURL=game.js.map
