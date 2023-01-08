@@ -712,13 +712,13 @@ ldtk_Project.prototype = {
 	,__class__: ldtk_Project
 };
 var LdtkProject = function(overrideEmbedJson) {
-	this.all_levels = { Level_1 : null, Level_2 : null};
+	this.all_levels = { Level_1 : null, Level_2 : null, Level_3 : null};
 	this.levels = [];
 	ldtk_Project.call(this);
 	this._enumTypePrefix = "Enum_";
 	this.projectDir = "res/heaps";
 	this.projectFilePath = "res/heaps/map.ldtk";
-	this.parseJson(overrideEmbedJson != null ? overrideEmbedJson : "{\n\t\"__header__\": {\n\t\t\"fileType\": \"LDtk Project JSON\",\n\t\t\"app\": \"LDtk\",\n\t\t\"doc\": \"https://ldtk.io/json\",\n\t\t\"schema\": \"https://ldtk.io/files/JSON_SCHEMA.json\",\n\t\t\"appAuthor\": \"Sebastien 'deepnight' Benard\",\n\t\t\"appVersion\": \"1.2.1\",\n\t\t\"url\": \"https://ldtk.io\"\n\t},\n\t\"iid\": \"2ed57400-7820-11ed-8a57-8f6658066982\",\n\t\"jsonVersion\": \"1.2.1\",\n\t\"appBuildId\": 464653,\n\t\"nextUid\": 7,\n\t\"identifierStyle\": \"Capitalize\",\n\t\"worldLayout\": \"LinearHorizontal\",\n\t\"worldGridWidth\": 256,\n\t\"worldGridHeight\": 256,\n\t\"defaultLevelWidth\": 256,\n\t\"defaultLevelHeight\": 256,\n\t\"defaultPivotX\": 0,\n\t\"defaultPivotY\": 0,\n\t\"defaultGridSize\": 16,\n\t\"bgColor\": \"#40465B\",\n\t\"defaultLevelBgColor\": \"#696A79\",\n\t\"minifyJson\": false,\n\t\"externalLevels\": false,\n\t\"exportTiled\": false,\n\t\"simplifiedExport\": false,\n\t\"imageExportMode\": \"None\",\n\t\"exportLevelBg\": true,\n\t\"pngFilePattern\": null,\n\t\"backupOnSave\": false,\n\t\"backupLimit\": 10,\n\t\"levelNamePattern\": \"Level_%idx1\",\n\t\"tutorialDesc\": null,\n\t\"customCommands\": [],\n\t\"flags\": [],\n\t\"defs\": { \"layers\": [\n\t\t{\n\t\t\t\"__type\": \"Entities\",\n\t\t\t\"identifier\": \"Entities\",\n\t\t\t\"type\": \"Entities\",\n\t\t\t\"uid\": 2,\n\t\t\t\"gridSize\": 8,\n\t\t\t\"guideGridWid\": 0,\n\t\t\t\"guideGridHei\": 0,\n\t\t\t\"displayOpacity\": 1,\n\t\t\t\"inactiveOpacity\": 0.6,\n\t\t\t\"hideInList\": false,\n\t\t\t\"hideFieldsWhenInactive\": true,\n\t\t\t\"canSelectWhenInactive\": true,\n\t\t\t\"pxOffsetX\": 0,\n\t\t\t\"pxOffsetY\": 0,\n\t\t\t\"parallaxFactorX\": 0,\n\t\t\t\"parallaxFactorY\": 0,\n\t\t\t\"parallaxScaling\": true,\n\t\t\t\"requiredTags\": [],\n\t\t\t\"excludedTags\": [],\n\t\t\t\"intGridValues\": [],\n\t\t\t\"autoRuleGroups\": [],\n\t\t\t\"autoSourceLayerDefUid\": null,\n\t\t\t\"tilesetDefUid\": null,\n\t\t\t\"tilePivotX\": 0,\n\t\t\t\"tilePivotY\": 0\n\t\t}\n\t], \"entities\": [\n\t\t{\n\t\t\t\"identifier\": \"Combine\",\n\t\t\t\"uid\": 3,\n\t\t\t\"tags\": [],\n\t\t\t\"width\": 64,\n\t\t\t\"height\": 64,\n\t\t\t\"resizableX\": false,\n\t\t\t\"resizableY\": false,\n\t\t\t\"keepAspectRatio\": false,\n\t\t\t\"tileOpacity\": 1,\n\t\t\t\"fillOpacity\": 1,\n\t\t\t\"lineOpacity\": 1,\n\t\t\t\"hollow\": false,\n\t\t\t\"color\": \"#FEAE34\",\n\t\t\t\"renderMode\": \"Rectangle\",\n\t\t\t\"showName\": true,\n\t\t\t\"tilesetId\": null,\n\t\t\t\"tileRenderMode\": \"FitInside\",\n\t\t\t\"tileRect\": null,\n\t\t\t\"nineSliceBorders\": [],\n\t\t\t\"maxCount\": 0,\n\t\t\t\"limitScope\": \"PerLevel\",\n\t\t\t\"limitBehavior\": \"MoveLastOne\",\n\t\t\t\"pivotX\": 0.8,\n\t\t\t\"pivotY\": 0.5,\n\t\t\t\"fieldDefs\": []\n\t\t}\n\t], \"tilesets\": [], \"enums\": [], \"externalEnums\": [], \"levelFields\": [] },\n\t\"levels\": [\n\t\t{\n\t\t\t\"identifier\": \"Level_1\",\n\t\t\t\"iid\": \"2ed59b10-7820-11ed-8a57-4bed449216cf\",\n\t\t\t\"uid\": 0,\n\t\t\t\"worldX\": -1,\n\t\t\t\"worldY\": -1,\n\t\t\t\"worldDepth\": 0,\n\t\t\t\"pxWid\": 768,\n\t\t\t\"pxHei\": 768,\n\t\t\t\"__bgColor\": \"#696A79\",\n\t\t\t\"bgColor\": null,\n\t\t\t\"useAutoIdentifier\": true,\n\t\t\t\"bgRelPath\": \"level1.png\",\n\t\t\t\"bgPos\": \"Contain\",\n\t\t\t\"bgPivotX\": 0.5,\n\t\t\t\"bgPivotY\": 0.5,\n\t\t\t\"__smartColor\": \"#ADADB5\",\n\t\t\t\"__bgPos\": { \"topLeftPx\": [0,0], \"scale\": [6,6], \"cropRect\": [0,0,128,128] },\n\t\t\t\"externalRelPath\": null,\n\t\t\t\"fieldInstances\": [],\n\t\t\t\"layerInstances\": [\n\t\t\t\t{\n\t\t\t\t\t\"__identifier\": \"Entities\",\n\t\t\t\t\t\"__type\": \"Entities\",\n\t\t\t\t\t\"__cWid\": 96,\n\t\t\t\t\t\"__cHei\": 96,\n\t\t\t\t\t\"__gridSize\": 8,\n\t\t\t\t\t\"__opacity\": 1,\n\t\t\t\t\t\"__pxTotalOffsetX\": 0,\n\t\t\t\t\t\"__pxTotalOffsetY\": 0,\n\t\t\t\t\t\"__tilesetDefUid\": null,\n\t\t\t\t\t\"__tilesetRelPath\": null,\n\t\t\t\t\t\"iid\": \"384e5620-7820-11ed-9d14-1b810d9730e8\",\n\t\t\t\t\t\"levelId\": 0,\n\t\t\t\t\t\"layerDefUid\": 2,\n\t\t\t\t\t\"pxOffsetX\": 0,\n\t\t\t\t\t\"pxOffsetY\": 0,\n\t\t\t\t\t\"visible\": true,\n\t\t\t\t\t\"optionalRules\": [],\n\t\t\t\t\t\"intGridCsv\": [],\n\t\t\t\t\t\"autoLayerTiles\": [],\n\t\t\t\t\t\"seed\": 8508788,\n\t\t\t\t\t\"overrideTilesetUid\": null,\n\t\t\t\t\t\"gridTiles\": [],\n\t\t\t\t\t\"entityInstances\": [\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"__identifier\": \"Combine\",\n\t\t\t\t\t\t\t\"__grid\": [38,60],\n\t\t\t\t\t\t\t\"__pivot\": [0.8,0.5],\n\t\t\t\t\t\t\t\"__tags\": [],\n\t\t\t\t\t\t\t\"__tile\": null,\n\t\t\t\t\t\t\t\"__smartColor\": \"#FEAE34\",\n\t\t\t\t\t\t\t\"iid\": \"fe903400-7820-11ed-9d14-e90854c21f44\",\n\t\t\t\t\t\t\t\"width\": 64,\n\t\t\t\t\t\t\t\"height\": 64,\n\t\t\t\t\t\t\t\"defUid\": 3,\n\t\t\t\t\t\t\t\"px\": [306,484],\n\t\t\t\t\t\t\t\"fieldInstances\": []\n\t\t\t\t\t\t}\n\t\t\t\t\t]\n\t\t\t\t}\n\t\t\t],\n\t\t\t\"__neighbours\": []\n\t\t},\n\t\t{\n\t\t\t\"identifier\": \"Level_2\",\n\t\t\t\"iid\": \"d61c8250-7820-11ed-9d14-e768b30eedc7\",\n\t\t\t\"uid\": 6,\n\t\t\t\"worldX\": -1,\n\t\t\t\"worldY\": -1,\n\t\t\t\"worldDepth\": 0,\n\t\t\t\"pxWid\": 768,\n\t\t\t\"pxHei\": 768,\n\t\t\t\"__bgColor\": \"#696A79\",\n\t\t\t\"bgColor\": null,\n\t\t\t\"useAutoIdentifier\": true,\n\t\t\t\"bgRelPath\": \"level2.png\",\n\t\t\t\"bgPos\": \"Contain\",\n\t\t\t\"bgPivotX\": 0.5,\n\t\t\t\"bgPivotY\": 0.5,\n\t\t\t\"__smartColor\": \"#ADADB5\",\n\t\t\t\"__bgPos\": { \"topLeftPx\": [0,0], \"scale\": [6,6], \"cropRect\": [0,0,128,128] },\n\t\t\t\"externalRelPath\": null,\n\t\t\t\"fieldInstances\": [],\n\t\t\t\"layerInstances\": [\n\t\t\t\t{\n\t\t\t\t\t\"__identifier\": \"Entities\",\n\t\t\t\t\t\"__type\": \"Entities\",\n\t\t\t\t\t\"__cWid\": 96,\n\t\t\t\t\t\"__cHei\": 96,\n\t\t\t\t\t\"__gridSize\": 8,\n\t\t\t\t\t\"__opacity\": 1,\n\t\t\t\t\t\"__pxTotalOffsetX\": 0,\n\t\t\t\t\t\"__pxTotalOffsetY\": 0,\n\t\t\t\t\t\"__tilesetDefUid\": null,\n\t\t\t\t\t\"__tilesetRelPath\": null,\n\t\t\t\t\t\"iid\": \"d61c8251-7820-11ed-9d14-8f40071589ab\",\n\t\t\t\t\t\"levelId\": 6,\n\t\t\t\t\t\"layerDefUid\": 2,\n\t\t\t\t\t\"pxOffsetX\": 0,\n\t\t\t\t\t\"pxOffsetY\": 0,\n\t\t\t\t\t\"visible\": true,\n\t\t\t\t\t\"optionalRules\": [],\n\t\t\t\t\t\"intGridCsv\": [],\n\t\t\t\t\t\"autoLayerTiles\": [],\n\t\t\t\t\t\"seed\": 8508788,\n\t\t\t\t\t\"overrideTilesetUid\": null,\n\t\t\t\t\t\"gridTiles\": [],\n\t\t\t\t\t\"entityInstances\": [\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"__identifier\": \"Combine\",\n\t\t\t\t\t\t\t\"__grid\": [30,11],\n\t\t\t\t\t\t\t\"__pivot\": [0.8,0.5],\n\t\t\t\t\t\t\t\"__tags\": [],\n\t\t\t\t\t\t\t\"__tile\": null,\n\t\t\t\t\t\t\t\"__smartColor\": \"#FEAE34\",\n\t\t\t\t\t\t\t\"iid\": \"d61c8252-7820-11ed-9d14-1d8ba3330c77\",\n\t\t\t\t\t\t\t\"width\": 64,\n\t\t\t\t\t\t\t\"height\": 64,\n\t\t\t\t\t\t\t\"defUid\": 3,\n\t\t\t\t\t\t\t\"px\": [242,92],\n\t\t\t\t\t\t\t\"fieldInstances\": []\n\t\t\t\t\t\t}\n\t\t\t\t\t]\n\t\t\t\t}\n\t\t\t],\n\t\t\t\"__neighbours\": []\n\t\t}\n\t],\n\t\"worlds\": []\n}");
+	this.parseJson(overrideEmbedJson != null ? overrideEmbedJson : "{\n\t\"__header__\": {\n\t\t\"fileType\": \"LDtk Project JSON\",\n\t\t\"app\": \"LDtk\",\n\t\t\"doc\": \"https://ldtk.io/json\",\n\t\t\"schema\": \"https://ldtk.io/files/JSON_SCHEMA.json\",\n\t\t\"appAuthor\": \"Sebastien 'deepnight' Benard\",\n\t\t\"appVersion\": \"1.2.1\",\n\t\t\"url\": \"https://ldtk.io\"\n\t},\n\t\"iid\": \"2ed57400-7820-11ed-8a57-8f6658066982\",\n\t\"jsonVersion\": \"1.2.1\",\n\t\"appBuildId\": 464653,\n\t\"nextUid\": 8,\n\t\"identifierStyle\": \"Capitalize\",\n\t\"worldLayout\": \"LinearHorizontal\",\n\t\"worldGridWidth\": 256,\n\t\"worldGridHeight\": 256,\n\t\"defaultLevelWidth\": 256,\n\t\"defaultLevelHeight\": 256,\n\t\"defaultPivotX\": 0,\n\t\"defaultPivotY\": 0,\n\t\"defaultGridSize\": 16,\n\t\"bgColor\": \"#40465B\",\n\t\"defaultLevelBgColor\": \"#696A79\",\n\t\"minifyJson\": false,\n\t\"externalLevels\": false,\n\t\"exportTiled\": false,\n\t\"simplifiedExport\": false,\n\t\"imageExportMode\": \"None\",\n\t\"exportLevelBg\": true,\n\t\"pngFilePattern\": null,\n\t\"backupOnSave\": false,\n\t\"backupLimit\": 10,\n\t\"levelNamePattern\": \"Level_%idx1\",\n\t\"tutorialDesc\": null,\n\t\"customCommands\": [],\n\t\"flags\": [],\n\t\"defs\": { \"layers\": [\n\t\t{\n\t\t\t\"__type\": \"Entities\",\n\t\t\t\"identifier\": \"Entities\",\n\t\t\t\"type\": \"Entities\",\n\t\t\t\"uid\": 2,\n\t\t\t\"gridSize\": 8,\n\t\t\t\"guideGridWid\": 0,\n\t\t\t\"guideGridHei\": 0,\n\t\t\t\"displayOpacity\": 1,\n\t\t\t\"inactiveOpacity\": 0.6,\n\t\t\t\"hideInList\": false,\n\t\t\t\"hideFieldsWhenInactive\": true,\n\t\t\t\"canSelectWhenInactive\": true,\n\t\t\t\"pxOffsetX\": 0,\n\t\t\t\"pxOffsetY\": 0,\n\t\t\t\"parallaxFactorX\": 0,\n\t\t\t\"parallaxFactorY\": 0,\n\t\t\t\"parallaxScaling\": true,\n\t\t\t\"requiredTags\": [],\n\t\t\t\"excludedTags\": [],\n\t\t\t\"intGridValues\": [],\n\t\t\t\"autoRuleGroups\": [],\n\t\t\t\"autoSourceLayerDefUid\": null,\n\t\t\t\"tilesetDefUid\": null,\n\t\t\t\"tilePivotX\": 0,\n\t\t\t\"tilePivotY\": 0\n\t\t}\n\t], \"entities\": [\n\t\t{\n\t\t\t\"identifier\": \"Combine\",\n\t\t\t\"uid\": 3,\n\t\t\t\"tags\": [],\n\t\t\t\"width\": 64,\n\t\t\t\"height\": 64,\n\t\t\t\"resizableX\": false,\n\t\t\t\"resizableY\": false,\n\t\t\t\"keepAspectRatio\": false,\n\t\t\t\"tileOpacity\": 1,\n\t\t\t\"fillOpacity\": 1,\n\t\t\t\"lineOpacity\": 1,\n\t\t\t\"hollow\": false,\n\t\t\t\"color\": \"#FEAE34\",\n\t\t\t\"renderMode\": \"Rectangle\",\n\t\t\t\"showName\": true,\n\t\t\t\"tilesetId\": null,\n\t\t\t\"tileRenderMode\": \"FitInside\",\n\t\t\t\"tileRect\": null,\n\t\t\t\"nineSliceBorders\": [],\n\t\t\t\"maxCount\": 0,\n\t\t\t\"limitScope\": \"PerLevel\",\n\t\t\t\"limitBehavior\": \"MoveLastOne\",\n\t\t\t\"pivotX\": 0.8,\n\t\t\t\"pivotY\": 0.5,\n\t\t\t\"fieldDefs\": []\n\t\t}\n\t], \"tilesets\": [], \"enums\": [], \"externalEnums\": [], \"levelFields\": [] },\n\t\"levels\": [\n\t\t{\n\t\t\t\"identifier\": \"Level_1\",\n\t\t\t\"iid\": \"2ed59b10-7820-11ed-8a57-4bed449216cf\",\n\t\t\t\"uid\": 0,\n\t\t\t\"worldX\": -1,\n\t\t\t\"worldY\": -1,\n\t\t\t\"worldDepth\": 0,\n\t\t\t\"pxWid\": 768,\n\t\t\t\"pxHei\": 768,\n\t\t\t\"__bgColor\": \"#696A79\",\n\t\t\t\"bgColor\": null,\n\t\t\t\"useAutoIdentifier\": true,\n\t\t\t\"bgRelPath\": \"level1.png\",\n\t\t\t\"bgPos\": \"Contain\",\n\t\t\t\"bgPivotX\": 0.5,\n\t\t\t\"bgPivotY\": 0.5,\n\t\t\t\"__smartColor\": \"#ADADB5\",\n\t\t\t\"__bgPos\": { \"topLeftPx\": [0,0], \"scale\": [6,6], \"cropRect\": [0,0,128,128] },\n\t\t\t\"externalRelPath\": null,\n\t\t\t\"fieldInstances\": [],\n\t\t\t\"layerInstances\": [\n\t\t\t\t{\n\t\t\t\t\t\"__identifier\": \"Entities\",\n\t\t\t\t\t\"__type\": \"Entities\",\n\t\t\t\t\t\"__cWid\": 96,\n\t\t\t\t\t\"__cHei\": 96,\n\t\t\t\t\t\"__gridSize\": 8,\n\t\t\t\t\t\"__opacity\": 1,\n\t\t\t\t\t\"__pxTotalOffsetX\": 0,\n\t\t\t\t\t\"__pxTotalOffsetY\": 0,\n\t\t\t\t\t\"__tilesetDefUid\": null,\n\t\t\t\t\t\"__tilesetRelPath\": null,\n\t\t\t\t\t\"iid\": \"384e5620-7820-11ed-9d14-1b810d9730e8\",\n\t\t\t\t\t\"levelId\": 0,\n\t\t\t\t\t\"layerDefUid\": 2,\n\t\t\t\t\t\"pxOffsetX\": 0,\n\t\t\t\t\t\"pxOffsetY\": 0,\n\t\t\t\t\t\"visible\": true,\n\t\t\t\t\t\"optionalRules\": [],\n\t\t\t\t\t\"intGridCsv\": [],\n\t\t\t\t\t\"autoLayerTiles\": [],\n\t\t\t\t\t\"seed\": 8508788,\n\t\t\t\t\t\"overrideTilesetUid\": null,\n\t\t\t\t\t\"gridTiles\": [],\n\t\t\t\t\t\"entityInstances\": [\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"__identifier\": \"Combine\",\n\t\t\t\t\t\t\t\"__grid\": [38,60],\n\t\t\t\t\t\t\t\"__pivot\": [0.8,0.5],\n\t\t\t\t\t\t\t\"__tags\": [],\n\t\t\t\t\t\t\t\"__tile\": null,\n\t\t\t\t\t\t\t\"__smartColor\": \"#FEAE34\",\n\t\t\t\t\t\t\t\"iid\": \"fe903400-7820-11ed-9d14-e90854c21f44\",\n\t\t\t\t\t\t\t\"width\": 64,\n\t\t\t\t\t\t\t\"height\": 64,\n\t\t\t\t\t\t\t\"defUid\": 3,\n\t\t\t\t\t\t\t\"px\": [306,484],\n\t\t\t\t\t\t\t\"fieldInstances\": []\n\t\t\t\t\t\t}\n\t\t\t\t\t]\n\t\t\t\t}\n\t\t\t],\n\t\t\t\"__neighbours\": []\n\t\t},\n\t\t{\n\t\t\t\"identifier\": \"Level_2\",\n\t\t\t\"iid\": \"d61c8250-7820-11ed-9d14-e768b30eedc7\",\n\t\t\t\"uid\": 6,\n\t\t\t\"worldX\": -1,\n\t\t\t\"worldY\": -1,\n\t\t\t\"worldDepth\": 0,\n\t\t\t\"pxWid\": 768,\n\t\t\t\"pxHei\": 768,\n\t\t\t\"__bgColor\": \"#696A79\",\n\t\t\t\"bgColor\": null,\n\t\t\t\"useAutoIdentifier\": true,\n\t\t\t\"bgRelPath\": \"level2.png\",\n\t\t\t\"bgPos\": \"Contain\",\n\t\t\t\"bgPivotX\": 0.5,\n\t\t\t\"bgPivotY\": 0.5,\n\t\t\t\"__smartColor\": \"#ADADB5\",\n\t\t\t\"__bgPos\": { \"topLeftPx\": [0,0], \"scale\": [6,6], \"cropRect\": [0,0,128,128] },\n\t\t\t\"externalRelPath\": null,\n\t\t\t\"fieldInstances\": [],\n\t\t\t\"layerInstances\": [\n\t\t\t\t{\n\t\t\t\t\t\"__identifier\": \"Entities\",\n\t\t\t\t\t\"__type\": \"Entities\",\n\t\t\t\t\t\"__cWid\": 96,\n\t\t\t\t\t\"__cHei\": 96,\n\t\t\t\t\t\"__gridSize\": 8,\n\t\t\t\t\t\"__opacity\": 1,\n\t\t\t\t\t\"__pxTotalOffsetX\": 0,\n\t\t\t\t\t\"__pxTotalOffsetY\": 0,\n\t\t\t\t\t\"__tilesetDefUid\": null,\n\t\t\t\t\t\"__tilesetRelPath\": null,\n\t\t\t\t\t\"iid\": \"d61c8251-7820-11ed-9d14-8f40071589ab\",\n\t\t\t\t\t\"levelId\": 6,\n\t\t\t\t\t\"layerDefUid\": 2,\n\t\t\t\t\t\"pxOffsetX\": 0,\n\t\t\t\t\t\"pxOffsetY\": 0,\n\t\t\t\t\t\"visible\": true,\n\t\t\t\t\t\"optionalRules\": [],\n\t\t\t\t\t\"intGridCsv\": [],\n\t\t\t\t\t\"autoLayerTiles\": [],\n\t\t\t\t\t\"seed\": 8508788,\n\t\t\t\t\t\"overrideTilesetUid\": null,\n\t\t\t\t\t\"gridTiles\": [],\n\t\t\t\t\t\"entityInstances\": [\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"__identifier\": \"Combine\",\n\t\t\t\t\t\t\t\"__grid\": [30,11],\n\t\t\t\t\t\t\t\"__pivot\": [0.8,0.5],\n\t\t\t\t\t\t\t\"__tags\": [],\n\t\t\t\t\t\t\t\"__tile\": null,\n\t\t\t\t\t\t\t\"__smartColor\": \"#FEAE34\",\n\t\t\t\t\t\t\t\"iid\": \"d61c8252-7820-11ed-9d14-1d8ba3330c77\",\n\t\t\t\t\t\t\t\"width\": 64,\n\t\t\t\t\t\t\t\"height\": 64,\n\t\t\t\t\t\t\t\"defUid\": 3,\n\t\t\t\t\t\t\t\"px\": [242,92],\n\t\t\t\t\t\t\t\"fieldInstances\": []\n\t\t\t\t\t\t}\n\t\t\t\t\t]\n\t\t\t\t}\n\t\t\t],\n\t\t\t\"__neighbours\": []\n\t\t},\n\t\t{\n\t\t\t\"identifier\": \"Level_3\",\n\t\t\t\"iid\": \"17839630-7820-11ed-9d14-c9637922de43\",\n\t\t\t\"uid\": 7,\n\t\t\t\"worldX\": -1,\n\t\t\t\"worldY\": -1,\n\t\t\t\"worldDepth\": 0,\n\t\t\t\"pxWid\": 768,\n\t\t\t\"pxHei\": 768,\n\t\t\t\"__bgColor\": \"#696A79\",\n\t\t\t\"bgColor\": null,\n\t\t\t\"useAutoIdentifier\": true,\n\t\t\t\"bgRelPath\": \"level3.png\",\n\t\t\t\"bgPos\": \"Contain\",\n\t\t\t\"bgPivotX\": 0.5,\n\t\t\t\"bgPivotY\": 0.5,\n\t\t\t\"__smartColor\": \"#ADADB5\",\n\t\t\t\"__bgPos\": { \"topLeftPx\": [0,0], \"scale\": [6,6], \"cropRect\": [0,0,128,128] },\n\t\t\t\"externalRelPath\": null,\n\t\t\t\"fieldInstances\": [],\n\t\t\t\"layerInstances\": [\n\t\t\t\t{\n\t\t\t\t\t\"__identifier\": \"Entities\",\n\t\t\t\t\t\"__type\": \"Entities\",\n\t\t\t\t\t\"__cWid\": 96,\n\t\t\t\t\t\"__cHei\": 96,\n\t\t\t\t\t\"__gridSize\": 8,\n\t\t\t\t\t\"__opacity\": 1,\n\t\t\t\t\t\"__pxTotalOffsetX\": 0,\n\t\t\t\t\t\"__pxTotalOffsetY\": 0,\n\t\t\t\t\t\"__tilesetDefUid\": null,\n\t\t\t\t\t\"__tilesetRelPath\": null,\n\t\t\t\t\t\"iid\": \"17839631-7820-11ed-9d14-339b860c528c\",\n\t\t\t\t\t\"levelId\": 7,\n\t\t\t\t\t\"layerDefUid\": 2,\n\t\t\t\t\t\"pxOffsetX\": 0,\n\t\t\t\t\t\"pxOffsetY\": 0,\n\t\t\t\t\t\"visible\": true,\n\t\t\t\t\t\"optionalRules\": [],\n\t\t\t\t\t\"intGridCsv\": [],\n\t\t\t\t\t\"autoLayerTiles\": [],\n\t\t\t\t\t\"seed\": 8508788,\n\t\t\t\t\t\"overrideTilesetUid\": null,\n\t\t\t\t\t\"gridTiles\": [],\n\t\t\t\t\t\"entityInstances\": [\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"__identifier\": \"Combine\",\n\t\t\t\t\t\t\t\"__grid\": [42,85],\n\t\t\t\t\t\t\t\"__pivot\": [0.8,0.5],\n\t\t\t\t\t\t\t\"__tags\": [],\n\t\t\t\t\t\t\t\"__tile\": null,\n\t\t\t\t\t\t\t\"__smartColor\": \"#FEAE34\",\n\t\t\t\t\t\t\t\"iid\": \"17839632-7820-11ed-9d14-a92b39fa4a76\",\n\t\t\t\t\t\t\t\"width\": 64,\n\t\t\t\t\t\t\t\"height\": 64,\n\t\t\t\t\t\t\t\"defUid\": 3,\n\t\t\t\t\t\t\t\"px\": [338,684],\n\t\t\t\t\t\t\t\"fieldInstances\": []\n\t\t\t\t\t\t},\n\t\t\t\t\t\t{\n\t\t\t\t\t\t\t\"__identifier\": \"Combine\",\n\t\t\t\t\t\t\t\"__grid\": [29,86],\n\t\t\t\t\t\t\t\"__pivot\": [0.8,0.5],\n\t\t\t\t\t\t\t\"__tags\": [],\n\t\t\t\t\t\t\t\"__tile\": null,\n\t\t\t\t\t\t\t\"__smartColor\": \"#FEAE34\",\n\t\t\t\t\t\t\t\"iid\": \"23bd7830-7820-11ed-9d14-bd8d51b5dc98\",\n\t\t\t\t\t\t\t\"width\": 64,\n\t\t\t\t\t\t\t\"height\": 64,\n\t\t\t\t\t\t\t\"defUid\": 3,\n\t\t\t\t\t\t\t\"px\": [238,692],\n\t\t\t\t\t\t\t\"fieldInstances\": []\n\t\t\t\t\t\t}\n\t\t\t\t\t]\n\t\t\t\t}\n\t\t\t],\n\t\t\t\"__neighbours\": []\n\t\t}\n\t],\n\t\"worlds\": []\n}");
 };
 $hxClasses["LdtkProject"] = LdtkProject;
 LdtkProject.__name__ = "LdtkProject";
@@ -1666,6 +1666,101 @@ App.prototype = $extend(HerbalTeaApp.prototype,{
 	}
 	,__class__: App
 });
+var DateTools = function() { };
+$hxClasses["DateTools"] = DateTools;
+DateTools.__name__ = "DateTools";
+DateTools.__format_get = function(d,e) {
+	switch(e) {
+	case "%":
+		return "%";
+	case "A":
+		return DateTools.DAY_NAMES[d.getDay()];
+	case "B":
+		return DateTools.MONTH_NAMES[d.getMonth()];
+	case "C":
+		return StringTools.lpad(Std.string(d.getFullYear() / 100 | 0),"0",2);
+	case "D":
+		return DateTools.__format(d,"%m/%d/%y");
+	case "F":
+		return DateTools.__format(d,"%Y-%m-%d");
+	case "I":case "l":
+		var hour = d.getHours() % 12;
+		return StringTools.lpad(Std.string(hour == 0 ? 12 : hour),e == "I" ? "0" : " ",2);
+	case "M":
+		return StringTools.lpad(Std.string(d.getMinutes()),"0",2);
+	case "R":
+		return DateTools.__format(d,"%H:%M");
+	case "S":
+		return StringTools.lpad(Std.string(d.getSeconds()),"0",2);
+	case "T":
+		return DateTools.__format(d,"%H:%M:%S");
+	case "Y":
+		return Std.string(d.getFullYear());
+	case "a":
+		return DateTools.DAY_SHORT_NAMES[d.getDay()];
+	case "b":case "h":
+		return DateTools.MONTH_SHORT_NAMES[d.getMonth()];
+	case "d":
+		return StringTools.lpad(Std.string(d.getDate()),"0",2);
+	case "e":
+		return Std.string(d.getDate());
+	case "H":case "k":
+		return StringTools.lpad(Std.string(d.getHours()),e == "H" ? "0" : " ",2);
+	case "m":
+		return StringTools.lpad(Std.string(d.getMonth() + 1),"0",2);
+	case "n":
+		return "\n";
+	case "p":
+		if(d.getHours() > 11) {
+			return "PM";
+		} else {
+			return "AM";
+		}
+		break;
+	case "r":
+		return DateTools.__format(d,"%I:%M:%S %p");
+	case "s":
+		return Std.string(d.getTime() / 1000 | 0);
+	case "t":
+		return "\t";
+	case "u":
+		var t = d.getDay();
+		if(t == 0) {
+			return "7";
+		} else if(t == null) {
+			return "null";
+		} else {
+			return "" + t;
+		}
+		break;
+	case "w":
+		return Std.string(d.getDay());
+	case "y":
+		return StringTools.lpad(Std.string(d.getFullYear() % 100),"0",2);
+	default:
+		throw new haxe_exceptions_NotImplementedException("Date.format %" + e + "- not implemented yet.",null,{ fileName : "DateTools.hx", lineNumber : 101, className : "DateTools", methodName : "__format_get"});
+	}
+};
+DateTools.__format = function(d,f) {
+	var r_b = "";
+	var p = 0;
+	while(true) {
+		var np = f.indexOf("%",p);
+		if(np < 0) {
+			break;
+		}
+		var len = np - p;
+		r_b += len == null ? HxOverrides.substr(f,p,null) : HxOverrides.substr(f,p,len);
+		r_b += Std.string(DateTools.__format_get(d,HxOverrides.substr(f,np + 1,1)));
+		p = np + 2;
+	}
+	var len = f.length - p;
+	r_b += len == null ? HxOverrides.substr(f,p,null) : HxOverrides.substr(f,p,len);
+	return r_b;
+};
+DateTools.format = function(d,f) {
+	return DateTools.__format(d,f);
+};
 var EReg = function(r,opt) {
 	this.r = new RegExp(r,opt.split("u").join(""));
 };
@@ -2676,6 +2771,20 @@ h2d_Object.prototype = {
 	,__class__: h2d_Object
 	,__properties__: {set_visible:"set_visible"}
 };
+var FuncObject = function(updateFunc,parent) {
+	this.updateFunc = updateFunc;
+	h2d_Object.call(this,parent);
+};
+$hxClasses["FuncObject"] = FuncObject;
+FuncObject.__name__ = "FuncObject";
+FuncObject.__super__ = h2d_Object;
+FuncObject.prototype = $extend(h2d_Object.prototype,{
+	sync: function(ctx) {
+		this.updateFunc();
+		h2d_Object.prototype.sync.call(this,ctx);
+	}
+	,__class__: FuncObject
+});
 var h2d_Layers = function(parent) {
 	h2d_Object.call(this,parent);
 	this.layersIndexes = [];
@@ -5102,6 +5211,26 @@ TextButton.prototype = $extend(Button.prototype,{
 	}
 	,__class__: TextButton
 });
+var TileButton = function(tile,parent,onClickFn,disableOnClick,scale) {
+	if(scale == null) {
+		scale = 4.0;
+	}
+	if(disableOnClick == null) {
+		disableOnClick = false;
+	}
+	Button.call(this,parent,onClickFn,0,disableOnClick);
+	var bitmap = new h2d_Bitmap(tile,this.content);
+	bitmap.posChanged = true;
+	bitmap.scaleX *= scale;
+	bitmap.posChanged = true;
+	bitmap.scaleY *= scale;
+};
+$hxClasses["TileButton"] = TileButton;
+TileButton.__name__ = "TileButton";
+TileButton.__super__ = Button;
+TileButton.prototype = $extend(Button.prototype,{
+	__class__: TileButton
+});
 var Lambda = function() { };
 $hxClasses["Lambda"] = Lambda;
 Lambda.__name__ = "Lambda";
@@ -5441,12 +5570,29 @@ ObjExt.setPos = function(obj,pos) {
 	obj.posChanged = true;
 	obj.y = pos.y;
 };
+var CombineInput = $hxEnums["CombineInput"] = { __ename__:"CombineInput",__constructs__:null
+	,TurnLeft: {_hx_name:"TurnLeft",_hx_index:0,__enum__:"CombineInput",toString:$estr}
+	,TurnRight: {_hx_name:"TurnRight",_hx_index:1,__enum__:"CombineInput",toString:$estr}
+	,Forward: {_hx_name:"Forward",_hx_index:2,__enum__:"CombineInput",toString:$estr}
+};
+CombineInput.__constructs__ = [CombineInput.TurnLeft,CombineInput.TurnRight,CombineInput.Forward];
+CombineInput.__empty_constructs__ = [CombineInput.TurnLeft,CombineInput.TurnRight,CombineInput.Forward];
 var PlayView = function(levelIndex) {
-	this.fieldTileEmpty = hxd_Res.get_loader().loadCache("field-tiles.png",hxd_res_Image).toTile().sub(PlayView.FIELD_TILE_SIZE,0,PlayView.FIELD_TILE_SIZE,PlayView.FIELD_TILE_SIZE,PlayView.FIELD_TILE_SIZE * -0.5,PlayView.FIELD_TILE_SIZE * -0.5);
-	this.fieldTileFull = hxd_Res.get_loader().loadCache("field-tiles.png",hxd_res_Image).toTile().sub(0 * PlayView.FIELD_TILE_SIZE,0,PlayView.FIELD_TILE_SIZE,PlayView.FIELD_TILE_SIZE,PlayView.FIELD_TILE_SIZE * -0.5,PlayView.FIELD_TILE_SIZE * -0.5);
+	this.fieldTilesEmpty = [3,4,5];
+	this.fieldTilesFull = [0,1,2];
+	this.fieldTiles = hxd_Res.get_loader().loadCache("field-tiles.png",hxd_res_Image).toTile().gridFlatten(PlayView.FIELD_TILE_SIZE,PlayView.FIELD_TILE_SIZE * -0.5,PlayView.FIELD_TILE_SIZE * -0.5);
+	this.numFields = 0;
+	this.completedFields = 0;
 	this.fieldElements = new haxe_ds__$HashMap_HashMapData();
+	this.paused = true;
+	this.timeAcc = 0.0;
+	this.currentFrame = 0;
+	this.activeCombine = null;
+	this.combines = [];
+	this.selectedHighlight = new h2d_Graphics();
 	GameState.call(this);
 	this.levelIndex = levelIndex;
+	haxe_Log.trace("foo",{ fileName : "src/PlayView.hx", lineNumber : 63, className : "PlayView", methodName : "new", customParams : [this.fieldTiles.length]});
 	this.levelData = App.ldtkProject.levels[levelIndex];
 };
 $hxClasses["PlayView"] = PlayView;
@@ -5454,6 +5600,7 @@ PlayView.__name__ = "PlayView";
 PlayView.__super__ = GameState;
 PlayView.prototype = $extend(GameState.prototype,{
 	init: function() {
+		var _gthis = this;
 		App.instance.engine.backgroundColor = 8429414;
 		this.posChanged = true;
 		this.scaleX *= 2;
@@ -5471,7 +5618,9 @@ PlayView.prototype = $extend(GameState.prototype,{
 			while(_g2 < _g3) {
 				var y = _g2++;
 				if((pixels.getPixel(x,y) & 16777215) == 0) {
-					var element = new h2d_BatchElement(this.fieldTileFull);
+					var fullTile = this.fieldTiles[this.fieldTilesFull[Std.random(this.fieldTilesFull.length)]];
+					var emptyTile = this.fieldTiles[this.fieldTilesEmpty[Std.random(this.fieldTilesEmpty.length)]];
+					var element = new h2d_BatchElement(fullTile);
 					element.x = x * PlayView.FIELD_TILE_SIZE;
 					element.y = y * PlayView.FIELD_TILE_SIZE;
 					field.add(element);
@@ -5482,96 +5631,200 @@ PlayView.prototype = $extend(GameState.prototype,{
 					_this.h[key] = k;
 					var _this1 = this1.values;
 					var key1 = k.hashCode();
-					_this1.h[key1] = element;
+					_this1.h[key1] = { e : element, fullTile : fullTile, emptyTile : emptyTile};
+					this.numFields++;
 				}
 			}
 		}
+		var combineTile = hxd_Res.get_loader().loadCache("combine.png",hxd_res_Image).toTile();
+		combineTile.dx = -(0.8 * combineTile.width);
+		combineTile.dy = -(0.5 * combineTile.height);
+		var _g = 0;
 		var _this = this.levelData;
 		_this.load();
-		var combine0 = Reflect.field(_this,"l_Entities").all_Combine[0];
-		var playerTile = hxd_Res.get_loader().loadCache("combine.png",hxd_res_Image).toTile();
-		playerTile.dx = -(0.8 * playerTile.width);
-		playerTile.dy = -(0.5 * playerTile.height);
-		this.player = new h2d_Bitmap(playerTile,this);
-		var _this = this.player;
+		var _g1 = Reflect.field(_this,"l_Entities").all_Combine;
+		while(_g < _g1.length) {
+			var combineData = _g1[_g];
+			++_g;
+			var combineObj = new h2d_Bitmap(combineTile,this);
+			combineObj.posChanged = true;
+			combineObj.x = combineData.pixelX;
+			combineObj.posChanged = true;
+			combineObj.y = combineData.pixelY;
+			var cutterOffset = new h2d_Object(combineObj);
+			cutterOffset.posChanged = true;
+			cutterOffset.x = 0;
+			var cutterTile = h2d_Tile.fromColor(0,10,60);
+			cutterTile.dx = -(0.5 * cutterTile.width);
+			cutterTile.dy = -(0.5 * cutterTile.height);
+			var cutter = new h2d_Bitmap(cutterTile,cutterOffset);
+			cutter.set_visible(false);
+			var combine = [{ obj : combineObj, cutter : cutter, startPos : Utils.point(combineObj), startRotation : combineObj.rotation, recordedInput : []}];
+			var interactive = [new h2d_Interactive(combineTile.width,combineTile.height,combineObj)];
+			var v = interactive[0].x + combineTile.dx;
+			interactive[0].posChanged = true;
+			interactive[0].x = v;
+			var v1 = interactive[0].y + combineTile.dy;
+			interactive[0].posChanged = true;
+			interactive[0].y = v1;
+			interactive[0].onClick = (function(combine) {
+				return function(e) {
+					_gthis.activeCombine = combine[0];
+					_gthis.selectedHighlight.set_visible(true);
+					combine[0].obj.addChild(_gthis.selectedHighlight);
+					_gthis.paused = true;
+				};
+			})(combine);
+			var select = [new h2d_Graphics(combineObj)];
+			select[0].beginFill(-1,0.3);
+			select[0].drawCircle(-20,0,combineTile.width * 0.6);
+			new FuncObject((function(select,interactive) {
+				return function() {
+					interactive[0].set_visible(_gthis.currentFrame == 0);
+					select[0].set_visible(_gthis.activeCombine == null);
+				};
+			})(select,interactive),combineObj);
+			this.combines.push(combine[0]);
+		}
+		this.selectedHighlight.lineStyle(2,-1);
+		this.selectedHighlight.drawCircle(-20,0,combineTile.width * 0.6);
+		var buttonBack = new TileButton(hxd_Res.get_loader().loadCache("buttons.png",hxd_res_Image).toTile().sub(11,0,11,11,-5.5,-5.5),this,function() {
+			_gthis.activeCombine = null;
+			_gthis.selectedHighlight.set_visible(false);
+			_gthis.paused = true;
+			_gthis.resetTime();
+		});
+		buttonBack.posChanged = true;
+		buttonBack.x = 880;
+		buttonBack.posChanged = true;
+		buttonBack.y = 400;
+		this.timeText = new Text("",this,0.5);
+		this.timeText.set_textColor(0);
+		this.timeText.dropShadow = { dx : 3, dy : 3, color : 0, alpha : 0.5};
+		var _this = this.timeText;
 		_this.posChanged = true;
-		_this.x = combine0.pixelX;
-		var _this = this.player;
+		_this.x = 800;
+		var _this = this.timeText;
 		_this.posChanged = true;
-		_this.y = combine0.pixelY;
-		var cutterOffset = new h2d_Object(this.player);
-		cutterOffset.posChanged = true;
-		cutterOffset.x = 0;
-		var cutterTile = h2d_Tile.fromColor(0,10,60);
-		cutterTile.dx = -(0.5 * cutterTile.width);
-		cutterTile.dy = -(0.5 * cutterTile.height);
-		this.cutter = new h2d_Bitmap(cutterTile,cutterOffset);
-		this.cutter.set_visible(false);
+		_this.y = 480;
+	}
+	,resetTime: function() {
+		this.currentFrame = 0;
+		this.timeAcc = 0;
+		this.completedFields = 0;
+		var e = this.fieldElements.values.iterator();
+		while(e.hasNext()) {
+			var e1 = e.next();
+			e1.e.t = e1.fullTile;
+		}
+		var _g = 0;
+		var _g1 = this.combines;
+		while(_g < _g1.length) {
+			var c = _g1[_g];
+			++_g;
+			ObjExt.setPos(c.obj,c.startPos);
+			var _this = c.obj;
+			_this.posChanged = true;
+			_this.rotation = c.startRotation;
+		}
 	}
 	,onEvent: function(event) {
 	}
 	,update: function(dt) {
+		var date = new Date(this.currentFrame * PlayView.FRAME_TIME * 1000);
+		this.timeText.set_text(DateTools.format(date,"%M:%S.") + StringTools.lpad("" + (this.currentFrame * PlayView.FRAME_TIME % 1.0 * 100 | 0),"0",2));
 		if(hxd_Key.isDown(38)) {
-			if(hxd_Key.isDown(37)) {
-				var fh = this.player;
-				fh.posChanged = true;
-				fh.rotation -= dt;
-			}
-			if(hxd_Key.isDown(39)) {
-				var fh = this.player;
-				fh.posChanged = true;
-				fh.rotation += dt;
-			}
-			var _this = Utils.direction(this.player.rotation);
-			var v = dt * 50.0;
-			var x = _this.x * v;
-			var y = _this.y * v;
-			if(y == null) {
-				y = 0.;
-			}
-			if(x == null) {
-				x = 0.;
-			}
-			var _this = Utils.point(this.player);
-			ObjExt.setPos(this.player,new h2d_col_Point(_this.x + x,_this.y + y));
-			var bounds = this.cutter.getBounds(this);
-			var xMin = Math.floor(bounds.xMin / PlayView.FIELD_TILE_SIZE);
-			var xMax = Math.ceil(bounds.xMax / PlayView.FIELD_TILE_SIZE);
-			var yMin = Math.floor(bounds.yMin / PlayView.FIELD_TILE_SIZE);
-			var yMax = Math.ceil(bounds.yMax / PlayView.FIELD_TILE_SIZE);
-			var localBounds = this.cutter.getBounds(this.cutter);
-			var points = [this.globalToLocal(this.cutter.localToGlobal(new h2d_col_Point(localBounds.xMin,localBounds.yMin))),this.globalToLocal(this.cutter.localToGlobal(new h2d_col_Point(localBounds.xMax,localBounds.yMin))),this.globalToLocal(this.cutter.localToGlobal(new h2d_col_Point(localBounds.xMax,localBounds.yMax))),this.globalToLocal(this.cutter.localToGlobal(new h2d_col_Point(localBounds.xMin,localBounds.yMax)))];
-			var collider = h2d_col_Polygon.getCollider(points == null ? [] : points);
-			var _g = yMin;
-			var _g1 = yMax + 1;
-			while(_g < _g1) {
-				var y = _g++;
-				var _g2 = xMin;
-				var _g3 = xMax + 1;
-				while(_g2 < _g3) {
-					var x = _g2++;
-					var _this = this.fieldElements.values;
-					var key = new Point2d(x,y).hashCode();
-					var element = _this.h[key];
-					if(element != null && collider.contains(new h2d_col_Point(x * PlayView.FIELD_TILE_SIZE,y * PlayView.FIELD_TILE_SIZE))) {
-						element.t = this.fieldTileEmpty;
-						var this1 = this.fieldElements;
-						var k = new Point2d(x,y);
-						this1.values.remove(k.hashCode());
-						this1.keys.remove(k.hashCode());
+			this.paused = false;
+		}
+		if(this.paused) {
+			return;
+		}
+		this.timeAcc++;
+		if(this.timeAcc >= PlayView.FRAME_TIME) {
+			this.timeAcc -= PlayView.FRAME_TIME;
+			this.currentFrame++;
+			var _g = 0;
+			var _g1 = this.combines;
+			while(_g < _g1.length) {
+				var combine = _g1[_g];
+				++_g;
+				var inputs = [];
+				if(this.activeCombine == combine) {
+					if(hxd_Key.isDown(38)) {
+						inputs.push(CombineInput.Forward);
+					}
+					if(hxd_Key.isDown(37)) {
+						inputs.push(CombineInput.TurnLeft);
+					}
+					if(hxd_Key.isDown(39)) {
+						inputs.push(CombineInput.TurnRight);
+					}
+					this.activeCombine.recordedInput.splice(this.currentFrame + 1,this.activeCombine.recordedInput.length);
+					while(this.activeCombine.recordedInput.length < this.currentFrame) this.activeCombine.recordedInput.push([]);
+					this.activeCombine.recordedInput[this.currentFrame] = inputs;
+				} else if(this.currentFrame < combine.recordedInput.length) {
+					inputs = combine.recordedInput[this.currentFrame];
+				}
+				if(inputs.indexOf(CombineInput.Forward) != -1) {
+					if(inputs.indexOf(CombineInput.TurnLeft) != -1) {
+						var fh = combine.obj;
+						fh.posChanged = true;
+						fh.rotation -= PlayView.FRAME_TIME;
+					}
+					if(inputs.indexOf(CombineInput.TurnRight) != -1) {
+						var fh1 = combine.obj;
+						fh1.posChanged = true;
+						fh1.rotation += PlayView.FRAME_TIME;
+					}
+					var _this = Utils.direction(combine.obj.rotation);
+					var v = PlayView.FRAME_TIME * 50.0;
+					var x = _this.x * v;
+					var y = _this.y * v;
+					if(y == null) {
+						y = 0.;
+					}
+					if(x == null) {
+						x = 0.;
+					}
+					var _this1 = Utils.point(combine.obj);
+					ObjExt.setPos(combine.obj,new h2d_col_Point(_this1.x + x,_this1.y + y));
+					var bounds = combine.cutter.getBounds(this);
+					var xMin = Math.floor(bounds.xMin / PlayView.FIELD_TILE_SIZE);
+					var xMax = Math.ceil(bounds.xMax / PlayView.FIELD_TILE_SIZE);
+					var yMin = Math.floor(bounds.yMin / PlayView.FIELD_TILE_SIZE);
+					var yMax = Math.ceil(bounds.yMax / PlayView.FIELD_TILE_SIZE);
+					var localBounds = combine.cutter.getBounds(combine.cutter);
+					var points = [this.globalToLocal(combine.cutter.localToGlobal(new h2d_col_Point(localBounds.xMin,localBounds.yMin))),this.globalToLocal(combine.cutter.localToGlobal(new h2d_col_Point(localBounds.xMax,localBounds.yMin))),this.globalToLocal(combine.cutter.localToGlobal(new h2d_col_Point(localBounds.xMax,localBounds.yMax))),this.globalToLocal(combine.cutter.localToGlobal(new h2d_col_Point(localBounds.xMin,localBounds.yMax)))];
+					var collider = h2d_col_Polygon.getCollider(points == null ? [] : points);
+					var _g2 = yMin;
+					var _g3 = yMax + 1;
+					while(_g2 < _g3) {
+						var y1 = _g2++;
+						var _g4 = xMin;
+						var _g5 = xMax + 1;
+						while(_g4 < _g5) {
+							var x1 = _g4++;
+							var _this2 = this.fieldElements.values;
+							var key = new Point2d(x1,y1).hashCode();
+							var element = _this2.h[key];
+							if(element != null && collider.contains(new h2d_col_Point(x1 * PlayView.FIELD_TILE_SIZE,y1 * PlayView.FIELD_TILE_SIZE)) && element.e.t == element.fullTile) {
+								this.completedFields++;
+								element.e.t = element.emptyTile;
+							}
+						}
 					}
 				}
-			}
-		}
-		if(!this.fieldElements.keys.iterator().hasNext()) {
-			if(App.save.unlockedLevel < this.levelIndex + 1) {
-				App.save.unlockedLevel = this.levelIndex + 1;
-				hxd_Save.save(App.save);
-			}
-			if(this.levelIndex + 1 < App.ldtkProject.levels.length) {
-				App.instance.switchState(new PlayView(this.levelIndex + 1));
-			} else {
-				App.instance.switchState(new GameEndView());
+				if(this.completedFields == this.numFields) {
+					if(App.save.unlockedLevel < this.levelIndex + 1) {
+						App.save.unlockedLevel = this.levelIndex + 1;
+						hxd_Save.save(App.save);
+					}
+					if(this.levelIndex + 1 < App.ldtkProject.levels.length) {
+						App.instance.switchState(new PlayView(this.levelIndex + 1));
+					} else {
+						App.instance.switchState(new GameEndView());
+					}
+				}
 			}
 		}
 	}
@@ -5704,6 +5957,16 @@ StringTools.rtrim = function(s) {
 };
 StringTools.trim = function(s) {
 	return StringTools.ltrim(StringTools.rtrim(s));
+};
+StringTools.lpad = function(s,c,l) {
+	if(c.length <= 0) {
+		return s;
+	}
+	var buf_b = "";
+	l -= s.length;
+	while(buf_b.length < l) buf_b += c == null ? "null" : "" + c;
+	buf_b += s == null ? "null" : "" + s;
+	return buf_b;
 };
 StringTools.rpad = function(s,c,l) {
 	if(c.length <= 0) {
@@ -11727,6 +11990,29 @@ h2d_Graphics.prototype = $extend(h2d_Drawable.prototype,{
 		}
 		this.flush();
 	}
+	,drawCircle: function(cx,cy,radius,nsegments) {
+		if(nsegments == null) {
+			nsegments = 0;
+		}
+		this.flush();
+		if(nsegments == 0) {
+			var f = radius * 3.14 * 2 / 4;
+			nsegments = Math.ceil(f < 0 ? -f : f);
+		}
+		if(nsegments < 3) {
+			nsegments = 3;
+		}
+		var angle = 6.28318530717958623 / nsegments;
+		var _g = 0;
+		var _g1 = nsegments + 1;
+		while(_g < _g1) {
+			var a = _g++ * angle;
+			var x = cx + Math.cos(a) * radius;
+			var y = cy + Math.sin(a) * radius;
+			this.addVertex(x,y,this.curR,this.curG,this.curB,this.curA,x * this.ma + y * this.mc + this.mx,x * this.mb + y * this.md + this.my);
+		}
+		this.flush();
+	}
 	,addVertex: function(x,y,r,g,b,a,u,v) {
 		if(v == null) {
 			v = 0.;
@@ -14260,6 +14546,24 @@ h2d_Tile.prototype = {
 	,scaleToSize: function(w,h) {
 		this.width = w;
 		this.height = h;
+	}
+	,gridFlatten: function(size,dx,dy) {
+		if(dy == null) {
+			dy = 0.;
+		}
+		if(dx == null) {
+			dx = 0.;
+		}
+		var _g = [];
+		var _g1 = 0;
+		var _g2 = this.height / size | 0;
+		while(_g1 < _g2) {
+			var y = _g1++;
+			var _g3 = 0;
+			var _g4 = this.width / size | 0;
+			while(_g3 < _g4) _g.push(this.sub(_g3++ * size,y * size,size,size,dx,dy));
+		}
+		return _g;
 	}
 	,__class__: h2d_Tile
 };
@@ -45725,11 +46029,16 @@ haxe_Unserializer.DEFAULT_RESOLVER = new haxe__$Unserializer_DefaultResolver();
 haxe_Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789%:";
 App.ldtkProject = new LdtkProject();
 App.save = hxd_Save.load({ unlockedLevel : 0});
+DateTools.DAY_SHORT_NAMES = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+DateTools.DAY_NAMES = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+DateTools.MONTH_SHORT_NAMES = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+DateTools.MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 h2d_HtmlText.REG_SPACES = new EReg("[\r\n\t ]+","g");
 Colors.BLUE = -13291603;
 Colors.LIGHT_GREY = -10066330;
 TextButton.BUTTON_TEXT_COLOR_ENABLED = -1;
 TextButton.BUTTON_TEXT_COLOR_DISABLED = -5592406;
+PlayView.FRAME_TIME = 0.0166666666666666664;
 PlayView.FIELD_TILE_SIZE = 6;
 Xml.Element = 0;
 Xml.PCData = 1;
