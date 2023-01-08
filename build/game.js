@@ -5581,6 +5581,7 @@ var CombineInput = $hxEnums["CombineInput"] = { __ename__:"CombineInput",__const
 CombineInput.__constructs__ = [CombineInput.TurnLeft,CombineInput.TurnRight,CombineInput.Forward];
 CombineInput.__empty_constructs__ = [CombineInput.TurnLeft,CombineInput.TurnRight,CombineInput.Forward];
 var PlayView = function(levelIndex) {
+	this.fieldTilesGrass = [6,7,8];
 	this.fieldTilesEmpty = [3,4,5];
 	this.fieldTilesFull = [0,1,2];
 	this.fieldTiles = hxd_Res.get_loader().loadCache("field-tiles.png",hxd_res_Image).toTile().gridFlatten(PlayView.FIELD_TILE_SIZE,PlayView.FIELD_TILE_SIZE * -0.5,PlayView.FIELD_TILE_SIZE * -0.5);
@@ -5595,7 +5596,7 @@ var PlayView = function(levelIndex) {
 	this.selectedHighlight = new h2d_Graphics();
 	GameState.call(this);
 	this.levelIndex = levelIndex;
-	haxe_Log.trace("foo",{ fileName : "src/PlayView.hx", lineNumber : 66, className : "PlayView", methodName : "new", customParams : [this.fieldTiles.length]});
+	haxe_Log.trace("foo",{ fileName : "src/PlayView.hx", lineNumber : 68, className : "PlayView", methodName : "new", customParams : [this.fieldTiles.length]});
 	this.levelData = App.ldtkProject.levels[levelIndex];
 };
 $hxClasses["PlayView"] = PlayView;
@@ -5604,7 +5605,7 @@ PlayView.__super__ = GameState;
 PlayView.prototype = $extend(GameState.prototype,{
 	init: function() {
 		var _gthis = this;
-		App.instance.engine.backgroundColor = 8429414;
+		App.instance.engine.backgroundColor = 11452453;
 		this.posChanged = true;
 		this.scaleX *= 2;
 		this.posChanged = true;
@@ -5612,6 +5613,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 		this.addEventListener($bind(this,this.onEvent));
 		var pixels = hxd_Res.get_loader().loadCache(this.levelData.bgImageInfos.relFilePath,hxd_res_Image).getPixels();
 		var field = new h2d_SpriteBatch(hxd_Res.get_loader().loadCache("field-tiles.png",hxd_res_Image).toTile(),this);
+		var staticTiles = new h2d_TileGroup(hxd_Res.get_loader().loadCache("field-tiles.png",hxd_res_Image).toTile(),this);
 		var _g = 0;
 		var _g1 = pixels.height;
 		while(_g < _g1) {
@@ -5636,6 +5638,9 @@ PlayView.prototype = $extend(GameState.prototype,{
 					var key1 = k.hashCode();
 					_this1.h[key1] = { e : element, fullTile : fullTile, emptyTile : emptyTile};
 					this.numFields++;
+				} else {
+					var grassTile = this.fieldTiles[this.fieldTilesGrass[Std.random(this.fieldTilesGrass.length)]];
+					staticTiles.content.add(x * PlayView.FIELD_TILE_SIZE,y * PlayView.FIELD_TILE_SIZE,staticTiles.curColor.x,staticTiles.curColor.y,staticTiles.curColor.z,staticTiles.curColor.w,grassTile);
 				}
 			}
 		}
