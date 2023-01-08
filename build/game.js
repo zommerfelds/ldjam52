@@ -5626,6 +5626,7 @@ var CombineInput = $hxEnums["CombineInput"] = { __ename__:"CombineInput",__const
 CombineInput.__constructs__ = [CombineInput.TurnLeft,CombineInput.TurnRight,CombineInput.Forward,CombineInput.Backward];
 CombineInput.__empty_constructs__ = [CombineInput.TurnLeft,CombineInput.TurnRight,CombineInput.Forward,CombineInput.Backward];
 var PlayView = function(levelIndex) {
+	this.fieldTileFence = 9;
 	this.fieldTilesGrass = [6,7,8];
 	this.fieldTilesEmpty = [3,4,5];
 	this.fieldTilesFull = [0,1,2];
@@ -5641,7 +5642,6 @@ var PlayView = function(levelIndex) {
 	this.selectedHighlight = new h2d_Graphics();
 	GameState.call(this);
 	this.levelIndex = levelIndex;
-	haxe_Log.trace("foo",{ fileName : "src/PlayView.hx", lineNumber : 72, className : "PlayView", methodName : "new", customParams : [this.fieldTiles.length]});
 	this.levelData = App.ldtkProject.levels[levelIndex];
 };
 $hxClasses["PlayView"] = PlayView;
@@ -5667,7 +5667,8 @@ PlayView.prototype = $extend(GameState.prototype,{
 			var _g3 = pixels.width;
 			while(_g2 < _g3) {
 				var y = _g2++;
-				if((pixels.getPixel(x,y) & 16777215) == 0) {
+				switch(pixels.getPixel(x,y) & 16777215) {
+				case 0:
 					var fullTile = this.fieldTiles[this.fieldTilesFull[Std.random(this.fieldTilesFull.length)]];
 					var emptyTile = this.fieldTiles[this.fieldTilesEmpty[Std.random(this.fieldTilesEmpty.length)]];
 					var element = new h2d_BatchElement(fullTile);
@@ -5683,7 +5684,20 @@ PlayView.prototype = $extend(GameState.prototype,{
 					var key1 = k.hashCode();
 					_this1.h[key1] = { e : element, fullTile : fullTile, emptyTile : emptyTile};
 					this.numFields++;
-				} else {
+					break;
+				case 16711680:
+					var fenceTile = this.fieldTiles[this.fieldTileFence];
+					staticTiles.content.add(x * PlayView.FIELD_TILE_SIZE,y * PlayView.FIELD_TILE_SIZE,staticTiles.curColor.x,staticTiles.curColor.y,staticTiles.curColor.z,staticTiles.curColor.w,fenceTile);
+					var this2 = this.fieldElements;
+					var k1 = new Point2d(x,y);
+					var _this2 = this2.keys;
+					var key2 = k1.hashCode();
+					_this2.h[key2] = k1;
+					var _this3 = this2.values;
+					var key3 = k1.hashCode();
+					_this3.h[key3] = { e : null, fullTile : fenceTile, emptyTile : null};
+					break;
+				default:
 					var grassTile = this.fieldTiles[this.fieldTilesGrass[Std.random(this.fieldTilesGrass.length)]];
 					staticTiles.content.add(x * PlayView.FIELD_TILE_SIZE,y * PlayView.FIELD_TILE_SIZE,staticTiles.curColor.x,staticTiles.curColor.y,staticTiles.curColor.z,staticTiles.curColor.w,grassTile);
 				}
@@ -5726,7 +5740,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 			var hitBoxOffset = new h2d_Object(combineObj);
 			hitBoxOffset.posChanged = true;
 			hitBoxOffset.x = -22;
-			var hitBoxTile = h2d_Tile.fromColor(0,55,48);
+			var hitBoxTile = h2d_Tile.fromColor(0,55,42);
 			hitBoxTile.dx = -(0.5 * hitBoxTile.width);
 			hitBoxTile.dy = -(0.5 * hitBoxTile.height);
 			var hitBox = new h2d_Bitmap(hitBoxTile,hitBoxOffset);
@@ -5988,27 +6002,54 @@ PlayView.prototype = $extend(GameState.prototype,{
 						}
 					}
 				}
+				var bounds = combine.hitBox.getBounds(this);
+				var xMin = Math.floor(bounds.xMin / PlayView.FIELD_TILE_SIZE);
+				var xMax = Math.ceil(bounds.xMax / PlayView.FIELD_TILE_SIZE);
+				var yMin = Math.floor(bounds.yMin / PlayView.FIELD_TILE_SIZE);
+				var yMax = Math.ceil(bounds.yMax / PlayView.FIELD_TILE_SIZE);
+				var hitBoxShape = this.getShape(combine.hitBox);
+				var _g10 = yMin;
+				var _g11 = yMax + 1;
+				while(_g10 < _g11) {
+					var y = _g10++;
+					var _g12 = xMin;
+					var _g13 = xMax + 1;
+					while(_g12 < _g13) {
+						var x = _g12++;
+						var _this3 = this.fieldElements.values;
+						var key = new Point2d(x,y).hashCode();
+						var element = _this3.h[key];
+						if(element != null && differ_Collision.pointInPoly(x * PlayView.FIELD_TILE_SIZE,y * PlayView.FIELD_TILE_SIZE,hitBoxShape) && element.fullTile == this.fieldTiles[this.fieldTileFence]) {
+							ObjExt.setPos(combine.obj,originalPos);
+							var _this4 = combine.obj;
+							_this4.posChanged = true;
+							_this4.rotation = originalRotation;
+							inputs.splice(0,inputs.length);
+							break;
+						}
+					}
+				}
 				if(inputs.indexOf(CombineInput.Forward) != -1) {
-					var bounds = combine.cutter.getBounds(this);
-					var xMin = Math.floor(bounds.xMin / PlayView.FIELD_TILE_SIZE);
-					var xMax = Math.ceil(bounds.xMax / PlayView.FIELD_TILE_SIZE);
-					var yMin = Math.floor(bounds.yMin / PlayView.FIELD_TILE_SIZE);
-					var yMax = Math.ceil(bounds.yMax / PlayView.FIELD_TILE_SIZE);
+					var bounds1 = combine.cutter.getBounds(this);
+					var xMin1 = Math.floor(bounds1.xMin / PlayView.FIELD_TILE_SIZE);
+					var xMax1 = Math.ceil(bounds1.xMax / PlayView.FIELD_TILE_SIZE);
+					var yMin1 = Math.floor(bounds1.yMin / PlayView.FIELD_TILE_SIZE);
+					var yMax1 = Math.ceil(bounds1.yMax / PlayView.FIELD_TILE_SIZE);
 					var cutterShape = this.getShape(combine.cutter);
-					var _g10 = yMin;
-					var _g11 = yMax + 1;
-					while(_g10 < _g11) {
-						var y = _g10++;
-						var _g12 = xMin;
-						var _g13 = xMax + 1;
-						while(_g12 < _g13) {
-							var x = _g12++;
-							var _this3 = this.fieldElements.values;
-							var key = new Point2d(x,y).hashCode();
-							var element = _this3.h[key];
-							if(element != null && differ_Collision.pointInPoly(x * PlayView.FIELD_TILE_SIZE,y * PlayView.FIELD_TILE_SIZE,cutterShape) && element.e.t == element.fullTile) {
+					var _g14 = yMin1;
+					var _g15 = yMax1 + 1;
+					while(_g14 < _g15) {
+						var y1 = _g14++;
+						var _g16 = xMin1;
+						var _g17 = xMax1 + 1;
+						while(_g16 < _g17) {
+							var x1 = _g16++;
+							var _this5 = this.fieldElements.values;
+							var key1 = new Point2d(x1,y1).hashCode();
+							var element1 = _this5.h[key1];
+							if(element1 != null && differ_Collision.pointInPoly(x1 * PlayView.FIELD_TILE_SIZE,y1 * PlayView.FIELD_TILE_SIZE,cutterShape) && element1.e != null && element1.e.t == element1.fullTile) {
 								this.completedFields++;
-								element.e.t = element.emptyTile;
+								element1.e.t = element1.emptyTile;
 							}
 						}
 					}
