@@ -5052,12 +5052,12 @@ var Text = function(text,parent,size,addDefaultShadow) {
 	if(size == null) {
 		size = 1.0;
 	}
-	var font = hxd_Res.get_loader().loadCache("Catamaran-Light-sdf.fnt",hxd_res_BitmapFont).toSdfFont(size * Gui.scale(60) | 0,3);
+	var font = hxd_Res.get_loader().loadCache("piellari.fnt",hxd_res_BitmapFont).toSdfFont(size * Gui.scale(60) | 0,3);
 	h2d_HtmlText.call(this,font,parent);
 	this.set_text(text);
 	this.smooth = true;
 	this.set_textColor(-1);
-	this.set_lineSpacing(-font.lineHeight * 0.2);
+	this.set_lineSpacing(font.lineHeight * 0.2);
 	if(addDefaultShadow) {
 		this.dropShadow = { dx : Gui.scale(5), dy : Gui.scale(5), color : 0, alpha : 0.5};
 	}
@@ -5072,7 +5072,7 @@ Text.prototype = $extend(h2d_HtmlText.prototype,{
 		} catch( _g ) {
 			var _g1 = haxe_Exception.caught(_g);
 			if(((_g1) instanceof haxe_ValueException)) {
-				haxe_Log.trace(_g1,{ fileName : "lib/Gui.hx", lineNumber : 48, className : "Text", methodName : "set_text"});
+				haxe_Log.trace(_g1,{ fileName : "lib/Gui.hx", lineNumber : 49, className : "Text", methodName : "set_text"});
 				h2d_HtmlText.prototype.set_text.call(this,"PARSE ERROR");
 			} else {
 				throw _g;
@@ -5227,8 +5227,6 @@ var TextButton = function(parent,labelText,onClickFn,backgroundColor,disableOnCl
 	if(maxWidth != null) {
 		this.text.set_maxWidth(maxWidth);
 	}
-	var fh = this.content;
-	fh.set_paddingTop(fh.paddingTop + (this.text.lineSpacing | 0));
 	this.redrawButton();
 };
 $hxClasses["TextButton"] = TextButton;
@@ -5632,7 +5630,7 @@ var PlayView = function(levelIndex) {
 	this.selectedHighlight = new h2d_Graphics();
 	GameState.call(this);
 	this.levelIndex = levelIndex;
-	haxe_Log.trace("foo",{ fileName : "src/PlayView.hx", lineNumber : 70, className : "PlayView", methodName : "new", customParams : [this.fieldTiles.length]});
+	haxe_Log.trace("foo",{ fileName : "src/PlayView.hx", lineNumber : 71, className : "PlayView", methodName : "new", customParams : [this.fieldTiles.length]});
 	this.levelData = App.ldtkProject.levels[levelIndex];
 };
 $hxClasses["PlayView"] = PlayView;
@@ -5704,7 +5702,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 			wheelR.x = wheelL.x;
 			wheelR.posChanged = true;
 			wheelR.y = -wheelL.y;
-			var anim = [new h2d_Anim(combineFrames,null,combineObj)];
+			var anim = [new h2d_Anim(combineFrames,25,combineObj)];
 			var cutterOffset = new h2d_Object(combineObj);
 			cutterOffset.posChanged = true;
 			cutterOffset.x = 0;
@@ -5774,15 +5772,27 @@ PlayView.prototype = $extend(GameState.prototype,{
 		buttonBack.x = 795;
 		buttonBack.posChanged = true;
 		buttonBack.y = 300;
+		var buttonMenu = new TextButton(this,"MENU",function() {
+			App.instance.switchState(new LevelSelectView());
+		},0,true,0.25);
+		buttonMenu.content.set_padding(0);
+		buttonMenu.content.set_horizontalAlign(h2d_FlowAlign.Middle);
+		buttonMenu.content.set_minHeight(60);
+		buttonMenu.content.set_minWidth(100);
+		buttonMenu.redrawButton();
+		buttonMenu.posChanged = true;
+		buttonMenu.x = 880;
+		buttonMenu.posChanged = true;
+		buttonMenu.y = 300;
 		this.statusText = new Text("",this,0.3);
 		this.statusText.set_textColor(0);
-		this.statusText.dropShadow = { dx : 1, dy : 1, color : 0, alpha : 0.5};
 		var _this = this.statusText;
 		_this.posChanged = true;
 		_this.x = 800;
 		var _this = this.statusText;
 		_this.posChanged = true;
-		_this.y = 380;
+		_this.y = 390;
+		this.statusText.set_maxWidth(350);
 	}
 	,resetTime: function() {
 		this.currentFrame = 0;
@@ -9992,6 +10002,13 @@ h2d_Flow.prototype = $extend(h2d_Object.prototype,{
 		}
 		return this.needReflow = v;
 	}
+	,set_padding: function(v) {
+		this.set_paddingLeft(v);
+		this.set_paddingTop(v);
+		this.set_paddingRight(v);
+		this.set_paddingBottom(v);
+		return v;
+	}
 	,set_scrollPosY: function(v) {
 		if(this.needReflow) {
 			this.reflow();
@@ -10293,6 +10310,15 @@ h2d_Flow.prototype = $extend(h2d_Object.prototype,{
 		if(this.realMinWidth != oldW || this.realMinHeight != oldH) {
 			this.set_needReflow(true);
 		}
+	}
+	,set_minWidth: function(w) {
+		if(this.minWidth == w) {
+			return w;
+		}
+		this.set_needReflow(true);
+		this.minWidth = w;
+		this.updateConstraint();
+		return w;
 	}
 	,set_minHeight: function(h) {
 		if(this.minHeight == h) {
@@ -11073,7 +11099,7 @@ h2d_Flow.prototype = $extend(h2d_Object.prototype,{
 	,onAfterReflow: function() {
 	}
 	,__class__: h2d_Flow
-	,__properties__: $extend(h2d_Object.prototype.__properties__,{set_scrollPosY:"set_scrollPosY",set_fillHeight:"set_fillHeight",set_fillWidth:"set_fillWidth",set_layout:"set_layout",get_outerHeight:"get_outerHeight",get_outerWidth:"get_outerWidth",get_innerHeight:"get_innerHeight",get_innerWidth:"get_innerWidth",set_backgroundTile:"set_backgroundTile",set_enableInteractive:"set_enableInteractive",set_verticalSpacing:"set_verticalSpacing",set_paddingBottom:"set_paddingBottom",set_paddingTop:"set_paddingTop",set_paddingRight:"set_paddingRight",set_paddingLeft:"set_paddingLeft",set_maxWidth:"set_maxWidth",set_minHeight:"set_minHeight",set_verticalAlign:"set_verticalAlign",set_horizontalAlign:"set_horizontalAlign",set_needReflow:"set_needReflow"})
+	,__properties__: $extend(h2d_Object.prototype.__properties__,{set_scrollPosY:"set_scrollPosY",set_fillHeight:"set_fillHeight",set_fillWidth:"set_fillWidth",set_layout:"set_layout",get_outerHeight:"get_outerHeight",get_outerWidth:"get_outerWidth",get_innerHeight:"get_innerHeight",get_innerWidth:"get_innerWidth",set_backgroundTile:"set_backgroundTile",set_enableInteractive:"set_enableInteractive",set_verticalSpacing:"set_verticalSpacing",set_paddingBottom:"set_paddingBottom",set_paddingTop:"set_paddingTop",set_paddingRight:"set_paddingRight",set_paddingLeft:"set_paddingLeft",set_padding:"set_padding",set_maxWidth:"set_maxWidth",set_minHeight:"set_minHeight",set_minWidth:"set_minWidth",set_verticalAlign:"set_verticalAlign",set_horizontalAlign:"set_horizontalAlign",set_needReflow:"set_needReflow"})
 });
 var h2d_Kerning = function(c,o) {
 	this.prevChar = c;
