@@ -5240,6 +5240,9 @@ Lambda.array = function(it) {
 	while(i.hasNext()) a.push(i.next());
 	return a;
 };
+Lambda.empty = function(it) {
+	return !$getIterator(it).hasNext();
+};
 var EntityEnum = $hxEnums["EntityEnum"] = { __ename__:"EntityEnum",__constructs__:null
 	,Combine: {_hx_name:"Combine",_hx_index:0,__enum__:"EntityEnum",toString:$estr}
 };
@@ -5592,7 +5595,7 @@ var PlayView = function(levelIndex) {
 	this.selectedHighlight = new h2d_Graphics();
 	GameState.call(this);
 	this.levelIndex = levelIndex;
-	haxe_Log.trace("foo",{ fileName : "src/PlayView.hx", lineNumber : 63, className : "PlayView", methodName : "new", customParams : [this.fieldTiles.length]});
+	haxe_Log.trace("foo",{ fileName : "src/PlayView.hx", lineNumber : 66, className : "PlayView", methodName : "new", customParams : [this.fieldTiles.length]});
 	this.levelData = App.ldtkProject.levels[levelIndex];
 };
 $hxClasses["PlayView"] = PlayView;
@@ -5636,9 +5639,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 				}
 			}
 		}
-		var combineTile = hxd_Res.get_loader().loadCache("combine.png",hxd_res_Image).toTile();
-		combineTile.dx = -(0.8 * combineTile.width);
-		combineTile.dy = -(0.5 * combineTile.height);
+		var combineFrames = hxd_Res.get_loader().loadCache("combine.png",hxd_res_Image).toTile().gridFlatten(64,-54,-32);
 		var _g = 0;
 		var _this = this.levelData;
 		_this.load();
@@ -5646,7 +5647,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 		while(_g < _g1.length) {
 			var combineData = _g1[_g];
 			++_g;
-			var combineObj = new h2d_Bitmap(combineTile,this);
+			var combineObj = new h2d_Object(this);
 			combineObj.posChanged = true;
 			combineObj.x = combineData.pixelX;
 			combineObj.posChanged = true;
@@ -5659,12 +5660,23 @@ PlayView.prototype = $extend(GameState.prototype,{
 			cutterTile.dy = -(0.5 * cutterTile.height);
 			var cutter = new h2d_Bitmap(cutterTile,cutterOffset);
 			cutter.set_visible(false);
-			var combine = [{ obj : combineObj, cutter : cutter, startPos : Utils.point(combineObj), startRotation : combineObj.rotation, recordedInput : []}];
-			var interactive = [new h2d_Interactive(combineTile.width,combineTile.height,combineObj)];
-			var v = interactive[0].x + combineTile.dx;
+			var wheelTile = hxd_Res.get_loader().loadCache("combine-parts.png",hxd_res_Image).toTile().sub(0,0,16,16,-8,-8);
+			var wheelL = new h2d_Bitmap(wheelTile,combineObj);
+			wheelL.posChanged = true;
+			wheelL.x = -38;
+			wheelL.posChanged = true;
+			wheelL.y = 15;
+			var wheelR = new h2d_Bitmap(wheelTile,combineObj);
+			wheelR.posChanged = true;
+			wheelR.x = wheelL.x;
+			wheelR.posChanged = true;
+			wheelR.y = -wheelL.y;
+			var combine = [{ obj : combineObj, anim : new h2d_Anim(combineFrames,null,combineObj), cutter : cutter, startPos : Utils.point(combineObj), startRotation : combineObj.rotation, recordedInput : [], wheels : [wheelL,wheelR]}];
+			var interactive = [new h2d_Interactive(combineFrames[0].width,combineFrames[0].height,combineObj)];
+			var v = interactive[0].x + combineFrames[0].dx;
 			interactive[0].posChanged = true;
 			interactive[0].x = v;
-			var v1 = interactive[0].y + combineTile.dy;
+			var v1 = interactive[0].y + combineFrames[0].dy;
 			interactive[0].posChanged = true;
 			interactive[0].y = v1;
 			interactive[0].onClick = (function(combine) {
@@ -5677,7 +5689,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 			})(combine);
 			var select = [new h2d_Graphics(combineObj)];
 			select[0].beginFill(-1,0.3);
-			select[0].drawCircle(-20,0,combineTile.width * 0.6);
+			select[0].drawCircle(-20,0,combineFrames[0].width * 0.6);
 			new FuncObject((function(select,interactive) {
 				return function() {
 					interactive[0].set_visible(_gthis.currentFrame == 0);
@@ -5687,7 +5699,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 			this.combines.push(combine[0]);
 		}
 		this.selectedHighlight.lineStyle(2,-1);
-		this.selectedHighlight.drawCircle(-20,0,combineTile.width * 0.6);
+		this.selectedHighlight.drawCircle(-20,0,combineFrames[0].width * 0.6);
 		var buttonBack = new TileButton(hxd_Res.get_loader().loadCache("buttons.png",hxd_res_Image).toTile().sub(11,0,11,11,-5.5,-5.5),this,function() {
 			_gthis.activeCombine = null;
 			_gthis.selectedHighlight.set_visible(false);
@@ -5733,6 +5745,14 @@ PlayView.prototype = $extend(GameState.prototype,{
 	,update: function(dt) {
 		var date = new Date(this.currentFrame * PlayView.FRAME_TIME * 1000);
 		this.timeText.set_text(DateTools.format(date,"%M:%S.") + StringTools.lpad("" + (this.currentFrame * PlayView.FRAME_TIME % 1.0 * 100 | 0),"0",2));
+		var _g = 0;
+		var _g1 = this.combines;
+		while(_g < _g1.length) {
+			var combine = _g1[_g];
+			++_g;
+			var tmp = this.paused || Lambda.empty(combine.recordedInput);
+			combine.anim.pause = tmp;
+		}
 		if(hxd_Key.isDown(38)) {
 			this.paused = false;
 		}
@@ -5765,16 +5785,40 @@ PlayView.prototype = $extend(GameState.prototype,{
 				} else if(this.currentFrame < combine.recordedInput.length) {
 					inputs = combine.recordedInput[this.currentFrame];
 				}
+				var _g2 = 0;
+				var _g3 = combine.wheels;
+				while(_g2 < _g3.length) {
+					var w = _g3[_g2];
+					++_g2;
+					w.posChanged = true;
+					w.rotation = 0.0;
+				}
 				if(inputs.indexOf(CombineInput.Forward) != -1) {
 					if(inputs.indexOf(CombineInput.TurnLeft) != -1) {
 						var fh = combine.obj;
 						fh.posChanged = true;
 						fh.rotation -= PlayView.FRAME_TIME;
+						var _g4 = 0;
+						var _g5 = combine.wheels;
+						while(_g4 < _g5.length) {
+							var w1 = _g5[_g4];
+							++_g4;
+							w1.posChanged = true;
+							w1.rotation = 0.4;
+						}
 					}
 					if(inputs.indexOf(CombineInput.TurnRight) != -1) {
 						var fh1 = combine.obj;
 						fh1.posChanged = true;
 						fh1.rotation += PlayView.FRAME_TIME;
+						var _g6 = 0;
+						var _g7 = combine.wheels;
+						while(_g6 < _g7.length) {
+							var w2 = _g7[_g6];
+							++_g6;
+							w2.posChanged = true;
+							w2.rotation = -0.4;
+						}
 					}
 					var _this = Utils.direction(combine.obj.rotation);
 					var v = PlayView.FRAME_TIME * 50.0;
@@ -5796,14 +5840,14 @@ PlayView.prototype = $extend(GameState.prototype,{
 					var localBounds = combine.cutter.getBounds(combine.cutter);
 					var points = [this.globalToLocal(combine.cutter.localToGlobal(new h2d_col_Point(localBounds.xMin,localBounds.yMin))),this.globalToLocal(combine.cutter.localToGlobal(new h2d_col_Point(localBounds.xMax,localBounds.yMin))),this.globalToLocal(combine.cutter.localToGlobal(new h2d_col_Point(localBounds.xMax,localBounds.yMax))),this.globalToLocal(combine.cutter.localToGlobal(new h2d_col_Point(localBounds.xMin,localBounds.yMax)))];
 					var collider = h2d_col_Polygon.getCollider(points == null ? [] : points);
-					var _g2 = yMin;
-					var _g3 = yMax + 1;
-					while(_g2 < _g3) {
-						var y1 = _g2++;
-						var _g4 = xMin;
-						var _g5 = xMax + 1;
-						while(_g4 < _g5) {
-							var x1 = _g4++;
+					var _g8 = yMin;
+					var _g9 = yMax + 1;
+					while(_g8 < _g9) {
+						var y1 = _g8++;
+						var _g10 = xMin;
+						var _g11 = xMax + 1;
+						while(_g10 < _g11) {
+							var x1 = _g10++;
 							var _this2 = this.fieldElements.values;
 							var key = new Point2d(x1,y1).hashCode();
 							var element = _this2.h[key];
@@ -9193,6 +9237,85 @@ format_wav_Reader.prototype = {
 	}
 	,__class__: format_wav_Reader
 };
+var h2d_Anim = function(frames,speed,parent) {
+	if(speed == null) {
+		speed = 15;
+	}
+	this.fading = false;
+	this.loop = true;
+	this.pause = false;
+	h2d_Drawable.call(this,parent);
+	this.frames = frames == null ? [] : frames;
+	this.curFrame = 0;
+	this.speed = speed;
+};
+$hxClasses["h2d.Anim"] = h2d_Anim;
+h2d_Anim.__name__ = "h2d.Anim";
+h2d_Anim.__super__ = h2d_Drawable;
+h2d_Anim.prototype = $extend(h2d_Drawable.prototype,{
+	onAnimEnd: function() {
+	}
+	,getBoundsRec: function(relativeTo,out,forSize) {
+		h2d_Drawable.prototype.getBoundsRec.call(this,relativeTo,out,forSize);
+		var tile = this.getFrame();
+		if(tile != null) {
+			this.addBounds(relativeTo,out,tile.dx,tile.dy,tile.width,tile.height);
+		}
+	}
+	,sync: function(ctx) {
+		h2d_Drawable.prototype.sync.call(this,ctx);
+		var prev = this.curFrame;
+		if(!this.pause) {
+			this.curFrame += this.speed * ctx.elapsedTime;
+		}
+		if(this.curFrame < this.frames.length) {
+			return;
+		}
+		if(this.loop) {
+			if(this.frames.length == 0) {
+				this.curFrame = 0;
+			} else {
+				this.curFrame %= this.frames.length;
+			}
+			this.onAnimEnd();
+		} else if(this.curFrame >= this.frames.length) {
+			this.curFrame = this.frames.length;
+			if(this.curFrame != prev) {
+				this.onAnimEnd();
+			}
+		}
+	}
+	,getFrame: function() {
+		var i = this.curFrame | 0;
+		if(i == this.frames.length) {
+			--i;
+		}
+		return this.frames[i];
+	}
+	,draw: function(ctx) {
+		var t = this.getFrame();
+		if(this.fading) {
+			var i = (this.curFrame | 0) + 1;
+			if(i >= this.frames.length) {
+				if(!this.loop) {
+					return;
+				}
+				i = 0;
+			}
+			var t2 = this.frames[i];
+			var old = ctx.globalAlpha;
+			var alpha = this.curFrame - (this.curFrame | 0);
+			ctx.globalAlpha *= 1 - alpha;
+			this.emitTile(ctx,t);
+			ctx.globalAlpha = old * alpha;
+			this.emitTile(ctx,t2);
+			ctx.globalAlpha = old;
+		} else {
+			this.emitTile(ctx,t);
+		}
+	}
+	,__class__: h2d_Anim
+});
 var h2d_Bitmap = function(tile,parent) {
 	h2d_Drawable.call(this,parent);
 	this.set_tile(tile);
