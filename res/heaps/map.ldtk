@@ -915,7 +915,7 @@
 			"__smartColor": "#ADADB5",
 			"__bgPos": { "topLeftPx": [0,0], "scale": [6,6], "cropRect": [0,0,128,128] },
 			"externalRelPath": null,
-			"fieldInstances": [{ "__identifier": "timeLimit", "__value": 105, "__type": "Float", "__tile": null, "defUid": 8, "realEditorValues": [{ "id": "V_Float", "params": [105] }] }],
+			"fieldInstances": [{ "__identifier": "timeLimit", "__value": 90, "__type": "Float", "__tile": null, "defUid": 8, "realEditorValues": [{ "id": "V_Float", "params": [90] }] }],
 			"layerInstances": [
 				{
 					"__identifier": "Props",
@@ -1026,6 +1026,20 @@
 							"defUid": 3,
 							"px": [238,692],
 							"fieldInstances": [{ "__identifier": "Rotation", "__value": 0, "__type": "Float", "__tile": null, "defUid": 10, "realEditorValues": [] }]
+						},
+						{
+							"__identifier": "Combine",
+							"__grid": [63,86],
+							"__pivot": [0.8,0.5],
+							"__tags": [],
+							"__tile": null,
+							"__smartColor": "#FEAE34",
+							"iid": "43f529c0-7820-11ed-b4bc-d9f4ca8cf85b",
+							"width": 64,
+							"height": 64,
+							"defUid": 3,
+							"px": [510,692],
+							"fieldInstances": [{ "__identifier": "Rotation", "__value": -1, "__type": "Float", "__tile": null, "defUid": 10, "realEditorValues": [{ "id": "V_Float", "params": [-1] }] }]
 						}
 					]
 				}
