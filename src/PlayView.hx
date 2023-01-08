@@ -294,7 +294,7 @@ class PlayView extends GameState {
 			combine.anim.pause = paused || combine.recordedInput.empty();
 		}
 
-		if (Key.isDown(Key.UP)) {
+		if (Key.isDown(Key.UP) || Key.isDown(Key.DOWN)) {
 			paused = false;
 		}
 		if (paused)
