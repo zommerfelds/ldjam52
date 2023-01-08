@@ -210,7 +210,7 @@ class PlayView extends GameState {
 			resetTime();
 		});
 		buttonBack.x = 795;
-		buttonBack.y = 300;
+		buttonBack.y = 200;
 		final buttonReset = new TextButton(this, "RESET", () -> {
 			activeCombine = null;
 			for (c in combines) {
@@ -228,7 +228,7 @@ class PlayView extends GameState {
 		buttonReset.content.minWidth = 100;
 		buttonReset.redrawButton();
 		buttonReset.x = 870;
-		buttonReset.y = 300;
+		buttonReset.y = 200;
 
 		final buttonMenu = new TextButton(this, "MENU", () -> {
 			App.instance.switchState(new LevelSelectView());
@@ -240,12 +240,12 @@ class PlayView extends GameState {
 		buttonMenu.content.minWidth = 100;
 		buttonMenu.redrawButton();
 		buttonMenu.x = 1040;
-		buttonMenu.y = 300;
+		buttonMenu.y = 200;
 
 		statusText = new Text("", this, 0.3);
 		statusText.textColor = 0x000000;
 		statusText.x = 800;
-		statusText.y = 390;
+		statusText.y = 290;
 		statusText.maxWidth = 350;
 	}
 
@@ -265,12 +265,15 @@ class PlayView extends GameState {
 	function onEvent(event:hxd.Event) {}
 
 	override function update(dt:Float) {
-		statusText.text = MyUtils.formatTime(currentFrame * FRAME_TIME) + "<br/>" + Utils.floatToStr(completedFields / numFields * 100, 1) + "%";
+		final color = currentFrame * FRAME_TIME <= levelData.f_timeLimit ? '#128a1c' : '#99300c';
+		statusText.text = 'Time: <font color="$color">' + MyUtils.formatTime(currentFrame * FRAME_TIME) + "</font><br/>" + "Goal: "
+			+ MyUtils.formatTime(levelData.f_timeLimit) + "<br/>" + "Progress: " + Utils.floatToStr(completedFields / numFields * 100, 1) + "%";
 		if (paused) {
+			statusText.text += "<br/><br/>";
 			if (activeCombine == null) {
-				statusText.text += "<br/>Click on a combine harvester to start.";
+				statusText.text += "Click on a combine harvester to start.";
 			} else {
-				statusText.text += "<br/>Press the UP key to move.";
+				statusText.text += "Press the UP key to move.";
 			}
 		}
 
@@ -389,7 +392,7 @@ class PlayView extends GameState {
 						}
 					}
 				}
-				if (completedFields == numFields) {
+				if (completedFields == numFields && currentFrame * FRAME_TIME <= levelData.f_timeLimit) {
 					if (App.save.unlockedLevel < levelIndex + 1) {
 						App.save.unlockedLevel = levelIndex + 1;
 						App.save.levelRecords.set(levelIndex, currentFrame * FRAME_TIME);

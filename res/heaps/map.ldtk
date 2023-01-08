@@ -11,7 +11,7 @@
 	"iid": "2ed57400-7820-11ed-8a57-8f6658066982",
 	"jsonVersion": "1.2.1",
 	"appBuildId": 464653,
-	"nextUid": 8,
+	"nextUid": 9,
 	"identifierStyle": "Capitalize",
 	"worldLayout": "LinearHorizontal",
 	"worldGridWidth": 256,
@@ -92,7 +92,40 @@
 			"pivotY": 0.5,
 			"fieldDefs": []
 		}
-	], "tilesets": [], "enums": [], "externalEnums": [], "levelFields": [] },
+	], "tilesets": [], "enums": [], "externalEnums": [], "levelFields": [
+		{
+			"identifier": "timeLimit",
+			"doc": "Time (in seconds) to unlock the next level.",
+			"__type": "Float",
+			"uid": 8,
+			"type": "F_Float",
+			"isArray": false,
+			"canBeNull": false,
+			"arrayMinLength": null,
+			"arrayMaxLength": null,
+			"editorDisplayMode": "Hidden",
+			"editorDisplayPos": "Above",
+			"editorLinkStyle": "StraightArrow",
+			"editorAlwaysShow": false,
+			"editorShowInWorld": true,
+			"editorCutLongValues": true,
+			"editorTextSuffix": "s",
+			"editorTextPrefix": null,
+			"useForSmartColor": false,
+			"min": null,
+			"max": null,
+			"regex": null,
+			"acceptFileTypes": null,
+			"defaultOverride": null,
+			"textLanguageMode": null,
+			"symmetricalRef": false,
+			"autoChainRef": true,
+			"allowOutOfLevelRef": true,
+			"allowedRefs": "OnlySame",
+			"allowedRefTags": [],
+			"tilesetUid": null
+		}
+	] },
 	"levels": [
 		{
 			"identifier": "Level_1",
@@ -113,7 +146,7 @@
 			"__smartColor": "#ADADB5",
 			"__bgPos": { "topLeftPx": [0,0], "scale": [6,6], "cropRect": [0,0,128,128] },
 			"externalRelPath": null,
-			"fieldInstances": [],
+			"fieldInstances": [{ "__identifier": "timeLimit", "__value": 120, "__type": "Float", "__tile": null, "defUid": 8, "realEditorValues": [{ "id": "V_Float", "params": [120] }] }],
 			"layerInstances": [
 				{
 					"__identifier": "Entities",
@@ -177,7 +210,7 @@
 			"__smartColor": "#ADADB5",
 			"__bgPos": { "topLeftPx": [0,0], "scale": [6,6], "cropRect": [0,0,128,128] },
 			"externalRelPath": null,
-			"fieldInstances": [],
+			"fieldInstances": [{ "__identifier": "timeLimit", "__value": 120, "__type": "Float", "__tile": null, "defUid": 8, "realEditorValues": [{ "id": "V_Float", "params": [120] }] }],
 			"layerInstances": [
 				{
 					"__identifier": "Entities",
@@ -241,7 +274,7 @@
 			"__smartColor": "#ADADB5",
 			"__bgPos": { "topLeftPx": [0,0], "scale": [6,6], "cropRect": [0,0,128,128] },
 			"externalRelPath": null,
-			"fieldInstances": [],
+			"fieldInstances": [{ "__identifier": "timeLimit", "__value": 60, "__type": "Float", "__tile": null, "defUid": 8, "realEditorValues": [{ "id": "V_Float", "params": [60] }] }],
 			"layerInstances": [
 				{
 					"__identifier": "Entities",
