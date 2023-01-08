@@ -1,3 +1,5 @@
+import Gui.Text;
+
 class LevelSelectView extends GameState {
 	override function init() {
 		final centeringFlow = new h2d.Flow(this);
@@ -27,6 +29,10 @@ class LevelSelectView extends GameState {
 			}, Gui.Colors.BLUE, 0.8);
 			button.enabled = !locked;
 			i++;
+		}
+
+		if (App.save.unlockedLevel >= App.ldtkProject.levels.length) {
+			new Text("You beat all levels! Thank you for playing. :)", centeringFlow);
 		}
 	}
 }

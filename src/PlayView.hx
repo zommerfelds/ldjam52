@@ -112,6 +112,7 @@ class PlayView extends GameState {
 			final combineObj = new Object(this);
 			combineObj.x = combineData.pixelX;
 			combineObj.y = combineData.pixelY;
+			combineObj.rotation = combineData.f_Rotation;
 
 			final wheelTile = Res.combine_parts.toTile().sub(0, 0, 16, 16, -8, -8);
 			final wheelL = new Bitmap(wheelTile, combineObj);
@@ -133,8 +134,8 @@ class PlayView extends GameState {
 			cutter.alpha = 0.5;
 
 			final hitBoxOffset = new Object(combineObj);
-			hitBoxOffset.x = -22;
-			final hitBoxTile = Tile.fromColor(0x000000, 55, 42);
+			hitBoxOffset.x = -20;
+			final hitBoxTile = Tile.fromColor(0x000000, 50, 39);
 			hitBoxTile.setCenterRatio();
 			final hitBox = new Bitmap(hitBoxTile, hitBoxOffset);
 			hitBox.visible = false;
@@ -258,7 +259,9 @@ class PlayView extends GameState {
 		timeAcc = 0;
 		completedFields = 0;
 		for (e in fieldElements) {
-			e.e.t = e.fullTile;
+			if (e.e != null) {
+				e.e.t = e.fullTile;
+			}
 		}
 		for (c in combines) {
 			c.obj.setPos(c.startPos);
@@ -425,12 +428,13 @@ class PlayView extends GameState {
 						Save.save(App.save);
 					}
 
-					if (levelIndex + 1 < App.ldtkProject.levels.length) {
-						// App.instance.switchState(new PlayView(levelIndex + 1));
-						App.instance.switchState(new LevelSelectView());
-					} else {
-						App.instance.switchState(new GameEndView());
-					}
+					App.instance.switchState(new LevelSelectView());
+					/*
+						if (levelIndex + 1 < App.ldtkProject.levels.length) {
+							App.instance.switchState(new PlayView(levelIndex + 1));
+						} else {
+							App.instance.switchState(new GameEndView());
+					}*/
 				}
 			}
 		}
