@@ -5748,15 +5748,11 @@ PlayView.prototype = $extend(GameState.prototype,{
 					}
 				};
 			})(combine,anim);
-			var select = [new h2d_Graphics(combineObj)];
-			select[0].beginFill(-1,0.3);
-			select[0].drawCircle(-20,0,combineFrames[0].width * 0.6);
-			new FuncObject((function(select,interactive) {
+			new FuncObject((function(interactive) {
 				return function() {
 					interactive[0].set_visible(_gthis.currentFrame == 0);
-					select[0].set_visible(_gthis.activeCombine == null);
 				};
-			})(select,interactive),combineObj);
+			})(interactive),combineObj);
 			this.combines.push(combine[0]);
 		}
 		var buttonBack = new TileButton(hxd_Res.get_loader().loadCache("buttons.png",hxd_res_Image).toTile().sub(11,0,11,11,-5.5,-5.5),this,function() {
@@ -12529,29 +12525,6 @@ h2d_Graphics.prototype = $extend(h2d_Drawable.prototype,{
 			var x1 = x + Math.cos(a) * radius;
 			var y1 = y + Math.sin(a) * radius;
 			this.addVertex(x1,y1,this.curR,this.curG,this.curB,this.curA,x1 * this.ma + y1 * this.mc + this.mx,x1 * this.mb + y1 * this.md + this.my);
-		}
-		this.flush();
-	}
-	,drawCircle: function(cx,cy,radius,nsegments) {
-		if(nsegments == null) {
-			nsegments = 0;
-		}
-		this.flush();
-		if(nsegments == 0) {
-			var f = radius * 3.14 * 2 / 4;
-			nsegments = Math.ceil(f < 0 ? -f : f);
-		}
-		if(nsegments < 3) {
-			nsegments = 3;
-		}
-		var angle = 6.28318530717958623 / nsegments;
-		var _g = 0;
-		var _g1 = nsegments + 1;
-		while(_g < _g1) {
-			var a = _g++ * angle;
-			var x = cx + Math.cos(a) * radius;
-			var y = cy + Math.sin(a) * radius;
-			this.addVertex(x,y,this.curR,this.curG,this.curB,this.curA,x * this.ma + y * this.mc + this.mx,x * this.mb + y * this.md + this.my);
 		}
 		this.flush();
 	}
