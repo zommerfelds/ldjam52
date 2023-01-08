@@ -3523,11 +3523,40 @@ $hxClasses["h2d.Drawable"] = h2d_Drawable;
 h2d_Drawable.__name__ = "h2d.Drawable";
 h2d_Drawable.__super__ = h2d_Object;
 h2d_Drawable.prototype = $extend(h2d_Object.prototype,{
-	drawFiltered: function(ctx,tile) {
+	set_colorAdd: function(c) {
+		var s = this.getShader(h3d_shader_ColorAdd);
+		if(s == null) {
+			if(c != null) {
+				s = this.addShader(new h3d_shader_ColorAdd());
+				s.color__ = c;
+			}
+		} else if(c == null) {
+			this.removeShader(s);
+		} else {
+			s.color__ = c;
+		}
+		return c;
+	}
+	,drawFiltered: function(ctx,tile) {
 		var old = this.shaders;
 		this.shaders = null;
 		h2d_Object.prototype.drawFiltered.call(this,ctx,tile);
 		this.shaders = old;
+	}
+	,getShader: function(stype) {
+		if(this.shaders != null) {
+			var last = null;
+			var _g_l = this.shaders;
+			while(_g_l != last) {
+				var s = _g_l.s;
+				_g_l = _g_l.next;
+				var s1 = js_Boot.__downcastCheck(s,stype) ? s : null;
+				if(s1 != null) {
+					return s1;
+				}
+			}
+		}
+		return null;
 	}
 	,addShader: function(s) {
 		if(s == null) {
@@ -3562,6 +3591,7 @@ h2d_Drawable.prototype = $extend(h2d_Object.prototype,{
 		}
 	}
 	,__class__: h2d_Drawable
+	,__properties__: $extend(h2d_Object.prototype.__properties__,{set_colorAdd:"set_colorAdd"})
 });
 var h2d_Text = function(font,parent) {
 	this.realMaxWidth = -1;
@@ -5564,6 +5594,12 @@ MenuView.prototype = $extend(GameState.prototype,{
 	}
 	,__class__: MenuView
 });
+var MyUtils = function() { };
+$hxClasses["MyUtils"] = MyUtils;
+MyUtils.__name__ = "MyUtils";
+MyUtils.differVector = function(pt) {
+	return new differ_math_Vector(pt.x,pt.y);
+};
 var ObjExt = function() { };
 $hxClasses["ObjExt"] = ObjExt;
 ObjExt.__name__ = "ObjExt";
@@ -5596,7 +5632,7 @@ var PlayView = function(levelIndex) {
 	this.selectedHighlight = new h2d_Graphics();
 	GameState.call(this);
 	this.levelIndex = levelIndex;
-	haxe_Log.trace("foo",{ fileName : "src/PlayView.hx", lineNumber : 68, className : "PlayView", methodName : "new", customParams : [this.fieldTiles.length]});
+	haxe_Log.trace("foo",{ fileName : "src/PlayView.hx", lineNumber : 70, className : "PlayView", methodName : "new", customParams : [this.fieldTiles.length]});
 	this.levelData = App.ldtkProject.levels[levelIndex];
 };
 $hxClasses["PlayView"] = PlayView;
@@ -5657,14 +5693,6 @@ PlayView.prototype = $extend(GameState.prototype,{
 			combineObj.x = combineData.pixelX;
 			combineObj.posChanged = true;
 			combineObj.y = combineData.pixelY;
-			var cutterOffset = new h2d_Object(combineObj);
-			cutterOffset.posChanged = true;
-			cutterOffset.x = 0;
-			var cutterTile = h2d_Tile.fromColor(0,10,60);
-			cutterTile.dx = -(0.5 * cutterTile.width);
-			cutterTile.dy = -(0.5 * cutterTile.height);
-			var cutter = new h2d_Bitmap(cutterTile,cutterOffset);
-			cutter.set_visible(false);
 			var wheelTile = hxd_Res.get_loader().loadCache("combine-parts.png",hxd_res_Image).toTile().sub(0,0,16,16,-8,-8);
 			var wheelL = new h2d_Bitmap(wheelTile,combineObj);
 			wheelL.posChanged = true;
@@ -5676,7 +5704,26 @@ PlayView.prototype = $extend(GameState.prototype,{
 			wheelR.x = wheelL.x;
 			wheelR.posChanged = true;
 			wheelR.y = -wheelL.y;
-			var combine = [{ obj : combineObj, anim : new h2d_Anim(combineFrames,null,combineObj), cutter : cutter, startPos : Utils.point(combineObj), startRotation : combineObj.rotation, recordedInput : [], wheels : [wheelL,wheelR]}];
+			var anim = [new h2d_Anim(combineFrames,null,combineObj)];
+			var cutterOffset = new h2d_Object(combineObj);
+			cutterOffset.posChanged = true;
+			cutterOffset.x = 0;
+			var cutterTile = h2d_Tile.fromColor(0,10,60);
+			cutterTile.dx = -(0.5 * cutterTile.width);
+			cutterTile.dy = -(0.5 * cutterTile.height);
+			var cutter = new h2d_Bitmap(cutterTile,cutterOffset);
+			cutter.set_visible(false);
+			cutter.alpha = 0.5;
+			var hitBoxOffset = new h2d_Object(combineObj);
+			hitBoxOffset.posChanged = true;
+			hitBoxOffset.x = -22;
+			var hitBoxTile = h2d_Tile.fromColor(0,55,48);
+			hitBoxTile.dx = -(0.5 * hitBoxTile.width);
+			hitBoxTile.dy = -(0.5 * hitBoxTile.height);
+			var hitBox = new h2d_Bitmap(hitBoxTile,hitBoxOffset);
+			hitBox.set_visible(false);
+			hitBox.alpha = 0.5;
+			var combine = [{ obj : combineObj, anim : anim[0], hitBox : hitBox, cutter : cutter, startPos : Utils.point(combineObj), startRotation : combineObj.rotation, recordedInput : [], wheels : [wheelL,wheelR]}];
 			var interactive = [new h2d_Interactive(combineFrames[0].width,combineFrames[0].height,combineObj)];
 			var v = interactive[0].x + combineFrames[0].dx;
 			interactive[0].posChanged = true;
@@ -5684,14 +5731,25 @@ PlayView.prototype = $extend(GameState.prototype,{
 			var v1 = interactive[0].y + combineFrames[0].dy;
 			interactive[0].posChanged = true;
 			interactive[0].y = v1;
-			interactive[0].onClick = (function(combine) {
+			interactive[0].onClick = (function(combine,anim) {
 				return function(e) {
 					_gthis.activeCombine = combine[0];
 					_gthis.selectedHighlight.set_visible(true);
 					combine[0].obj.addChild(_gthis.selectedHighlight);
 					_gthis.paused = true;
+					anim[0].set_colorAdd(new h3d_Vector(0.2,0.2,0.2));
+					var _g = 0;
+					var _g1 = _gthis.combines;
+					while(_g < _g1.length) {
+						var c = _g1[_g];
+						++_g;
+						if(c.anim == anim[0]) {
+							continue;
+						}
+						c.anim.set_colorAdd(null);
+					}
 				};
-			})(combine);
+			})(combine,anim);
 			var select = [new h2d_Graphics(combineObj)];
 			select[0].beginFill(-1,0.3);
 			select[0].drawCircle(-20,0,combineFrames[0].width * 0.6);
@@ -5703,10 +5761,11 @@ PlayView.prototype = $extend(GameState.prototype,{
 			})(select,interactive),combineObj);
 			this.combines.push(combine[0]);
 		}
-		this.selectedHighlight.lineStyle(2,-1);
-		this.selectedHighlight.drawCircle(-20,0,combineFrames[0].width * 0.6);
 		var buttonBack = new TileButton(hxd_Res.get_loader().loadCache("buttons.png",hxd_res_Image).toTile().sub(11,0,11,11,-5.5,-5.5),this,function() {
 			_gthis.activeCombine = null;
+			var _g = 0;
+			var _g1 = _gthis.combines;
+			while(_g < _g1.length) _g1[_g++].anim.set_colorAdd(null);
 			_gthis.selectedHighlight.set_visible(false);
 			_gthis.paused = true;
 			_gthis.resetTime();
@@ -5714,7 +5773,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 		buttonBack.posChanged = true;
 		buttonBack.x = 795;
 		buttonBack.posChanged = true;
-		buttonBack.y = 400;
+		buttonBack.y = 300;
 		this.statusText = new Text("",this,0.3);
 		this.statusText.set_textColor(0);
 		this.statusText.dropShadow = { dx : 1, dy : 1, color : 0, alpha : 0.5};
@@ -5723,7 +5782,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 		_this.x = 800;
 		var _this = this.statusText;
 		_this.posChanged = true;
-		_this.y = 480;
+		_this.y = 380;
 	}
 	,resetTime: function() {
 		this.currentFrame = 0;
@@ -5808,6 +5867,8 @@ PlayView.prototype = $extend(GameState.prototype,{
 					w.rotation = 0.0;
 				}
 				if(inputs.indexOf(CombineInput.Forward) != -1) {
+					var originalPos = Utils.point(combine.obj);
+					var originalRotation = combine.obj.rotation;
 					if(inputs.indexOf(CombineInput.TurnLeft) != -1) {
 						var fh = combine.obj;
 						fh.posChanged = true;
@@ -5844,28 +5905,43 @@ PlayView.prototype = $extend(GameState.prototype,{
 					if(x == null) {
 						x = 0.;
 					}
-					var _this1 = Utils.point(combine.obj);
-					ObjExt.setPos(combine.obj,new h2d_col_Point(_this1.x + x,_this1.y + y));
+					ObjExt.setPos(combine.obj,new h2d_col_Point(originalPos.x + x,originalPos.y + y));
+					var shape = this.getShape(combine.hitBox);
+					var _g8 = 0;
+					var _g9 = this.combines;
+					while(_g8 < _g9.length) {
+						var other = _g9[_g8];
+						++_g8;
+						if(combine == other) {
+							continue;
+						}
+						if(shape.test(this.getShape(other.hitBox),null) != null) {
+							ObjExt.setPos(combine.obj,originalPos);
+							var _this1 = combine.obj;
+							_this1.posChanged = true;
+							_this1.rotation = originalRotation;
+							inputs.splice(0,inputs.length);
+							break;
+						}
+					}
 					var bounds = combine.cutter.getBounds(this);
 					var xMin = Math.floor(bounds.xMin / PlayView.FIELD_TILE_SIZE);
 					var xMax = Math.ceil(bounds.xMax / PlayView.FIELD_TILE_SIZE);
 					var yMin = Math.floor(bounds.yMin / PlayView.FIELD_TILE_SIZE);
 					var yMax = Math.ceil(bounds.yMax / PlayView.FIELD_TILE_SIZE);
-					var localBounds = combine.cutter.getBounds(combine.cutter);
-					var points = [this.globalToLocal(combine.cutter.localToGlobal(new h2d_col_Point(localBounds.xMin,localBounds.yMin))),this.globalToLocal(combine.cutter.localToGlobal(new h2d_col_Point(localBounds.xMax,localBounds.yMin))),this.globalToLocal(combine.cutter.localToGlobal(new h2d_col_Point(localBounds.xMax,localBounds.yMax))),this.globalToLocal(combine.cutter.localToGlobal(new h2d_col_Point(localBounds.xMin,localBounds.yMax)))];
-					var collider = h2d_col_Polygon.getCollider(points == null ? [] : points);
-					var _g8 = yMin;
-					var _g9 = yMax + 1;
-					while(_g8 < _g9) {
-						var y1 = _g8++;
-						var _g10 = xMin;
-						var _g11 = xMax + 1;
-						while(_g10 < _g11) {
-							var x1 = _g10++;
+					var cutterShape = this.getShape(combine.cutter);
+					var _g10 = yMin;
+					var _g11 = yMax + 1;
+					while(_g10 < _g11) {
+						var y1 = _g10++;
+						var _g12 = xMin;
+						var _g13 = xMax + 1;
+						while(_g12 < _g13) {
+							var x1 = _g12++;
 							var _this2 = this.fieldElements.values;
 							var key = new Point2d(x1,y1).hashCode();
 							var element = _this2.h[key];
-							if(element != null && collider.contains(new h2d_col_Point(x1 * PlayView.FIELD_TILE_SIZE,y1 * PlayView.FIELD_TILE_SIZE)) && element.e.t == element.fullTile) {
+							if(element != null && differ_Collision.pointInPoly(x1 * PlayView.FIELD_TILE_SIZE,y1 * PlayView.FIELD_TILE_SIZE,cutterShape) && element.e.t == element.fullTile) {
 								this.completedFields++;
 								element.e.t = element.emptyTile;
 							}
@@ -5885,6 +5961,10 @@ PlayView.prototype = $extend(GameState.prototype,{
 				}
 			}
 		}
+	}
+	,getShape: function(obj) {
+		var localBounds = obj.getBounds(obj);
+		return new differ_shapes_Polygon(0,0,[MyUtils.differVector(this.globalToLocal(obj.localToGlobal(new h2d_col_Point(localBounds.xMin,localBounds.yMin)))),MyUtils.differVector(this.globalToLocal(obj.localToGlobal(new h2d_col_Point(localBounds.xMax,localBounds.yMin)))),MyUtils.differVector(this.globalToLocal(obj.localToGlobal(new h2d_col_Point(localBounds.xMax,localBounds.yMax)))),MyUtils.differVector(this.globalToLocal(obj.localToGlobal(new h2d_col_Point(localBounds.xMin,localBounds.yMax))))]);
 	}
 	,__class__: PlayView
 });
@@ -6434,6 +6514,305 @@ Xml.prototype = {
 	}
 	,__class__: Xml
 };
+var differ_Collision = function() { };
+$hxClasses["differ.Collision"] = differ_Collision;
+differ_Collision.__name__ = "differ.Collision";
+differ_Collision.pointInPoly = function(x,y,poly) {
+	var sides = poly.get_transformedVertices().length;
+	var verts = poly.get_transformedVertices();
+	var j = sides - 1;
+	var oddNodes = false;
+	var _g = 0;
+	while(_g < sides) {
+		var i = _g++;
+		if(verts[i].y < y && verts[j].y >= y || verts[j].y < y && verts[i].y >= y) {
+			if(verts[i].x + (y - verts[i].y) / (verts[j].y - verts[i].y) * (verts[j].x - verts[i].x) < x) {
+				oddNodes = !oddNodes;
+			}
+		}
+		j = i;
+	}
+	return oddNodes;
+};
+var differ_data_ShapeCollision = function() {
+	this.otherUnitVectorY = 0.0;
+	this.otherUnitVectorX = 0.0;
+	this.otherSeparationY = 0.0;
+	this.otherSeparationX = 0.0;
+	this.otherOverlap = 0.0;
+	this.unitVectorY = 0.0;
+	this.unitVectorX = 0.0;
+	this.separationY = 0.0;
+	this.separationX = 0.0;
+	this.overlap = 0.0;
+};
+$hxClasses["differ.data.ShapeCollision"] = differ_data_ShapeCollision;
+differ_data_ShapeCollision.__name__ = "differ.data.ShapeCollision";
+differ_data_ShapeCollision.prototype = {
+	__class__: differ_data_ShapeCollision
+};
+var differ_math_Matrix = function(a,b,c,d,tx,ty) {
+	if(ty == null) {
+		ty = 0;
+	}
+	if(tx == null) {
+		tx = 0;
+	}
+	if(d == null) {
+		d = 1;
+	}
+	if(c == null) {
+		c = 0;
+	}
+	if(b == null) {
+		b = 0;
+	}
+	if(a == null) {
+		a = 1;
+	}
+	this.a = a;
+	this.b = b;
+	this.c = c;
+	this.d = d;
+	this.tx = tx;
+	this.ty = ty;
+};
+$hxClasses["differ.math.Matrix"] = differ_math_Matrix;
+differ_math_Matrix.__name__ = "differ.math.Matrix";
+differ_math_Matrix.prototype = {
+	makeTranslation: function(_x,_y) {
+		this.tx = _x;
+		this.ty = _y;
+		return this;
+	}
+	,__class__: differ_math_Matrix
+};
+var differ_math_Vector = function(_x,_y) {
+	if(_y == null) {
+		_y = 0;
+	}
+	if(_x == null) {
+		_x = 0;
+	}
+	this.y = 0;
+	this.x = 0;
+	this.x = _x;
+	this.y = _y;
+};
+$hxClasses["differ.math.Vector"] = differ_math_Vector;
+differ_math_Vector.__name__ = "differ.math.Vector";
+differ_math_Vector.prototype = {
+	transform: function(matrix) {
+		var v = new differ_math_Vector(this.x,this.y);
+		v.x = this.x * matrix.a + this.y * matrix.c + matrix.tx;
+		v.y = this.x * matrix.b + this.y * matrix.d + matrix.ty;
+		return v;
+	}
+	,__class__: differ_math_Vector
+};
+var differ_sat_SAT2D = function() { };
+$hxClasses["differ.sat.SAT2D"] = differ_sat_SAT2D;
+differ_sat_SAT2D.__name__ = "differ.sat.SAT2D";
+differ_sat_SAT2D.testPolygonVsPolygon = function(polygon1,polygon2,into,flip) {
+	if(flip == null) {
+		flip = false;
+	}
+	if(into == null) {
+		into = new differ_data_ShapeCollision();
+	} else {
+		into.shape1 = into.shape2 = null;
+		into.overlap = into.separationX = into.separationY = into.unitVectorX = into.unitVectorY = 0.0;
+		into.otherOverlap = into.otherSeparationX = into.otherSeparationY = into.otherUnitVectorX = into.otherUnitVectorY = 0.0;
+	}
+	if(differ_sat_SAT2D.checkPolygons(polygon1,polygon2,differ_sat_SAT2D.tmp1,flip) == null) {
+		return null;
+	}
+	if(differ_sat_SAT2D.checkPolygons(polygon2,polygon1,differ_sat_SAT2D.tmp2,!flip) == null) {
+		return null;
+	}
+	var result = null;
+	var other = null;
+	if(Math.abs(differ_sat_SAT2D.tmp1.overlap) < Math.abs(differ_sat_SAT2D.tmp2.overlap)) {
+		result = differ_sat_SAT2D.tmp1;
+		other = differ_sat_SAT2D.tmp2;
+	} else {
+		result = differ_sat_SAT2D.tmp2;
+		other = differ_sat_SAT2D.tmp1;
+	}
+	result.otherOverlap = other.overlap;
+	result.otherSeparationX = other.separationX;
+	result.otherSeparationY = other.separationY;
+	result.otherUnitVectorX = other.unitVectorX;
+	result.otherUnitVectorY = other.unitVectorY;
+	into.overlap = result.overlap;
+	into.separationX = result.separationX;
+	into.separationY = result.separationY;
+	into.unitVectorX = result.unitVectorX;
+	into.unitVectorY = result.unitVectorY;
+	into.otherOverlap = result.otherOverlap;
+	into.otherSeparationX = result.otherSeparationX;
+	into.otherSeparationY = result.otherSeparationY;
+	into.otherUnitVectorX = result.otherUnitVectorX;
+	into.otherUnitVectorY = result.otherUnitVectorY;
+	into.shape1 = result.shape1;
+	into.shape2 = result.shape2;
+	return into;
+};
+differ_sat_SAT2D.checkPolygons = function(polygon1,polygon2,into,flip) {
+	if(flip == null) {
+		flip = false;
+	}
+	into.shape1 = into.shape2 = null;
+	into.overlap = into.separationX = into.separationY = into.unitVectorX = into.unitVectorY = 0.0;
+	into.otherOverlap = into.otherSeparationX = into.otherSeparationY = into.otherUnitVectorX = into.otherUnitVectorY = 0.0;
+	var test1 = 0.0;
+	var test2 = 0.0;
+	var testNum = 0.0;
+	var min1 = 0.0;
+	var max1 = 0.0;
+	var min2 = 0.0;
+	var max2 = 0.0;
+	var closest = 1073741823;
+	var axisX = 0.0;
+	var axisY = 0.0;
+	var verts1 = polygon1.get_transformedVertices();
+	var verts2 = polygon2.get_transformedVertices();
+	var _g = 0;
+	var _g1 = verts1.length;
+	while(_g < _g1) {
+		var i = _g++;
+		axisX = -((i >= verts1.length - 1 ? verts1[0] : verts1[i + 1]).y - verts1[i].y);
+		axisY = (i >= verts1.length - 1 ? verts1[0] : verts1[i + 1]).x - verts1[i].x;
+		var aLen = Math.sqrt(axisX * axisX + axisY * axisY);
+		var component = axisX;
+		if(aLen == 0) {
+			axisX = 0;
+		} else {
+			component /= aLen;
+			axisX = component;
+		}
+		var component1 = axisY;
+		if(aLen == 0) {
+			axisY = 0;
+		} else {
+			component1 /= aLen;
+			axisY = component1;
+		}
+		min1 = axisX * verts1[0].x + axisY * verts1[0].y;
+		max1 = min1;
+		var _g2 = 1;
+		var _g3 = verts1.length;
+		while(_g2 < _g3) {
+			var j = _g2++;
+			testNum = axisX * verts1[j].x + axisY * verts1[j].y;
+			if(testNum < min1) {
+				min1 = testNum;
+			}
+			if(testNum > max1) {
+				max1 = testNum;
+			}
+		}
+		min2 = axisX * verts2[0].x + axisY * verts2[0].y;
+		max2 = min2;
+		var _g4 = 1;
+		var _g5 = verts2.length;
+		while(_g4 < _g5) {
+			var j1 = _g4++;
+			testNum = axisX * verts2[j1].x + axisY * verts2[j1].y;
+			if(testNum < min2) {
+				min2 = testNum;
+			}
+			if(testNum > max2) {
+				max2 = testNum;
+			}
+		}
+		test1 = min1 - max2;
+		test2 = min2 - max1;
+		if(test1 > 0 || test2 > 0) {
+			return null;
+		}
+		var distMin = -(max2 - min1);
+		if(flip) {
+			distMin *= -1;
+		}
+		if(Math.abs(distMin) < closest) {
+			into.unitVectorX = axisX;
+			into.unitVectorY = axisY;
+			into.overlap = distMin;
+			closest = Math.abs(distMin);
+		}
+	}
+	into.shape1 = flip ? polygon2 : polygon1;
+	into.shape2 = flip ? polygon1 : polygon2;
+	into.separationX = -into.unitVectorX * into.overlap;
+	into.separationY = -into.unitVectorY * into.overlap;
+	if(flip) {
+		into.unitVectorX = -into.unitVectorX;
+		into.unitVectorY = -into.unitVectorY;
+	}
+	return into;
+};
+var differ_shapes_Shape = function(_x,_y) {
+	this._transformed = false;
+	this._scaleY = 1;
+	this._scaleX = 1;
+	this._rotation = 0;
+	this.name = "shape";
+	this.tags = new haxe_ds_StringMap();
+	this._position = new differ_math_Vector(_x,_y);
+	this._scale = new differ_math_Vector(1,1);
+	this._rotation = 0;
+	this._scaleX = 1;
+	this._scaleY = 1;
+	this._transformMatrix = new differ_math_Matrix();
+	this._transformMatrix.makeTranslation(this._position.x,this._position.y);
+};
+$hxClasses["differ.shapes.Shape"] = differ_shapes_Shape;
+differ_shapes_Shape.__name__ = "differ.shapes.Shape";
+differ_shapes_Shape.prototype = {
+	testPolygon: function(polygon,into,flip) {
+		if(flip == null) {
+			flip = false;
+		}
+		return null;
+	}
+	,__class__: differ_shapes_Shape
+};
+var differ_shapes_Polygon = function(x,y,vertices) {
+	differ_shapes_Shape.call(this,x,y);
+	this.name = "polygon(sides:" + vertices.length + ")";
+	this._transformedVertices = [];
+	this._vertices = vertices;
+};
+$hxClasses["differ.shapes.Polygon"] = differ_shapes_Polygon;
+differ_shapes_Polygon.__name__ = "differ.shapes.Polygon";
+differ_shapes_Polygon.__super__ = differ_shapes_Shape;
+differ_shapes_Polygon.prototype = $extend(differ_shapes_Shape.prototype,{
+	test: function(shape,into) {
+		return shape.testPolygon(this,into,true);
+	}
+	,testPolygon: function(polygon,into,flip) {
+		if(flip == null) {
+			flip = false;
+		}
+		return differ_sat_SAT2D.testPolygonVsPolygon(this,polygon,into,flip);
+	}
+	,get_transformedVertices: function() {
+		if(!this._transformed) {
+			this._transformedVertices = [];
+			this._transformed = true;
+			var _count = this._vertices.length;
+			var _g = 0;
+			while(_g < _count) {
+				var _this = this._vertices[_g++];
+				this._transformedVertices.push(new differ_math_Vector(_this.x,_this.y).transform(this._transformMatrix));
+			}
+		}
+		return this._transformedVertices;
+	}
+	,__class__: differ_shapes_Polygon
+	,__properties__: {get_transformedVertices:"get_transformedVertices"}
+});
 var dn_Cooldown = function(fps,maxSize) {
 	if(dn_Cooldown.INDEXES == null) {
 		if(haxe_rtti_Meta.getType(dn_Cooldown).indexes != null) {
@@ -15207,78 +15586,6 @@ $hxClasses["h2d.col.Point"] = h2d_col_Point;
 h2d_col_Point.__name__ = "h2d.col.Point";
 h2d_col_Point.prototype = {
 	__class__: h2d_col_Point
-};
-var h2d_col_Polygon = {};
-h2d_col_Polygon.getCollider = function(this1,isConvex) {
-	if(isConvex == null) {
-		isConvex = false;
-	}
-	return new h2d_col_PolygonCollider([this1],isConvex);
-};
-h2d_col_Polygon.contains = function(this1,p,isConvex) {
-	if(isConvex == null) {
-		isConvex = false;
-	}
-	if(isConvex) {
-		var p1 = this1[this1.length - 1];
-		var _g = 0;
-		while(_g < this1.length) {
-			var p2 = this1[_g];
-			++_g;
-			if((p2.x - p1.x) * (p.y - p1.y) - (p2.y - p1.y) * (p.x - p1.x) < 0) {
-				return false;
-			}
-			p1 = p2;
-		}
-		return true;
-	} else {
-		var w = 0;
-		var p1 = this1[this1.length - 1];
-		var _g = 0;
-		while(_g < this1.length) {
-			var p2 = this1[_g];
-			++_g;
-			if(p2.y <= p.y) {
-				if(p1.y > p.y && (p1.x - p2.x) * (p.y - p2.y) - (p1.y - p2.y) * (p.x - p2.x) > 0) {
-					++w;
-				}
-			} else if(p1.y <= p.y && (p1.x - p2.x) * (p.y - p2.y) - (p1.y - p2.y) * (p.x - p2.x) < 0) {
-				--w;
-			}
-			p1 = p2;
-		}
-		return w != 0;
-	}
-};
-var h2d_col_PolygonCollider = function(polygons,isConvex) {
-	if(isConvex == null) {
-		isConvex = false;
-	}
-	this.polygons = polygons;
-	this.isConvex = isConvex;
-};
-$hxClasses["h2d.col.PolygonCollider"] = h2d_col_PolygonCollider;
-h2d_col_PolygonCollider.__name__ = "h2d.col.PolygonCollider";
-h2d_col_PolygonCollider.__interfaces__ = [h2d_col_Collider];
-h2d_col_PolygonCollider.prototype = {
-	contains: function(p) {
-		if(this.polygons == null) {
-			return false;
-		}
-		return h2d_col_Polygons.contains(this.polygons,p,this.isConvex);
-	}
-	,__class__: h2d_col_PolygonCollider
-};
-var h2d_col_Polygons = {};
-h2d_col_Polygons.contains = function(this1,p,isConvex) {
-	if(isConvex == null) {
-		isConvex = false;
-	}
-	var _g = 0;
-	while(_g < this1.length) if(h2d_col_Polygon.contains(this1[_g++],p,isConvex)) {
-		return true;
-	}
-	return false;
 };
 var h2d_filter_Filter = function() {
 	this.enable = true;
@@ -46184,6 +46491,8 @@ Xml.Comment = 3;
 Xml.DocType = 4;
 Xml.ProcessingInstruction = 5;
 Xml.Document = 6;
+differ_sat_SAT2D.tmp1 = new differ_data_ShapeCollision();
+differ_sat_SAT2D.tmp2 = new differ_data_ShapeCollision();
 dn_Cooldown.__meta__ = { obj : { indexes : ["test","jump","a","b","c"]}};
 dn_Cooldown.DEFAULT_COUNT_LIMIT = 512;
 dn_FilePath.WIN_NETWORK_DRIVE_REG = new EReg("^\\\\\\\\([a-z0-9-]+)\\\\(.*)","i");
