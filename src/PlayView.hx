@@ -1,4 +1,3 @@
-import h2d.TileGroup;
 import Gui.Text;
 import Gui.TileButton;
 import Utils.Point2d;
@@ -9,6 +8,7 @@ import h2d.Interactive;
 import h2d.Object;
 import h2d.SpriteBatch;
 import h2d.Tile;
+import h2d.TileGroup;
 import h2d.col.Point;
 import h2d.col.Polygon;
 import haxe.ds.HashMap;
@@ -48,7 +48,7 @@ class PlayView extends GameState {
 	var timeAcc = 0.0;
 
 	var paused = true;
-	var timeText:Text;
+	var statusText:Text;
 
 	static final FRAME_TIME = 1 / 60.0;
 	static final FIELD_TILE_SIZE = 6;
@@ -164,7 +164,7 @@ class PlayView extends GameState {
 			final buttonPlay = new TileButton(buttonPlayTile, this, () -> {
 				paused = false;
 			});
-			buttonPlay.x = 800;
+			buttonPlay.x = 880;
 			buttonPlay.y = 400;
 			final buttonPauseTile = Res.buttons.toTile()
 				.sub(2 * BUTTON_TILE_SIZE, 0, BUTTON_TILE_SIZE, BUTTON_TILE_SIZE, BUTTON_TILE_SIZE * -0.5, BUTTON_TILE_SIZE * -0.5);
@@ -186,19 +186,19 @@ class PlayView extends GameState {
 			paused = true;
 			resetTime();
 		});
-		buttonBack.x = 880;
+		buttonBack.x = 795;
 		buttonBack.y = 400;
 
-		timeText = new Text("", this, 0.5);
-		timeText.textColor = 0x000000;
-		timeText.dropShadow = {
-			dx: 3,
-			dy: 3,
+		statusText = new Text("", this, 0.3);
+		statusText.textColor = 0x000000;
+		statusText.dropShadow = {
+			dx: 1,
+			dy: 1,
 			color: 0x000000,
 			alpha: 0.5
 		};
-		timeText.x = 800;
-		timeText.y = 480;
+		statusText.x = 800;
+		statusText.y = 480;
 	}
 
 	function resetTime() {
@@ -218,7 +218,18 @@ class PlayView extends GameState {
 
 	override function update(dt:Float) {
 		final date = Date.fromTime(currentFrame * FRAME_TIME * 1000);
-		timeText.text = DateTools.format(date, "%M:%S.") + ("" + Std.int(((currentFrame * FRAME_TIME) % 1.0) * 100)).lpad("0", 2);
+		statusText.text = DateTools.format(date, "%M:%S.")
+			+ ("" + Std.int(((currentFrame * FRAME_TIME) % 1.0) * 100)).lpad("0", 2)
+			+ "<br/>"
+			+ Utils.floatToStr(completedFields / numFields * 100, 1)
+			+ "%";
+		if (paused) {
+			if (activeCombine == null) {
+				statusText.text += "<br/>Click on a combine harvester to start.";
+			} else {
+			statusText.text += "<br/>Press the UP key to move.";
+			}
+		}
 
 		for (combine in combines) {
 			combine.anim.pause = paused || combine.recordedInput.empty();
