@@ -76,8 +76,7 @@ class PlayView extends GameState {
 	override function init() {
 		App.instance.engine.backgroundColor = 0xccdb5e;
 		x = 20;
-		y = 20;
-		scale(2);
+		y = 60;
 
 		addEventListener(onEvent);
 
@@ -207,8 +206,7 @@ class PlayView extends GameState {
 				buttonPause.visible = !paused;
 			}, buttonPlay);
 		 */
-		final buttonBackTile = Res.buttons.toTile()
-			.sub(1 * BUTTON_TILE_SIZE, 0, BUTTON_TILE_SIZE, BUTTON_TILE_SIZE, BUTTON_TILE_SIZE * -0.5, BUTTON_TILE_SIZE * -0.5);
+		final buttonBackTile = Res.buttons.toTile().sub(1 * BUTTON_TILE_SIZE, 0, BUTTON_TILE_SIZE, BUTTON_TILE_SIZE);
 		final buttonBack = new TileButton(buttonBackTile, this, () -> {
 			activeCombine = null;
 			for (c in combines) {
@@ -218,6 +216,12 @@ class PlayView extends GameState {
 			paused = true;
 			resetTime();
 		});
+		buttonBack.content.padding = 0;
+		// buttonBack.content.paddingBottom = 10;
+		buttonBack.content.horizontalAlign = Middle;
+		buttonBack.content.minHeight = 60;
+		buttonBack.content.minWidth = 60;
+		buttonBack.redrawButton();
 		buttonBack.x = 795;
 		buttonBack.y = 200;
 		final buttonReset = new TextButton(this, "RESET", () -> {
@@ -260,6 +264,22 @@ class PlayView extends GameState {
 		final gr = new Graphics(this);
 		gr.lineStyle(1, 0x000000);
 		gr.drawRect(-0.5 * FIELD_TILE_SIZE, -0.5 * FIELD_TILE_SIZE, 128 * FIELD_TILE_SIZE, 128 * FIELD_TILE_SIZE);
+
+		final zoomOut = new TextButton(this, "zoom out", () -> {
+			scale(0.8);
+		}, 0x000000, false, 0.15);
+		zoomOut.content.padding = 15;
+		zoomOut.redrawButton();
+		zoomOut.x = 0;
+		zoomOut.y = -20;
+
+		final zoomIn = new TextButton(this, "zoom in", () -> {
+			scale(1 / 0.8);
+		}, 0x000000, false, 0.15);
+		zoomIn.content.padding = 15;
+		zoomIn.redrawButton();
+		zoomIn.x = 100;
+		zoomIn.y = -20;
 	}
 
 	function resetTime() {

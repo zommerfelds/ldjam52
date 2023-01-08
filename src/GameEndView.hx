@@ -8,7 +8,7 @@ class GameEndView extends GameState {
 		centeringFlow.verticalAlign = Middle;
 		centeringFlow.maxWidth = width;
 		centeringFlow.layout = Vertical;
-		centeringFlow.verticalSpacing = Gui.scaleAsInt(50);
+		centeringFlow.verticalSpacing = 50;
 
 		new Gui.Text("You win", centeringFlow);
 	}

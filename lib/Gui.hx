@@ -1,19 +1,22 @@
 import haxe.Timer;
 import haxe.ValueException;
 
+#if 0
 class Gui {
 	public static function scale(multiplier = 1.0) {
-		var normWidth:Float = hxd.Window.getInstance().width;
+		/*var normWidth:Float = hxd.Window.getInstance().width;
 		if (hxd.Window.getInstance().width / hxd.Window.getInstance().height > 9 / 16) {
 			normWidth = 9 / 16 * hxd.Window.getInstance().height;
 		}
-		return normWidth / 600 * multiplier;
+		return normWidth / 600 * multiplier;*/
+		return 1 * multiplier;
 	};
 
 	public static function scaleAsInt(multiplier = 1.0) {
 		return Std.int(scale(multiplier));
 	};
 }
+#end
 
 class Text extends h2d.HtmlText {
 	// Small hack to get spaces to work in HtmlText.
@@ -21,7 +24,7 @@ class Text extends h2d.HtmlText {
 
 	public function new(text, ?parent, size = 1.0, addDefaultShadow = false) {
 		final fontRes = hxd.Res.piellari;
-		final font = fontRes.toSdfFont(Std.int(size * Gui.scale(60)), Alpha);
+		final font = fontRes.toSdfFont(Std.int(size * 100.0), Alpha);
 		super(font, parent);
 		this.text = text;
 		smooth = true;
@@ -33,8 +36,8 @@ class Text extends h2d.HtmlText {
 
 		if (addDefaultShadow) {
 			dropShadow = {
-				dx: Gui.scale(5),
-				dy: Gui.scale(5),
+				dx: 5,
+				dy: 5,
 				color: 0x000000,
 				alpha: 0.5
 			};
@@ -81,11 +84,11 @@ class Button extends h2d.Object {
 		if (backgroundColor == null)
 			backgroundColor = Colors.LIGHT_GREY;
 
-		final horizontalPadding = 20 * Gui.scale();
-		final verticalPadding = 20 * Gui.scale();
+		final horizontalPadding = 20;
+		final verticalPadding = 20;
 
-		shadowOffsetX = 5 * Gui.scale();
-		shadowOffsetY = 5 * Gui.scale();
+		shadowOffsetX = 5;
+		shadowOffsetY = 5;
 		final buttonOffsetXPressed = shadowOffsetX * 0.5;
 		final buttonOffsetYPressed = shadowOffsetY * 0.5;
 
@@ -153,18 +156,18 @@ class Button extends h2d.Object {
 	// Users or subclasses must call this function if they change the content.
 	// There is maybe a better way to do this with contentChanged, but meh.
 	public function redrawButton() {
-		final w = content.outerWidth == 0 ? Std.int(Gui.scale() * 100) : content.outerWidth;
-		final h = content.outerHeight == 0 ? Std.int(Gui.scale() * 100) : content.outerHeight;
+		final w = content.outerWidth == 0 ? 100 : content.outerWidth;
+		final h = content.outerHeight == 0 ? 100 : content.outerHeight;
 
 		buttonShadow.clear();
 		buttonShadow.beginFill(0x000000, 0.5);
-		buttonShadow.drawRoundedRect(0, 0, w, h, 10 * Gui.scale());
+		buttonShadow.drawRoundedRect(0, 0, w, h, 10);
 		buttonShadow.x = shadowOffsetX;
 		buttonShadow.y = shadowOffsetY;
 
 		buttonShape.clear();
 		buttonShape.beginFill(backgroundColor);
-		buttonShape.drawRoundedRect(0, 0, w, h, 10 * Gui.scale());
+		buttonShape.drawRoundedRect(0, 0, w, h, 10);
 	}
 
 	function set_enabled(enabled) {

@@ -8,12 +8,12 @@ class MenuView extends GameState {
 		centeringFlow.verticalAlign = Middle;
 		centeringFlow.maxWidth = width;
 		centeringFlow.layout = Vertical;
-		centeringFlow.verticalSpacing = Gui.scaleAsInt(50);
+		centeringFlow.verticalSpacing = 10;
 
 		new Gui.Text("Wellcome to...", centeringFlow, 0.8);
 		new Gui.Text("Combine Harvester: Time Attack!", centeringFlow);
 
-		centeringFlow.addSpacing(Gui.scaleAsInt(100));
+		centeringFlow.addSpacing(50);
 
 		new Gui.TextButton(centeringFlow, "Toggle fullscreen", () -> {
 			HerbalTeaApp.toggleFullScreen();
@@ -23,7 +23,7 @@ class MenuView extends GameState {
 			App.instance.switchState(new LevelSelectView());
 		}, Gui.Colors.BLUE, 0.8);
 
-		centeringFlow.addSpacing(Gui.scaleAsInt(100));
+		// centeringFlow.addSpacing(Gui.scaleAsInt(100));
 
 		new Gui.Text("version: " + hxd.Res.version.entry.getText(), centeringFlow, 0.5);
 	}

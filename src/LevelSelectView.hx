@@ -10,11 +10,11 @@ class LevelSelectView extends GameState {
 		centeringFlow.verticalAlign = Middle;
 		centeringFlow.maxWidth = width;
 		centeringFlow.layout = Vertical;
-		centeringFlow.verticalSpacing = Gui.scaleAsInt(50);
+		centeringFlow.verticalSpacing = 50;
 
 		new Gui.Text("Select level", centeringFlow);
 
-		centeringFlow.addSpacing(Gui.scaleAsInt(100));
+		centeringFlow.addSpacing(100);
 
 		var totalTime = 0.0;
 		var i = 0;

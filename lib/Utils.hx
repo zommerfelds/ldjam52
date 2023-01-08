@@ -305,21 +305,6 @@ class Utils {
 		};
 	}
 
-	public static function addInteractive(obj:h2d.Object, ?padding:Float) {
-		if (padding == null) {
-			// Note: the default padding ignores potential scaling of the parents.
-			padding = Gui.scale(15) / obj.scaleX;
-		}
-		final interactive = new h2d.Interactive(
-			obj.getBounds(obj).width + 2 * padding,
-			obj.getBounds(obj).height + 2 * padding,
-			obj
-		);
-		interactive.x = -padding;
-		interactive.y = -padding;
-		return interactive;
-	}
-
 	/** An opinionated, somewhat generic and hacky toString() function. **/
 	public static function anythingToString(any:Dynamic) {
 		final buf = new StringBuf();
