@@ -5654,7 +5654,7 @@ MenuView.prototype = $extend(GameState.prototype,{
 		centeringFlow.set_maxWidth(this.width);
 		centeringFlow.set_layout(h2d_FlowLayout.Vertical);
 		centeringFlow.set_verticalSpacing(10);
-		new Text("Wellcome to...",centeringFlow,0.8);
+		new Text("Welcome to...",centeringFlow,0.8);
 		new Text("Combine Harvester: Time Attack!",centeringFlow);
 		centeringFlow.addSpacing(50);
 		new TextButton(centeringFlow,"Toggle fullscreen",function() {
@@ -5724,6 +5724,10 @@ PlayView.prototype = $extend(GameState.prototype,{
 		this.x = 20;
 		this.posChanged = true;
 		this.y = 60;
+		this.posChanged = true;
+		this.scaleX *= 2;
+		this.posChanged = true;
+		this.scaleY *= 2;
 		this.addEventListener($bind(this,this.onEvent));
 		var pixels = hxd_Res.get_loader().loadCache(this.levelData.bgImageInfos.relFilePath,hxd_res_Image).getPixels();
 		var field = new h2d_SpriteBatch(hxd_Res.get_loader().loadCache("field-tiles.png",hxd_res_Image).toTile(),this);
