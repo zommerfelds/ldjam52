@@ -20,7 +20,7 @@ class Text extends h2d.HtmlText {
 	public static final SPACE = "<b> </b>";
 
 	public function new(text, ?parent, size = 1.0, addDefaultShadow = false) {
-		final fontRes = hxd.Res.Catamaran_Light_sdf;
+		final fontRes = hxd.Res.piellari;
 		final font = fontRes.toSdfFont(Std.int(size * Gui.scale(60)), Alpha);
 		super(font, parent);
 		this.text = text;
@@ -28,7 +28,8 @@ class Text extends h2d.HtmlText {
 		textColor = 0xffffffff;
 
 		// Reduce space between lines. This may need to change depending on the font.
-		lineSpacing = -font.lineHeight * 0.2;
+		// lineSpacing = -font.lineHeight * 0.2;
+		lineSpacing = font.lineHeight * 0.2;
 
 		if (addDefaultShadow) {
 			dropShadow = {
@@ -189,7 +190,7 @@ class TextButton extends Button {
 		}
 
 		// Remove some space from top (lineSpacing is usually negative).
-		content.paddingTop += Std.int(text.lineSpacing);
+		// content.paddingTop += Std.int(text.lineSpacing);
 
 		redrawButton();
 	}

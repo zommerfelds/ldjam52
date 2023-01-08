@@ -1,3 +1,4 @@
+import Gui.TextButton;
 import Gui.Text;
 import Gui.TileButton;
 import Utils.Point2d;
@@ -115,7 +116,7 @@ class PlayView extends GameState {
 			wheelR.x = wheelL.x;
 			wheelR.y = -wheelL.y;
 
-			final anim = new Anim(combineFrames, combineObj);
+			final anim = new Anim(combineFrames, 25, combineObj);
 
 			// A bit of a hacky way to set the collision shape that cuts the crops.
 			final cutterOffset = new Object(combineObj);
@@ -209,17 +210,23 @@ class PlayView extends GameState {
 		});
 		buttonBack.x = 795;
 		buttonBack.y = 300;
+		final buttonMenu = new TextButton(this, "MENU", () -> {
+			App.instance.switchState(new LevelSelectView());
+		}, 0x000000, true, 0.25);
+		buttonMenu.content.padding = 0;
+		//buttonMenu.content.paddingBottom = 10;
+		buttonMenu.content.horizontalAlign = Middle;
+		buttonMenu.content.minHeight = 60;
+		buttonMenu.content.minWidth = 100;
+		buttonMenu.redrawButton();
+		buttonMenu.x = 880;
+		buttonMenu.y = 300;
 
 		statusText = new Text("", this, 0.3);
 		statusText.textColor = 0x000000;
-		statusText.dropShadow = {
-			dx: 1,
-			dy: 1,
-			color: 0x000000,
-			alpha: 0.5
-		};
 		statusText.x = 800;
-		statusText.y = 380;
+		statusText.y = 390;
+		statusText.maxWidth = 350;
 	}
 
 	function resetTime() {
