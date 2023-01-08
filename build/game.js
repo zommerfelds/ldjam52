@@ -3494,30 +3494,11 @@ GameEndView.prototype = $extend(GameState.prototype,{
 		centeringFlow.set_verticalAlign(h2d_FlowAlign.Middle);
 		centeringFlow.set_maxWidth(this.width);
 		centeringFlow.set_layout(h2d_FlowLayout.Vertical);
-		centeringFlow.set_verticalSpacing(Gui.scaleAsInt(50));
+		centeringFlow.set_verticalSpacing(50);
 		new Text("You win",centeringFlow);
 	}
 	,__class__: GameEndView
 });
-var Gui = function() { };
-$hxClasses["Gui"] = Gui;
-Gui.__name__ = "Gui";
-Gui.scale = function(multiplier) {
-	if(multiplier == null) {
-		multiplier = 1.0;
-	}
-	var normWidth = hxd_Window.getInstance().get_width();
-	if(hxd_Window.getInstance().get_width() / hxd_Window.getInstance().get_height() > 0.5625) {
-		normWidth = 0.5625 * hxd_Window.getInstance().get_height();
-	}
-	return normWidth / 600 * multiplier;
-};
-Gui.scaleAsInt = function(multiplier) {
-	if(multiplier == null) {
-		multiplier = 1.0;
-	}
-	return Gui.scale(multiplier) | 0;
-};
 var h2d_Drawable = function(parent) {
 	h2d_Object.call(this,parent);
 	this.color = new h3d_Vector(1,1,1,1);
@@ -5055,14 +5036,14 @@ var Text = function(text,parent,size,addDefaultShadow) {
 	if(size == null) {
 		size = 1.0;
 	}
-	var font = hxd_Res.get_loader().loadCache("piellari.fnt",hxd_res_BitmapFont).toSdfFont(size * Gui.scale(60) | 0,3);
+	var font = hxd_Res.get_loader().loadCache("piellari.fnt",hxd_res_BitmapFont).toSdfFont(size * 100.0 | 0,3);
 	h2d_HtmlText.call(this,font,parent);
 	this.set_text(text);
 	this.smooth = true;
 	this.set_textColor(-1);
 	this.set_lineSpacing(font.lineHeight * 0.2);
 	if(addDefaultShadow) {
-		this.dropShadow = { dx : Gui.scale(5), dy : Gui.scale(5), color : 0, alpha : 0.5};
+		this.dropShadow = { dx : 5, dy : 5, color : 0, alpha : 0.5};
 	}
 };
 $hxClasses["Text"] = Text;
@@ -5075,7 +5056,7 @@ Text.prototype = $extend(h2d_HtmlText.prototype,{
 		} catch( _g ) {
 			var _g1 = haxe_Exception.caught(_g);
 			if(((_g1) instanceof haxe_ValueException)) {
-				haxe_Log.trace(_g1,{ fileName : "lib/Gui.hx", lineNumber : 49, className : "Text", methodName : "set_text"});
+				haxe_Log.trace(_g1,{ fileName : "lib/Gui.hx", lineNumber : 52, className : "Text", methodName : "set_text"});
 				h2d_HtmlText.prototype.set_text.call(this,"PARSE ERROR");
 			} else {
 				throw _g;
@@ -5100,10 +5081,8 @@ var Button = function(parent,onClickFn,backgroundColor,disableOnClick) {
 	if(backgroundColor == null) {
 		backgroundColor = Colors.LIGHT_GREY;
 	}
-	var horizontalPadding = 20 * Gui.scale();
-	var verticalPadding = 20 * Gui.scale();
-	this.shadowOffsetX = 5 * Gui.scale();
-	this.shadowOffsetY = 5 * Gui.scale();
+	this.shadowOffsetX = 5;
+	this.shadowOffsetY = 5;
 	var buttonOffsetXPressed = this.shadowOffsetX * 0.5;
 	var buttonOffsetYPressed = this.shadowOffsetY * 0.5;
 	this.addChild(this.buttonShadow);
@@ -5113,13 +5092,11 @@ var Button = function(parent,onClickFn,backgroundColor,disableOnClick) {
 	this.content = new h2d_Flow(this);
 	this.content.set_enableInteractive(true);
 	var _this = this.content;
-	var v = horizontalPadding | 0;
-	_this.set_paddingLeft(v);
-	_this.set_paddingRight(v);
+	_this.set_paddingLeft(20);
+	_this.set_paddingRight(20);
 	var _this = this.content;
-	var v = verticalPadding | 0;
-	_this.set_paddingTop(v);
-	_this.set_paddingBottom(v);
+	_this.set_paddingTop(20);
+	_this.set_paddingBottom(20);
 	this.content.set_verticalAlign(h2d_FlowAlign.Middle);
 	this.content.interactive.onClick = function(e) {
 		e.propagate = false;
@@ -5193,11 +5170,11 @@ Button.prototype = $extend(h2d_Object.prototype,{
 		return this.backgroundColor;
 	}
 	,redrawButton: function() {
-		var w = this.content.get_outerWidth() == 0 ? Gui.scale() * 100 | 0 : this.content.get_outerWidth();
-		var h = this.content.get_outerHeight() == 0 ? Gui.scale() * 100 | 0 : this.content.get_outerHeight();
+		var w = this.content.get_outerWidth() == 0 ? 100 : this.content.get_outerWidth();
+		var h = this.content.get_outerHeight() == 0 ? 100 : this.content.get_outerHeight();
 		this.buttonShadow.clear();
 		this.buttonShadow.beginFill(0,0.5);
-		this.buttonShadow.drawRoundedRect(0,0,w,h,10 * Gui.scale());
+		this.buttonShadow.drawRoundedRect(0,0,w,h,10);
 		var _this = this.buttonShadow;
 		_this.posChanged = true;
 		_this.x = this.shadowOffsetX;
@@ -5206,7 +5183,7 @@ Button.prototype = $extend(h2d_Object.prototype,{
 		_this.y = this.shadowOffsetY;
 		this.buttonShape.clear();
 		this.buttonShape.beginFill(this.backgroundColor);
-		this.buttonShape.drawRoundedRect(0,0,w,h,10 * Gui.scale());
+		this.buttonShape.drawRoundedRect(0,0,w,h,10);
 	}
 	,set_enabled: function(enabled) {
 		return this.enabled = enabled;
@@ -5632,9 +5609,9 @@ LevelSelectView.prototype = $extend(GameState.prototype,{
 		centeringFlow.set_verticalAlign(h2d_FlowAlign.Middle);
 		centeringFlow.set_maxWidth(this.width);
 		centeringFlow.set_layout(h2d_FlowLayout.Vertical);
-		centeringFlow.set_verticalSpacing(Gui.scaleAsInt(50));
+		centeringFlow.set_verticalSpacing(50);
 		new Text("Select level",centeringFlow);
-		centeringFlow.addSpacing(Gui.scaleAsInt(100));
+		centeringFlow.addSpacing(100);
 		var totalTime = 0.0;
 		var i = 0;
 		var _g = 0;
@@ -5676,10 +5653,10 @@ MenuView.prototype = $extend(GameState.prototype,{
 		centeringFlow.set_verticalAlign(h2d_FlowAlign.Middle);
 		centeringFlow.set_maxWidth(this.width);
 		centeringFlow.set_layout(h2d_FlowLayout.Vertical);
-		centeringFlow.set_verticalSpacing(Gui.scaleAsInt(50));
+		centeringFlow.set_verticalSpacing(10);
 		new Text("Wellcome to...",centeringFlow,0.8);
 		new Text("Combine Harvester: Time Attack!",centeringFlow);
-		centeringFlow.addSpacing(Gui.scaleAsInt(100));
+		centeringFlow.addSpacing(50);
 		new TextButton(centeringFlow,"Toggle fullscreen",function() {
 			HerbalTeaApp.toggleFullScreen();
 			centeringFlow.reflow();
@@ -5687,7 +5664,6 @@ MenuView.prototype = $extend(GameState.prototype,{
 		new TextButton(centeringFlow,"Start game",function() {
 			App.instance.switchState(new LevelSelectView());
 		},Colors.BLUE,null,0.8);
-		centeringFlow.addSpacing(Gui.scaleAsInt(100));
 		new Text("version: " + hxd_Res.get_loader().loadCache("version.txt",hxd_res_Resource).entry.getText(),centeringFlow,0.5);
 	}
 	,__class__: MenuView
@@ -5747,11 +5723,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 		this.posChanged = true;
 		this.x = 20;
 		this.posChanged = true;
-		this.y = 20;
-		this.posChanged = true;
-		this.scaleX *= 2;
-		this.posChanged = true;
-		this.scaleY *= 2;
+		this.y = 60;
 		this.addEventListener($bind(this,this.onEvent));
 		var pixels = hxd_Res.get_loader().loadCache(this.levelData.bgImageInfos.relFilePath,hxd_res_Image).getPixels();
 		var field = new h2d_SpriteBatch(hxd_Res.get_loader().loadCache("field-tiles.png",hxd_res_Image).toTile(),this);
@@ -5967,7 +5939,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 			})(interactive),combineObj);
 			this.combines.push(combine[0]);
 		}
-		var buttonBack = new TileButton(hxd_Res.get_loader().loadCache("buttons.png",hxd_res_Image).toTile().sub(11,0,11,11,-5.5,-5.5),this,function() {
+		var buttonBack = new TileButton(hxd_Res.get_loader().loadCache("buttons.png",hxd_res_Image).toTile().sub(11,0,11,11),this,function() {
 			_gthis.activeCombine = null;
 			var _g = 0;
 			var _g1 = _gthis.combines;
@@ -5976,6 +5948,11 @@ PlayView.prototype = $extend(GameState.prototype,{
 			_gthis.paused = true;
 			_gthis.resetTime();
 		});
+		buttonBack.content.set_padding(0);
+		buttonBack.content.set_horizontalAlign(h2d_FlowAlign.Middle);
+		buttonBack.content.set_minHeight(60);
+		buttonBack.content.set_minWidth(60);
+		buttonBack.redrawButton();
 		buttonBack.posChanged = true;
 		buttonBack.x = 795;
 		buttonBack.posChanged = true;
@@ -6027,6 +6004,34 @@ PlayView.prototype = $extend(GameState.prototype,{
 		var gr = new h2d_Graphics(this);
 		gr.lineStyle(1,0);
 		gr.drawRect(-0.5 * PlayView.FIELD_TILE_SIZE,-0.5 * PlayView.FIELD_TILE_SIZE,128 * PlayView.FIELD_TILE_SIZE,128 * PlayView.FIELD_TILE_SIZE);
+		var zoomOut = new TextButton(this,"zoom out",function() {
+			var v = _gthis.scaleX * 0.8;
+			_gthis.posChanged = true;
+			_gthis.scaleX = v;
+			var v = _gthis.scaleY * 0.8;
+			_gthis.posChanged = true;
+			_gthis.scaleY = v;
+		},0,false,0.15);
+		zoomOut.content.set_padding(15);
+		zoomOut.redrawButton();
+		zoomOut.posChanged = true;
+		zoomOut.x = 0;
+		zoomOut.posChanged = true;
+		zoomOut.y = -20;
+		var zoomIn = new TextButton(this,"zoom in",function() {
+			var v = _gthis.scaleX * 1.25;
+			_gthis.posChanged = true;
+			_gthis.scaleX = v;
+			var v = _gthis.scaleY * 1.25;
+			_gthis.posChanged = true;
+			_gthis.scaleY = v;
+		},0,false,0.15);
+		zoomIn.content.set_padding(15);
+		zoomIn.redrawButton();
+		zoomIn.posChanged = true;
+		zoomIn.x = 100;
+		zoomIn.posChanged = true;
+		zoomIn.y = -20;
 	}
 	,resetTime: function() {
 		this.currentFrame = 0;
