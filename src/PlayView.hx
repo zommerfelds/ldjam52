@@ -64,12 +64,11 @@ class PlayView extends GameState {
 	final fieldTilesFull = [0, 1, 2];
 	final fieldTilesEmpty = [3, 4, 5];
 	final fieldTilesGrass = [6, 7, 8];
+	final fieldTileFence = 9;
 
 	public function new(levelIndex) {
 		super();
 		this.levelIndex = levelIndex;
-
-		trace("foo", fieldTiles.length);
 
 		levelData = App.ldtkProject.levels[levelIndex];
 	}
@@ -85,19 +84,24 @@ class PlayView extends GameState {
 		final staticTiles = new TileGroup(Res.field_tiles.toTile(), this);
 		for (x in 0...pixels.height) {
 			for (y in 0...pixels.width) {
-				final isField = pixels.getPixel(x, y) & 0xFFFFFF == 0;
-				if (isField) {
-					final fullTile = fieldTiles[fieldTilesFull[Std.random(fieldTilesFull.length)]];
-					final emptyTile = fieldTiles[fieldTilesEmpty[Std.random(fieldTilesEmpty.length)]];
-					final element = new BatchElement(fullTile);
-					element.x = x * FIELD_TILE_SIZE;
-					element.y = y * FIELD_TILE_SIZE;
-					field.add(element);
-					fieldElements.set(new Point2d(x, y), {e: element, fullTile: fullTile, emptyTile: emptyTile});
-					numFields++;
-				} else {
-					final grassTile = fieldTiles[fieldTilesGrass[Std.random(fieldTilesGrass.length)]];
-					staticTiles.add(x * FIELD_TILE_SIZE, y * FIELD_TILE_SIZE, grassTile);
+				switch (pixels.getPixel(x, y) & 0xFFFFFF) {
+					case 0x000000:
+						final fullTile = fieldTiles[fieldTilesFull[Std.random(fieldTilesFull.length)]];
+						final emptyTile = fieldTiles[fieldTilesEmpty[Std.random(fieldTilesEmpty.length)]];
+						final element = new BatchElement(fullTile);
+						element.x = x * FIELD_TILE_SIZE;
+						element.y = y * FIELD_TILE_SIZE;
+						field.add(element);
+						fieldElements.set(new Point2d(x, y), {e: element, fullTile: fullTile, emptyTile: emptyTile});
+						numFields++;
+					case 0xff0000:
+						final fenceTile = fieldTiles[fieldTileFence];
+						staticTiles.add(x * FIELD_TILE_SIZE, y * FIELD_TILE_SIZE, fenceTile);
+						fieldElements.set(new Point2d(x, y), {e: null, fullTile: fenceTile, emptyTile: null});
+
+					default:
+						final grassTile = fieldTiles[fieldTilesGrass[Std.random(fieldTilesGrass.length)]];
+						staticTiles.add(x * FIELD_TILE_SIZE, y * FIELD_TILE_SIZE, grassTile);
 				}
 			}
 		}
@@ -130,7 +134,7 @@ class PlayView extends GameState {
 
 			final hitBoxOffset = new Object(combineObj);
 			hitBoxOffset.x = -22;
-			final hitBoxTile = Tile.fromColor(0x000000, 55, 48);
+			final hitBoxTile = Tile.fromColor(0x000000, 55, 42);
 			hitBoxTile.setCenterRatio();
 			final hitBox = new Bitmap(hitBoxTile, hitBoxOffset);
 			hitBox.visible = false;
@@ -373,6 +377,27 @@ class PlayView extends GameState {
 						}
 					}
 				}
+				{
+					final bounds = combine.hitBox.getBounds(this);
+					final xMin = Math.floor(bounds.xMin / FIELD_TILE_SIZE);
+					final xMax = Math.ceil(bounds.xMax / FIELD_TILE_SIZE);
+					final yMin = Math.floor(bounds.yMin / FIELD_TILE_SIZE);
+					final yMax = Math.ceil(bounds.yMax / FIELD_TILE_SIZE);
+					final hitBoxShape = getShape(combine.hitBox);
+					for (y in yMin...yMax + 1) {
+						for (x in xMin...xMax + 1) {
+							final element = fieldElements.get(new Point2d(x, y));
+							if (element != null
+								&& Collision.pointInPoly(x * FIELD_TILE_SIZE, y * FIELD_TILE_SIZE, hitBoxShape)
+								&& element.fullTile == fieldTiles[fieldTileFence]) {
+								combine.obj.setPos(originalPos);
+								combine.obj.rotation = originalRotation;
+								inputs.splice(0, inputs.length); // This will also change the recording, since it's the same reference.
+								break;
+							}
+						}
+					}
+				}
 				if (inputs.contains(Forward)) {
 					final bounds = combine.cutter.getBounds(this);
 					final xMin = Math.floor(bounds.xMin / FIELD_TILE_SIZE);
@@ -385,6 +410,7 @@ class PlayView extends GameState {
 							final element = fieldElements.get(new Point2d(x, y));
 							if (element != null
 								&& Collision.pointInPoly(x * FIELD_TILE_SIZE, y * FIELD_TILE_SIZE, cutterShape)
+								&& element.e != null
 								&& element.e.t == element.fullTile) {
 								completedFields++;
 								element.e.t = element.emptyTile;
