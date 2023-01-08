@@ -5547,6 +5547,7 @@ LevelSelectView.prototype = $extend(GameState.prototype,{
 		centeringFlow.set_verticalSpacing(Gui.scaleAsInt(50));
 		new Text("Select level",centeringFlow);
 		centeringFlow.addSpacing(Gui.scaleAsInt(100));
+		var totalTime = 0.0;
 		var i = 0;
 		var _g = 0;
 		var _g1 = App.ldtkProject.levels;
@@ -5555,6 +5556,7 @@ LevelSelectView.prototype = $extend(GameState.prototype,{
 			var label = _g1[_g++].identifier;
 			if(App.save.levelRecords.h[i] != null) {
 				label += " (" + MyUtils.formatTime(App.save.levelRecords.h[i]) + ")";
+				totalTime += App.save.levelRecords.h[i];
 			}
 			new TextButton(centeringFlow,label,(function(iCopy) {
 				return function() {
@@ -5564,7 +5566,7 @@ LevelSelectView.prototype = $extend(GameState.prototype,{
 			++i;
 		}
 		if(App.save.unlockedLevel >= App.ldtkProject.levels.length) {
-			new Text("You beat all levels! Thank you for playing. :)",centeringFlow);
+			new Text("You beat all levels! Thank you for playing. :)<br/>Total best time: " + MyUtils.formatTime(totalTime),centeringFlow).set_textAlign(h2d_Align.MultilineCenter);
 		}
 	}
 	,__class__: LevelSelectView
@@ -5653,7 +5655,11 @@ PlayView.__super__ = GameState;
 PlayView.prototype = $extend(GameState.prototype,{
 	init: function() {
 		var _gthis = this;
-		App.instance.engine.backgroundColor = 11452453;
+		App.instance.engine.backgroundColor = 13425502;
+		this.posChanged = true;
+		this.x = 20;
+		this.posChanged = true;
+		this.y = 20;
 		this.posChanged = true;
 		this.scaleX *= 2;
 		this.posChanged = true;
@@ -5842,6 +5848,9 @@ PlayView.prototype = $extend(GameState.prototype,{
 		_this.posChanged = true;
 		_this.y = 290;
 		this.statusText.set_maxWidth(350);
+		var gr = new h2d_Graphics(this);
+		gr.lineStyle(1,0);
+		gr.drawRect(-0.5 * PlayView.FIELD_TILE_SIZE,-0.5 * PlayView.FIELD_TILE_SIZE,128 * PlayView.FIELD_TILE_SIZE,128 * PlayView.FIELD_TILE_SIZE);
 	}
 	,resetTime: function() {
 		this.currentFrame = 0;
