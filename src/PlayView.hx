@@ -77,6 +77,7 @@ class PlayView extends GameState {
 		App.instance.engine.backgroundColor = 0xccdb5e;
 		x = 20;
 		y = 60;
+		scale(2);
 
 		addEventListener(onEvent);
 

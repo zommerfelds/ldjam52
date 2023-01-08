@@ -10,7 +10,7 @@ class MenuView extends GameState {
 		centeringFlow.layout = Vertical;
 		centeringFlow.verticalSpacing = 10;
 
-		new Gui.Text("Wellcome to...", centeringFlow, 0.8);
+		new Gui.Text("Welcome to...", centeringFlow, 0.8);
 		new Gui.Text("Combine Harvester: Time Attack!", centeringFlow);
 
 		centeringFlow.addSpacing(50);
