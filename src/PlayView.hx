@@ -163,12 +163,12 @@ class PlayView extends GameState {
 				}
 				// resetTime();
 			};
-			final select = new Graphics(combineObj);
+			/*final select = new Graphics(combineObj);
 			select.beginFill(0xffffffff, 0.3);
-			select.drawCircle(-20, 0, combineFrames[0].width * 0.6);
+			select.drawCircle(-20, 0, combineFrames[0].width * 0.6);*/
 			new FuncObject(() -> {
 				interactive.visible = (currentFrame == 0);
-				select.visible = (activeCombine == null);
+				// select.visible = (activeCombine == null);
 			}, combineObj);
 			combines.push(combine);
 		}
