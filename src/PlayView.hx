@@ -1,6 +1,7 @@
 import Gui.Text;
 import Gui.TileButton;
 import Utils.Point2d;
+import h2d.Anim;
 import h2d.Bitmap;
 import h2d.Graphics;
 import h2d.Interactive;
@@ -27,9 +28,11 @@ enum CombineInput {
 
 typedef Combine = {
 	obj:Object,
+	anim:Anim,
 	cutter:Object,
 	startPos:Point,
 	startRotation:Float,
+	wheels:Array<Object>,
 	recordedInput:Array<Array<CombineInput>>
 };
 
@@ -89,11 +92,10 @@ class PlayView extends GameState {
 			}
 		}
 
-		final combineTile = Res.combine.toTile();
-		combineTile.setCenterRatio(0.8, 0.5);
+		final combineFrames = Res.combine.toTile().gridFlatten(64, -54, -32);
 
 		for (combineData in levelData.l_Entities.all_Combine) {
-			final combineObj = new Bitmap(combineTile, this);
+			final combineObj = new Object(this);
 			combineObj.x = combineData.pixelX;
 			combineObj.y = combineData.pixelY;
 
@@ -105,16 +107,28 @@ class PlayView extends GameState {
 			final cutter = new Bitmap(cutterTile, cutterOffset);
 			cutter.visible = false;
 
+			final wheelTile = Res.combine_parts.toTile().sub(0,0,16,16,-8,-8);
+			final wheelL = new Bitmap(wheelTile, combineObj);
+			wheelL.x = -38;
+			wheelL.y = 15;
+			final wheelR = new Bitmap(wheelTile, combineObj);
+			wheelR.x = wheelL.x;
+			wheelR.y = -wheelL.y;
+
+			final anim = new Anim(combineFrames, combineObj);
+
 			final combine:Combine = {
 				obj: combineObj,
+				anim: anim,
 				cutter: cutter,
 				startPos: Utils.point(combineObj),
 				startRotation: combineObj.rotation,
-				recordedInput: []
+				recordedInput: [],
+				wheels: [wheelL, wheelR]
 			};
-			final interactive = new Interactive(combineTile.width, combineTile.height, combineObj);
-			interactive.x += combineTile.dx;
-			interactive.y += combineTile.dy;
+			final interactive = new Interactive(combineFrames[0].width, combineFrames[0].height, combineObj);
+			interactive.x += combineFrames[0].dx;
+			interactive.y += combineFrames[0].dy;
 			// interactive.backgroundColor = 0xffff0000;
 			interactive.onClick = e -> {
 				activeCombine = combine;
@@ -126,7 +140,7 @@ class PlayView extends GameState {
 			};
 			final select = new Graphics(combineObj);
 			select.beginFill(0xffffffff, 0.3);
-			select.drawCircle(-20, 0, combineTile.width * 0.6);
+			select.drawCircle(-20, 0, combineFrames[0].width * 0.6);
 			new FuncObject(() -> {
 				interactive.visible = (currentFrame == 0);
 				select.visible = (activeCombine == null);
@@ -135,7 +149,7 @@ class PlayView extends GameState {
 		}
 
 		selectedHighlight.lineStyle(2, 0xffffffff);
-		selectedHighlight.drawCircle(-20, 0, combineTile.width * 0.6);
+		selectedHighlight.drawCircle(-20, 0, combineFrames[0].width * 0.6);
 
 		final BUTTON_TILE_SIZE = 11;
 		/*
@@ -200,6 +214,10 @@ class PlayView extends GameState {
 		final date = Date.fromTime(currentFrame * FRAME_TIME * 1000);
 		timeText.text = DateTools.format(date, "%M:%S.") + ("" + Std.int(((currentFrame * FRAME_TIME) % 1.0) * 100)).lpad("0", 2);
 
+		for (combine in combines) {
+			combine.anim.pause = paused || combine.recordedInput.empty();
+		}
+
 		if (Key.isDown(Key.UP)) {
 			paused = false;
 		}
@@ -235,12 +253,21 @@ class PlayView extends GameState {
 						inputs = combine.recordedInput[currentFrame];
 					}
 				}
+				for (w in combine.wheels) {
+					w.rotation = 0.0;
+				}
 				if (inputs.contains(Forward)) {
 					if (inputs.contains(TurnLeft)) {
 						combine.obj.rotation -= FRAME_TIME * 1.0;
+						for (w in combine.wheels) {
+							w.rotation = 0.4;
+						}
 					}
 					if (inputs.contains(TurnRight)) {
 						combine.obj.rotation += FRAME_TIME * 1.0;
+						for (w in combine.wheels) {
+							w.rotation = -0.4;
+						}
 					}
 
 					final vel = Utils.direction(combine.obj.rotation).multiply(FRAME_TIME * 50.0);
