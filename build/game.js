@@ -5712,16 +5712,16 @@ PlayView.prototype = $extend(GameState.prototype,{
 			_gthis.resetTime();
 		});
 		buttonBack.posChanged = true;
-		buttonBack.x = 880;
+		buttonBack.x = 795;
 		buttonBack.posChanged = true;
 		buttonBack.y = 400;
-		this.timeText = new Text("",this,0.5);
-		this.timeText.set_textColor(0);
-		this.timeText.dropShadow = { dx : 3, dy : 3, color : 0, alpha : 0.5};
-		var _this = this.timeText;
+		this.statusText = new Text("",this,0.3);
+		this.statusText.set_textColor(0);
+		this.statusText.dropShadow = { dx : 1, dy : 1, color : 0, alpha : 0.5};
+		var _this = this.statusText;
 		_this.posChanged = true;
 		_this.x = 800;
-		var _this = this.timeText;
+		var _this = this.statusText;
 		_this.posChanged = true;
 		_this.y = 480;
 	}
@@ -5749,7 +5749,16 @@ PlayView.prototype = $extend(GameState.prototype,{
 	}
 	,update: function(dt) {
 		var date = new Date(this.currentFrame * PlayView.FRAME_TIME * 1000);
-		this.timeText.set_text(DateTools.format(date,"%M:%S.") + StringTools.lpad("" + (this.currentFrame * PlayView.FRAME_TIME % 1.0 * 100 | 0),"0",2));
+		this.statusText.set_text(DateTools.format(date,"%M:%S.") + StringTools.lpad("" + (this.currentFrame * PlayView.FRAME_TIME % 1.0 * 100 | 0),"0",2) + "<br/>" + Utils.floatToStr(this.completedFields / this.numFields * 100,1) + "%");
+		if(this.paused) {
+			if(this.activeCombine == null) {
+				var fh = this.statusText;
+				fh.set_text(fh.text + "<br/>Click on a combine harvester to start.");
+			} else {
+				var fh = this.statusText;
+				fh.set_text(fh.text + "<br/>Press the UP key to move.");
+			}
+		}
 		var _g = 0;
 		var _g1 = this.combines;
 		while(_g < _g1.length) {
