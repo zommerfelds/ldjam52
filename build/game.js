@@ -6088,8 +6088,8 @@ PlayView.prototype = $extend(GameState.prototype,{
 		if(this.paused) {
 			return;
 		}
-		this.timeAcc++;
-		if(this.timeAcc >= PlayView.FRAME_TIME) {
+		this.timeAcc += dt;
+		while(this.timeAcc >= PlayView.FRAME_TIME) {
 			this.timeAcc -= PlayView.FRAME_TIME;
 			this.currentFrame++;
 			var _g = 0;
