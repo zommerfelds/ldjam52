@@ -1,3 +1,4 @@
+import h2d.TileGroup;
 import Gui.Text;
 import Gui.TileButton;
 import Utils.Point2d;
@@ -58,6 +59,7 @@ class PlayView extends GameState {
 	final fieldTiles = Res.field_tiles.toTile().gridFlatten(FIELD_TILE_SIZE, FIELD_TILE_SIZE * -0.5, FIELD_TILE_SIZE * -0.5);
 	final fieldTilesFull = [0, 1, 2];
 	final fieldTilesEmpty = [3, 4, 5];
+	final fieldTilesGrass = [6, 7, 8];
 
 	public function new(levelIndex) {
 		super();
@@ -69,13 +71,14 @@ class PlayView extends GameState {
 	}
 
 	override function init() {
-		App.instance.engine.backgroundColor = 0x809F66;
+		App.instance.engine.backgroundColor = 0xaec025;
 		scale(2);
 
 		addEventListener(onEvent);
 
 		final pixels = Res.loader.loadCache(levelData.bgImageInfos.relFilePath, Image).getPixels();
 		final field = new SpriteBatch(Res.field_tiles.toTile(), this);
+		final staticTiles = new TileGroup(Res.field_tiles.toTile(), this);
 		for (x in 0...pixels.height) {
 			for (y in 0...pixels.width) {
 				final isField = pixels.getPixel(x, y) & 0xFFFFFF == 0;
@@ -88,6 +91,9 @@ class PlayView extends GameState {
 					field.add(element);
 					fieldElements.set(new Point2d(x, y), {e: element, fullTile: fullTile, emptyTile: emptyTile});
 					numFields++;
+				} else {
+					final grassTile = fieldTiles[fieldTilesGrass[Std.random(fieldTilesGrass.length)]];
+					staticTiles.add(x * FIELD_TILE_SIZE, y * FIELD_TILE_SIZE, grassTile);
 				}
 			}
 		}
@@ -107,7 +113,7 @@ class PlayView extends GameState {
 			final cutter = new Bitmap(cutterTile, cutterOffset);
 			cutter.visible = false;
 
-			final wheelTile = Res.combine_parts.toTile().sub(0,0,16,16,-8,-8);
+			final wheelTile = Res.combine_parts.toTile().sub(0, 0, 16, 16, -8, -8);
 			final wheelL = new Bitmap(wheelTile, combineObj);
 			wheelL.x = -38;
 			wheelL.y = 15;
