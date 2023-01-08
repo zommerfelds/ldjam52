@@ -323,8 +323,8 @@ class PlayView extends GameState {
 		if (paused)
 			return;
 
-		timeAcc++;
-		if (timeAcc >= FRAME_TIME) {
+		timeAcc += dt;
+		while (timeAcc >= FRAME_TIME) {
 			timeAcc -= FRAME_TIME;
 			currentFrame++;
 
