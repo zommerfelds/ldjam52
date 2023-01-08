@@ -1,6 +1,7 @@
 import Gui.Text;
 import Gui.TileButton;
 import Utils.Point2d;
+import differ.Collision;
 import h2d.Anim;
 import h2d.Bitmap;
 import h2d.Graphics;
@@ -10,7 +11,7 @@ import h2d.SpriteBatch;
 import h2d.Tile;
 import h2d.TileGroup;
 import h2d.col.Point;
-import h2d.col.Polygon;
+import h3d.Vector;
 import haxe.ds.HashMap;
 import hxd.Key;
 import hxd.Res;
@@ -31,6 +32,7 @@ typedef Combine = {
 	obj:Object,
 	anim:Anim,
 	cutter:Object,
+	hitBox:Object,
 	startPos:Point,
 	startRotation:Float,
 	wheels:Array<Object>,
@@ -105,14 +107,6 @@ class PlayView extends GameState {
 			combineObj.x = combineData.pixelX;
 			combineObj.y = combineData.pixelY;
 
-			// A bit of a hacky way to set the collision shape that cuts the crops.
-			final cutterOffset = new Object(combineObj);
-			cutterOffset.x = 0;
-			final cutterTile = Tile.fromColor(0x000000, 10, 60);
-			cutterTile.setCenterRatio();
-			final cutter = new Bitmap(cutterTile, cutterOffset);
-			cutter.visible = false;
-
 			final wheelTile = Res.combine_parts.toTile().sub(0, 0, 16, 16, -8, -8);
 			final wheelL = new Bitmap(wheelTile, combineObj);
 			wheelL.x = -38;
@@ -123,9 +117,27 @@ class PlayView extends GameState {
 
 			final anim = new Anim(combineFrames, combineObj);
 
+			// A bit of a hacky way to set the collision shape that cuts the crops.
+			final cutterOffset = new Object(combineObj);
+			cutterOffset.x = 0;
+			final cutterTile = Tile.fromColor(0x000000, 10, 60);
+			cutterTile.setCenterRatio();
+			final cutter = new Bitmap(cutterTile, cutterOffset);
+			cutter.visible = false;
+			cutter.alpha = 0.5;
+
+			final hitBoxOffset = new Object(combineObj);
+			hitBoxOffset.x = -22;
+			final hitBoxTile = Tile.fromColor(0x000000, 55, 48);
+			hitBoxTile.setCenterRatio();
+			final hitBox = new Bitmap(hitBoxTile, hitBoxOffset);
+			hitBox.visible = false;
+			hitBox.alpha = 0.5;
+
 			final combine:Combine = {
 				obj: combineObj,
 				anim: anim,
+				hitBox: hitBox,
 				cutter: cutter,
 				startPos: Utils.point(combineObj),
 				startRotation: combineObj.rotation,
@@ -142,6 +154,12 @@ class PlayView extends GameState {
 				selectedHighlight.visible = true;
 				combine.obj.addChild(selectedHighlight);
 				paused = true;
+				anim.colorAdd = new Vector(0.2, 0.2, 0.2);
+				for (c in combines) {
+					if (c.anim == anim)
+						continue;
+					c.anim.colorAdd = null;
+				}
 				// resetTime();
 			};
 			final select = new Graphics(combineObj);
@@ -154,8 +172,8 @@ class PlayView extends GameState {
 			combines.push(combine);
 		}
 
-		selectedHighlight.lineStyle(2, 0xffffffff);
-		selectedHighlight.drawCircle(-20, 0, combineFrames[0].width * 0.6);
+		// selectedHighlight.lineStyle(2, 0xffffffff);
+		// selectedHighlight.drawCircle(-20, 0, combineFrames[0].width * 0.6);
 
 		final BUTTON_TILE_SIZE = 11;
 		/*
@@ -165,7 +183,7 @@ class PlayView extends GameState {
 				paused = false;
 			});
 			buttonPlay.x = 880;
-			buttonPlay.y = 400;
+			buttonPlay.y = 300;
 			final buttonPauseTile = Res.buttons.toTile()
 				.sub(2 * BUTTON_TILE_SIZE, 0, BUTTON_TILE_SIZE, BUTTON_TILE_SIZE, BUTTON_TILE_SIZE * -0.5, BUTTON_TILE_SIZE * -0.5);
 			final buttonPause = new TileButton(buttonPauseTile, this, () -> {
@@ -182,12 +200,15 @@ class PlayView extends GameState {
 			.sub(1 * BUTTON_TILE_SIZE, 0, BUTTON_TILE_SIZE, BUTTON_TILE_SIZE, BUTTON_TILE_SIZE * -0.5, BUTTON_TILE_SIZE * -0.5);
 		final buttonBack = new TileButton(buttonBackTile, this, () -> {
 			activeCombine = null;
+			for (c in combines) {
+				c.anim.colorAdd = null;
+			}
 			selectedHighlight.visible = false;
 			paused = true;
 			resetTime();
 		});
 		buttonBack.x = 795;
-		buttonBack.y = 400;
+		buttonBack.y = 300;
 
 		statusText = new Text("", this, 0.3);
 		statusText.textColor = 0x000000;
@@ -198,7 +219,7 @@ class PlayView extends GameState {
 			alpha: 0.5
 		};
 		statusText.x = 800;
-		statusText.y = 480;
+		statusText.y = 380;
 	}
 
 	function resetTime() {
@@ -227,7 +248,7 @@ class PlayView extends GameState {
 			if (activeCombine == null) {
 				statusText.text += "<br/>Click on a combine harvester to start.";
 			} else {
-			statusText.text += "<br/>Press the UP key to move.";
+				statusText.text += "<br/>Press the UP key to move.";
 			}
 		}
 
@@ -240,8 +261,6 @@ class PlayView extends GameState {
 		}
 		if (paused)
 			return;
-		// if (activeCombine == null)
-		//	return;
 
 		timeAcc++;
 		if (timeAcc >= FRAME_TIME) {
@@ -274,6 +293,9 @@ class PlayView extends GameState {
 					w.rotation = 0.0;
 				}
 				if (inputs.contains(Forward)) {
+					final originalPos = Utils.point(combine.obj);
+					final originalRotation = combine.obj.rotation;
+
 					if (inputs.contains(TurnLeft)) {
 						combine.obj.rotation -= FRAME_TIME * 1.0;
 						for (w in combine.wheels) {
@@ -288,28 +310,32 @@ class PlayView extends GameState {
 					}
 
 					final vel = Utils.direction(combine.obj.rotation).multiply(FRAME_TIME * 50.0);
-					combine.obj.setPos(Utils.point(combine.obj).add(vel));
+					combine.obj.setPos(originalPos.add(vel));
+
+					final shape = getShape(combine.hitBox);
+					for (other in combines) {
+						if (combine == other)
+							continue;
+						final shapeOther = getShape(other.hitBox);
+						if (Collision.shapeWithShape(shape, shapeOther) != null) {
+							combine.obj.setPos(originalPos);
+							combine.obj.rotation = originalRotation;
+							inputs.splice(0, inputs.length); // This will also change the recording, since it's the same reference.
+							break;
+						}
+					}
 
 					final bounds = combine.cutter.getBounds(this);
 					final xMin = Math.floor(bounds.xMin / FIELD_TILE_SIZE);
 					final xMax = Math.ceil(bounds.xMax / FIELD_TILE_SIZE);
 					final yMin = Math.floor(bounds.yMin / FIELD_TILE_SIZE);
 					final yMax = Math.ceil(bounds.yMax / FIELD_TILE_SIZE);
-
-					final localBounds = combine.cutter.getBounds(combine.cutter);
-					final p = new Polygon([
-						globalToLocal(combine.cutter.localToGlobal(new Point(localBounds.xMin, localBounds.yMin))),
-						globalToLocal(combine.cutter.localToGlobal(new Point(localBounds.xMax, localBounds.yMin))),
-						globalToLocal(combine.cutter.localToGlobal(new Point(localBounds.xMax, localBounds.yMax))),
-						globalToLocal(combine.cutter.localToGlobal(new Point(localBounds.xMin, localBounds.yMax)))
-					]);
-					final collider = p.getCollider();
-
+					final cutterShape = getShape(combine.cutter);
 					for (y in yMin...yMax + 1) {
 						for (x in xMin...xMax + 1) {
 							final element = fieldElements.get(new Point2d(x, y));
 							if (element != null
-								&& collider.contains(new Point(x * FIELD_TILE_SIZE, y * FIELD_TILE_SIZE))
+								&& Collision.pointInPoly(x * FIELD_TILE_SIZE, y * FIELD_TILE_SIZE, cutterShape)
 								&& element.e.t == element.fullTile) {
 								completedFields++;
 								element.e.t = element.emptyTile;
@@ -331,5 +357,15 @@ class PlayView extends GameState {
 				}
 			}
 		}
+	}
+
+	function getShape(obj:Object) {
+		final localBounds = obj.getBounds(obj);
+		return new differ.shapes.Polygon(0, 0, [
+			MyUtils.differVector(globalToLocal(obj.localToGlobal(new Point(localBounds.xMin, localBounds.yMin)))),
+			MyUtils.differVector(globalToLocal(obj.localToGlobal(new Point(localBounds.xMax, localBounds.yMin)))),
+			MyUtils.differVector(globalToLocal(obj.localToGlobal(new Point(localBounds.xMax, localBounds.yMax)))),
+			MyUtils.differVector(globalToLocal(obj.localToGlobal(new Point(localBounds.xMin, localBounds.yMax))))
+		]);
 	}
 }
