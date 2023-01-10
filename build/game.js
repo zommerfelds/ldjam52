@@ -6063,7 +6063,12 @@ PlayView.prototype = $extend(GameState.prototype,{
 	}
 	,update: function(dt) {
 		this.statusText.set_text("Time: <font color=\"" + (this.currentFrame * PlayView.FRAME_TIME <= this.levelData.f_timeLimit ? "#128a1c" : "#99300c") + "\">" + MyUtils.formatTime(this.currentFrame * PlayView.FRAME_TIME) + "</font><br/>" + "Goal: " + MyUtils.formatTime(this.levelData.f_timeLimit) + "<br/>" + "Progress: " + Utils.floatToStr(this.completedFields / this.numFields * 100,1) + "%");
-		if(this.paused) {
+		if(this.currentFrame * PlayView.FRAME_TIME > this.levelData.f_timeLimit) {
+			var fh = this.statusText;
+			fh.set_text(fh.text + "<br/><br/>");
+			var fh = this.statusText;
+			fh.set_text(fh.text + "The time is up! Press the back or reset button to go to rewind.");
+		} else if(this.paused) {
 			var fh = this.statusText;
 			fh.set_text(fh.text + "<br/><br/>");
 			if(this.activeCombine == null) {
@@ -6082,7 +6087,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 			var tmp = this.paused || Lambda.empty(combine.recordedInput);
 			combine.anim.pause = tmp;
 		}
-		if(hxd_Key.isDown(38) || hxd_Key.isDown(40)) {
+		if((hxd_Key.isDown(38) || hxd_Key.isDown(40)) && this.activeCombine != null) {
 			this.paused = false;
 		}
 		if(this.paused) {
@@ -6249,13 +6254,15 @@ PlayView.prototype = $extend(GameState.prototype,{
 							var key1 = new Point2d(x1,y1).hashCode();
 							var element1 = _this5.h[key1];
 							if(element1 != null && differ_Collision.pointInPoly(x1 * PlayView.FIELD_TILE_SIZE,y1 * PlayView.FIELD_TILE_SIZE,cutterShape) && element1.e != null && element1.e.t == element1.fullTile) {
-								this.completedFields++;
+								if(this.currentFrame * PlayView.FRAME_TIME <= this.levelData.f_timeLimit) {
+									this.completedFields++;
+								}
 								element1.e.t = element1.emptyTile;
 							}
 						}
 					}
 				}
-				if(this.completedFields == this.numFields && this.currentFrame * PlayView.FRAME_TIME <= this.levelData.f_timeLimit) {
+				if(this.completedFields == this.numFields) {
 					if(App.save.unlockedLevel < this.levelIndex + 1) {
 						App.save.unlockedLevel = this.levelIndex + 1;
 						App.save.levelRecords.h[this.levelIndex] = this.currentFrame * PlayView.FRAME_TIME;
