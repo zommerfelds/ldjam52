@@ -304,7 +304,10 @@ class PlayView extends GameState {
 		final color = currentFrame * FRAME_TIME <= levelData.f_timeLimit ? '#128a1c' : '#99300c';
 		statusText.text = 'Time: <font color="$color">' + MyUtils.formatTime(currentFrame * FRAME_TIME) + "</font><br/>" + "Goal: "
 			+ MyUtils.formatTime(levelData.f_timeLimit) + "<br/>" + "Progress: " + Utils.floatToStr(completedFields / numFields * 100, 1) + "%";
-		if (paused) {
+		if (currentFrame * FRAME_TIME > levelData.f_timeLimit) {
+			statusText.text += "<br/><br/>";
+			statusText.text += "The time is up! Press the back or reset button to go to rewind.";
+		} else if (paused) {
 			statusText.text += "<br/><br/>";
 			if (activeCombine == null) {
 				statusText.text += "Click on a combine harvester to start.";
@@ -317,7 +320,7 @@ class PlayView extends GameState {
 			combine.anim.pause = paused || combine.recordedInput.empty();
 		}
 
-		if (Key.isDown(Key.UP) || Key.isDown(Key.DOWN)) {
+		if ((Key.isDown(Key.UP) || Key.isDown(Key.DOWN)) && activeCombine != null) {
 			paused = false;
 		}
 		if (paused)
@@ -444,13 +447,15 @@ class PlayView extends GameState {
 								&& Collision.pointInPoly(x * FIELD_TILE_SIZE, y * FIELD_TILE_SIZE, cutterShape)
 								&& element.e != null
 								&& element.e.t == element.fullTile) {
-								completedFields++;
+								if (currentFrame * FRAME_TIME <= levelData.f_timeLimit) {
+									completedFields++;
+								}
 								element.e.t = element.emptyTile;
 							}
 						}
 					}
 				}
-				if (completedFields == numFields && currentFrame * FRAME_TIME <= levelData.f_timeLimit) {
+				if (completedFields == numFields) {
 					if (App.save.unlockedLevel < levelIndex + 1) {
 						App.save.unlockedLevel = levelIndex + 1;
 						App.save.levelRecords.set(levelIndex, currentFrame * FRAME_TIME);
