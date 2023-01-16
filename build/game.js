@@ -6067,7 +6067,7 @@ PlayView.prototype = $extend(GameState.prototype,{
 			var fh = this.statusText;
 			fh.set_text(fh.text + "<br/><br/>");
 			var fh = this.statusText;
-			fh.set_text(fh.text + "The time is up! Press the back or reset button to go to rewind.");
+			fh.set_text(fh.text + "The time is up! Press the back or reset button to rewind.");
 		} else if(this.paused) {
 			var fh = this.statusText;
 			fh.set_text(fh.text + "<br/><br/>");
