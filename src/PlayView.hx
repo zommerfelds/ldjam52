@@ -306,7 +306,7 @@ class PlayView extends GameState {
 			+ MyUtils.formatTime(levelData.f_timeLimit) + "<br/>" + "Progress: " + Utils.floatToStr(completedFields / numFields * 100, 1) + "%";
 		if (currentFrame * FRAME_TIME > levelData.f_timeLimit) {
 			statusText.text += "<br/><br/>";
-			statusText.text += "The time is up! Press the back or reset button to go to rewind.";
+			statusText.text += "The time is up! Press the back or reset button to rewind.";
 		} else if (paused) {
 			statusText.text += "<br/><br/>";
 			if (activeCombine == null) {
